@@ -60,8 +60,8 @@ public class Omni_Move extends OpMode {
             //This is the normal version to use in the TeleOp
             if (!slowMode) follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
                     -gamepad1.right_stick_x,
+                    -gamepad1.left_stick_x,
                     true // Robot Centric
             );
 

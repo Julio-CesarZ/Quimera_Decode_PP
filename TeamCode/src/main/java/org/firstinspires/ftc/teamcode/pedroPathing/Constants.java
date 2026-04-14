@@ -33,9 +33,9 @@ public class Constants {
             .leftRearMotorName("lr")
             .leftFrontMotorName("lf")
             .leftFrontMotorDirection(DcMotorEx.Direction.REVERSE)
-            .leftRearMotorDirection(DcMotorEx.Direction.REVERSE)
-            .rightFrontMotorDirection(DcMotorEx.Direction.FORWARD)
-            .rightRearMotorDirection(DcMotorEx.Direction.FORWARD);
+            .leftRearMotorDirection(DcMotorEx.Direction.FORWARD)
+            .rightFrontMotorDirection(DcMotorEx.Direction.REVERSE)
+            .rightRearMotorDirection(DcMotorEx.Direction.REVERSE);
 
     public static TwoWheelConstants localizerConstants = new TwoWheelConstants()
             .forwardEncoder_HardwareMapName("leftFront")
