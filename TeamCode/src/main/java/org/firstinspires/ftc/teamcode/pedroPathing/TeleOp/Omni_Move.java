@@ -28,6 +28,7 @@ public class Omni_Move extends OpMode {
 
     @Override
     public void init() {
+
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
         follower.update();
