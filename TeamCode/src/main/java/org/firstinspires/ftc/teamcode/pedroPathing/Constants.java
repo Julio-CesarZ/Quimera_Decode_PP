@@ -31,6 +31,8 @@ public class Constants {
     }
 
     public static MecanumConstants driveConstants = new MecanumConstants()
+            .xVelocity(1)//Número Default de Máximo de Velocidade, precisamos pegar esse número no Velocity Tuner
+            .yVelocity(1)//Número Default
             .maxPower(1)
             .rightFrontMotorName("rf")
             .rightRearMotorName("rr")
@@ -40,6 +42,9 @@ public class Constants {
             .leftRearMotorDirection(DcMotorEx.Direction.FORWARD)
             .rightFrontMotorDirection(DcMotorEx.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorEx.Direction.REVERSE);
+
+
+
 
     public static PinpointConstants localizer = new PinpointConstants()
             .forwardPodY(-5)
@@ -51,10 +56,3 @@ public class Constants {
             .strafeEncoderDirection(GoBildaPinpointDriver.EncoderDirection.FORWARD);
 
 }
-
-
-
-
-
-
-
