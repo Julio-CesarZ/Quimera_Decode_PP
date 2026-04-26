@@ -1,109 +1,82 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
-import com.bylazar.configurables.annotations.Configurable;
-import com.bylazar.telemetry.PanelsTelemetry;
-import com.bylazar.telemetry.TelemetryManager;
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.BezierLine;
-import com.pedropathing.geometry.Pose;
-import com.pedropathing.paths.HeadingInterpolator;
-import com.pedropathing.paths.Path;
-import com.pedropathing.paths.PathChain;
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+@TeleOp (name = "Move", group = "TeleOp")
+public class Omni_Move extends LinearOpMode {
 
-import java.util.function.Supplier;
-
-@Configurable
-@TeleOp(name = "Omni Direcional", group = "TeleOp")
-public class Omni_Move extends OpMode {
-    private Follower follower;
-    public static Pose startingPose;
-    private boolean automatedDrive;
-    private Supplier<PathChain> pathChain;
-    private TelemetryManager telemetryM;
-    private boolean slowMode = false;
-    private double slowModeMultiplier = 0.5;
+    boolean press = false;
+    boolean pressr = false;
+    boolean pressr1 = false;
+    boolean pressr2 = false;
 
     @Override
-    public void init() {
+    public void runOpMode() throws InterruptedException {
 
-        follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
-        follower.update();
-        telemetryM = PanelsTelemetry.INSTANCE.getTelemetry();
+        DcMotorEx c1 = hardwareMap.get(DcMotorEx.class, "c1");
+        DcMotorEx c2 = hardwareMap.get(DcMotorEx.class, "c2");
 
-        pathChain = () -> follower.pathBuilder() //Lazy Curve Generation
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
-                .build();
+        double currentPowerBase = 1;
+
+        //follower.startTeleopDrive();
+
+        waitForStart();
+
+        while (opModeIsActive()) {
+
+            if(gamepad1.a && !press) {
+                c1.setPower(1);
+                press = true;
+                sleep(100);
+            } else if(gamepad1.a && press) {
+                c1.setPower(0);
+                press = false;
+                sleep(100);
+            }
+
+            if(gamepad1.b && !pressr) {
+                c1.setPower(-1);
+                pressr = true;
+                sleep(100);
+            } else if(gamepad1.b && pressr) {
+                c1.setPower(0);
+                pressr = false;
+                sleep(100);
+            }
+
+            if(gamepad1.y && !pressr1) {
+                c2.setPower(1);
+                pressr1 = true;
+                sleep(100);
+            } else if(gamepad1.y && pressr1) {
+                c2.setPower(0);
+                pressr1 = false;
+                sleep(100);
+            }
+
+            if(gamepad1.x && !pressr2) {
+                c2.setPower(-1);
+                pressr2 = true;
+                sleep(100);
+            } else if(gamepad1.x && pressr2) {
+                c2.setPower(0);
+                pressr2 = false;
+                sleep(100);
+            }
+
+        }
+
+
     }
 
-    @Override
-    public void start() {
-        //The parameter controls whether the Follower should use break mode on the motors (using it is recommended).
-        //In order to use float mode, add .useBrakeModeInTeleOp(true); to your Drivetrain Constants in Constant.java (for Mecanum)
-        //If you don't pass anything in, it uses the default (false)
-        follower.startTeleopDrive();
-    }
 
-    @Override
-    public void loop() {
-        //Call this once per loop
-        follower.update();
-        telemetryM.update();
 
-        if (!automatedDrive) {
-            //Make the last parameter false for field-centric
-            //In case the drivers want to use a "slowMode" you can scale the vectors
 
-            //This is the normal version to use in the TeleOp
-            if (!slowMode) follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.right_stick_x,
-                    -gamepad1.left_stick_x,
-                    true // Robot Centric
-            );
 
-                //This is how it looks with slowMode on
-            else follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * slowModeMultiplier,
-                    -gamepad1.left_stick_x * slowModeMultiplier,
-                    -gamepad1.right_stick_x * slowModeMultiplier,
-                    true // Robot Centric
-            );
-        }
-
-        //Automated PathFollowing
-        if (gamepad1.aWasPressed()) {
-            follower.followPath(pathChain.get());
-            automatedDrive = true;
-        }
-
-        //Stop automated following if the follower is done
-        if (automatedDrive && (gamepad1.bWasPressed() || !follower.isBusy())) {
-            follower.startTeleopDrive();
-            automatedDrive = false;
-        }
-
-        //Slow Mode
-        if (gamepad1.rightBumperWasPressed()) {
-            slowMode = !slowMode;
-        }
-
-        //Optional way to change slow mode strength
-        if (gamepad1.xWasPressed()) {
-            slowModeMultiplier += 0.25;
-        }
-
-        //Optional way to change slow mode strength
-        if (gamepad2.yWasPressed()) {
-            slowModeMultiplier -= 0.25;
-        }
-
-        telemetryM.debug("position", follower.getPose());
-        telemetryM.debug("velocity", follower.getVelocity());
-        telemetryM.debug("automatedDrive", automatedDrive);
-    }
 }
