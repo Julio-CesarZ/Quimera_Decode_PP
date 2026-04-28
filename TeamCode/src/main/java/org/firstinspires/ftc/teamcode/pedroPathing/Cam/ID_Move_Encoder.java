@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import java.util.concurrent.TimeUnit;
 
-@Autonomous(name = "ID_Encoder", group = "Cam")
+@Autonomous(name = "ID_Encoder_CameraTest", group = "Cam")
 public class ID_Move_Encoder extends LinearOpMode {
     private HuskyLens huskyLens;
     //definir a programação da huskylens

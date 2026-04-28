@@ -1,9 +1,12 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
 
+import com.pedropathing.follower.Follower;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+@Disabled
 @TeleOp (name = "Move / Omni_Mover", group = "TeleOp")
 public class Omni_Move extends LinearOpMode {
 
@@ -12,6 +15,7 @@ public class Omni_Move extends LinearOpMode {
     boolean pressr1 = false;
     boolean pressr2 = false;
     boolean tdc = false;
+    private Follower follower;
 
     @Override
     public void runOpMode() throws InterruptedException {

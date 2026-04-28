@@ -37,7 +37,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.TeleOp.Omni_Move;
 
 import java.util.function.Supplier;
 
-
+@Disabled
 @TeleOp(name = "First Launcher / TestMode", group = "TeleOp")
 public class LauncherTest extends LinearOpMode{
     private Omni_Move Drive;
