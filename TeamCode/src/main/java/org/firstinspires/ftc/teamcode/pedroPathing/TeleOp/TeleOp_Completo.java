@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
 
-import com.bylazar.telemetry.PanelsTelemetry;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -11,7 +10,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -38,9 +36,8 @@ public class TeleOp_Completo extends LinearOpMode {
     private Follower follower;
     public static Pose startingPose;
     private Supplier<PathChain> pathChain;
-    private boolean slowMode = false;
-    private double slowModeMultiplier = 0.5;
-    private double shotP = 0.5;
+    private double multiplier = 0.5;
+    private double shotP = 0.75;
     private double intakeP = 1;
     private int change = 0;
     private String changeM = "Movimentação";
@@ -66,6 +63,7 @@ public class TeleOp_Completo extends LinearOpMode {
         DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
         DcMotorEx l_right = hardwareMap.get(DcMotorEx.class, "l_right");
         DcMotorEx l_left = hardwareMap.get(DcMotorEx.class,"l_left");
+        DcMotorEx tower = hardwareMap.get(DcMotorEx.class,"tower");
 
         Servo s1 = hardwareMap.get(Servo.class,"s1");
         Servo s2 = hardwareMap.get(Servo.class,"s2");
@@ -89,7 +87,7 @@ public class TeleOp_Completo extends LinearOpMode {
             telemetry.addLine();
             telemetry.addData("Modo de Velocidade", mode);
             telemetry.addData("Troca de poder atual", changeM);
-            telemetry.addData("Chassi Power", slowModeMultiplier);
+            telemetry.addData("Chassi Power", multiplier);
             telemetry.addData("Intake Power", intakeP);
             telemetry.addData("Shot Power", shotP);
             telemetry.addLine();
@@ -103,15 +101,10 @@ public class TeleOp_Completo extends LinearOpMode {
 
             telemetry.update();
 
-            if (!slowMode) follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    true
-            ); else follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * slowModeMultiplier,
-                    -gamepad1.left_stick_x * slowModeMultiplier,
-                    -gamepad1.right_stick_x * slowModeMultiplier,
+            follower.setTeleOpDrive(
+                    -gamepad1.left_stick_y * multiplier,
+                    -gamepad1.left_stick_x * multiplier,
+                    -gamepad1.right_stick_x * multiplier,
                     true
             );
 
@@ -164,12 +157,10 @@ public class TeleOp_Completo extends LinearOpMode {
                 }
             }
 
-            if(gamepad1.y && !slowMode && !intervalo_y) {
-                slowMode = !slowMode;
-                mode = "Slow";
-            } else if(gamepad1.y && slowMode && !intervalo_y) {
-                slowMode = !slowMode;
-                mode = "Normal";
+            if(gamepad1.y && !intervalo_y) {
+
+            } else if(gamepad1.y && !intervalo_y) {
+
             }
             intervalo_y = gamepad1.y;
 
@@ -187,11 +178,11 @@ public class TeleOp_Completo extends LinearOpMode {
 
             if(change == 0) {
                 if(gamepad1.right_bumper && !intervalo_bumper) {
-                    slowModeMultiplier += 0.1;
+                    multiplier += 0.1;
                 } else if(gamepad1.left_bumper && !intervalo_bumper) {
-                    slowModeMultiplier -= 0.1;
+                    multiplier -= 0.1;
                 }
-                slowModeMultiplier = Range.clip(slowModeMultiplier, 0.0, 1.0);
+                multiplier = Range.clip(multiplier, 0.0, 1.0);
 
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if(change == 1) {
@@ -205,9 +196,9 @@ public class TeleOp_Completo extends LinearOpMode {
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if(change == 2) {
                 if(gamepad1.right_bumper && !intervalo_bumper) {
-                    shotP += 0.1;
+                    shotP += 0.05;
                 } else if(gamepad1.left_bumper && !intervalo_bumper) {
-                    shotP -= 0.1;
+                    shotP -= 0.05;
                 }
                 shotP = Range.clip(shotP, 0.0, 1.0);
 
