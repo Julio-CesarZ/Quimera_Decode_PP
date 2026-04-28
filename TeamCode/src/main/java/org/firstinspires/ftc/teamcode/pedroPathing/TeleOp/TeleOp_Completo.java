@@ -19,7 +19,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
-@TeleOp (name = "TeleOp", group = "TeleOp")
+@TeleOp (name = "TeleOp / (21%) Completo", group = "TeleOp")
 public class TeleOp_Completo extends LinearOpMode {
 
     boolean intervalo_a = false;
@@ -78,11 +78,17 @@ public class TeleOp_Completo extends LinearOpMode {
         while (opModeIsActive()) {
 
             follower.update();
-
+            // Telemetria para mostrar a potência dos Motores e Intakes
             telemetry.addData("Troca de poder atual", changeM);
             telemetry.addData("Chassi Power", slowModeMultiplier);
             telemetry.addData("Intake Power", intakeP);
             telemetry.addData("Shot Power", shotP);
+
+            telemetry.addData("X", follower.getPose().getX());
+            telemetry.addData("Y", follower.getPose().getY());
+            telemetry.addData("Heading", follower.getPose().getHeading());
+            telemetry.addData("Total Heading", follower.getTotalHeading());
+
 
             if (!slowMode) follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
@@ -96,6 +102,7 @@ public class TeleOp_Completo extends LinearOpMode {
                     true
             );
 
+            // Gamepads do intakes e lançadores
             if(gamepad1.a && !intakeF && !intervalo_a) {
                 intake.setPower(intakeP);
                 intakeF = !intakeF;
