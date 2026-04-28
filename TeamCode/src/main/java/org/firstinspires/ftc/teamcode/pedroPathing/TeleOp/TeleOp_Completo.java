@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
@@ -27,9 +28,11 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean intervalo_y = false;
     boolean intervalo_x = false;
     boolean intervalo_RT = false;
+    boolean intervalo_LT = false;
     boolean intervalo_bumper = false;
     boolean intakeF = false;
     boolean reverse = false;
+    boolean reverseL = false;
     boolean lF = false;
     // ^^ booleans para as funções de intervalo do robô ^^
     private Follower follower;
@@ -37,11 +40,13 @@ public class TeleOp_Completo extends LinearOpMode {
     private Supplier<PathChain> pathChain;
     private boolean slowMode = false;
     private double slowModeMultiplier = 0.5;
-    private double shotP = 0.6;
-    private double intakeP = 0.6;
+    private double shotP = 0.5;
+    private double intakeP = 1;
     private int change = 0;
     private String changeM = "Movimentação";
+    private String mode = "Normal";
     // ^^ implementando motores e outros componentes do robô ^^
+    private ElapsedTime Rtime = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -51,7 +56,7 @@ public class TeleOp_Completo extends LinearOpMode {
         follower.update();
 
         pathChain = () -> follower.pathBuilder()
-                .addPath(new Path(new BezierLine(follower::getPose, new Pose(45, 98))))
+                .addPath(new Path(new BezierLine(follower::getPose, new Pose(0, 0))))
                 .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
                 .build();
 
@@ -78,17 +83,25 @@ public class TeleOp_Completo extends LinearOpMode {
         while (opModeIsActive()) {
 
             follower.update();
+
             // Telemetria para mostrar a potência dos Motores e Intakes
+            telemetry.addLine("Valores de Potência");
+            telemetry.addLine();
+            telemetry.addData("Modo de Velocidade", mode);
             telemetry.addData("Troca de poder atual", changeM);
             telemetry.addData("Chassi Power", slowModeMultiplier);
             telemetry.addData("Intake Power", intakeP);
             telemetry.addData("Shot Power", shotP);
-
+            telemetry.addLine();
+            telemetry.addLine("Valores de Posição");
+            telemetry.addLine();
             telemetry.addData("X", follower.getPose().getX());
             telemetry.addData("Y", follower.getPose().getY());
             telemetry.addData("Heading", follower.getPose().getHeading());
-            telemetry.addData("Total Heading", follower.getTotalHeading());
+            telemetry.addLine();
+            telemetry.addData("Elapsed Time atual", Rtime.seconds());
 
+            telemetry.update();
 
             if (!slowMode) follower.setTeleOpDrive(
                     -gamepad1.left_stick_y,
@@ -136,10 +149,27 @@ public class TeleOp_Completo extends LinearOpMode {
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
+            if(gamepad1.left_trigger > 0.3 && !reverseL) {
+                Rtime.reset();
+                reverseL = !reverseL;
+            }
+            intervalo_LT = gamepad1.left_trigger > 0.3;
+
+            if(reverseL) {
+                if(Rtime.milliseconds() < 200) {
+                    intake.setPower(-0.5);
+                } else {
+                    intake.setPower(0);
+                    reverseL = !reverseL;
+                }
+            }
+
             if(gamepad1.y && !slowMode && !intervalo_y) {
                 slowMode = !slowMode;
+                mode = "Slow";
             } else if(gamepad1.y && slowMode && !intervalo_y) {
                 slowMode = !slowMode;
+                mode = "Normal";
             }
             intervalo_y = gamepad1.y;
 
@@ -196,8 +226,6 @@ public class TeleOp_Completo extends LinearOpMode {
                 l_right.setPower(shotP);
                 l_left.setPower(shotP);
             }
-
-            telemetry.update();
         }
 
 
