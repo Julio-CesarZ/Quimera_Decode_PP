@@ -31,6 +31,7 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean intakeF = false;
     boolean reverse = false;
     boolean lF = false;
+    // ^^ booleans para as funções de intervalo do robô ^^
     private Follower follower;
     public static Pose startingPose;
     private Supplier<PathChain> pathChain;
@@ -40,6 +41,7 @@ public class TeleOp_Completo extends LinearOpMode {
     private double intakeP = 0.6;
     private int change = 0;
     private String changeM = "Movimentação";
+    // ^^ implementando motores e outros componentes do robô ^^
 
     @Override
     public void runOpMode() throws InterruptedException {
