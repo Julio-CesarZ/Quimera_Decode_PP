@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
-@TeleOp (name = "TeleOp / (21%) Completo", group = "TeleOp")
-public class TeleOp_Completo extends LinearOpMode {
+@TeleOp (name = "TeleOp / 2 Jogadores", group = "TeleOp")
+public class players2 extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_b = false;
@@ -91,6 +91,8 @@ public class TeleOp_Completo extends LinearOpMode {
             follower.update();
 
             // Telemetria para mostrar a potência dos Motores e Intakes
+            telemetry.addLine("------------------------------ sistema de 2 Jogadores ------------------------------");
+            telemetry.addLine();
             telemetry.addLine("Valores de Potência");
             telemetry.addLine();
             telemetry.addData("Modo de Velocidade", mode);
@@ -123,44 +125,44 @@ public class TeleOp_Completo extends LinearOpMode {
             );
 
             // Gamepads do intakes e lançadores
-            if (gamepad1.a && !intakeF && !intervalo_a) {
+            if (gamepad2.a && !intakeF && !intervalo_a) {
                 intake.setPower(intakeP);
                 intakeF = !intakeF;
-            } else if (gamepad1.a && intakeF && !intervalo_a) {
+            } else if (gamepad2.a && intakeF && !intervalo_a) {
                 intake.setPower(0);
                 intakeF = !intakeF;
             }
-            intervalo_a = gamepad1.a;
+            intervalo_a = gamepad2.a;
 
-            if (gamepad1.b && !reverse && !intervalo_b) {
+            if (gamepad2.b && !reverse && !intervalo_b) {
                 intake.setPower(-intakeP);
                 l_right.setPower(-shotP);
                 l_left.setPower(-shotP);
                 reverse = !reverse;
-            } else if (gamepad1.b && reverse && !intervalo_b) {
+            } else if (gamepad2.b && reverse && !intervalo_b) {
                 intake.setPower(0);
                 l_right.setPower(0);
                 l_left.setPower(0);
                 reverse = !reverse;
             }
-            intervalo_b = gamepad1.b;
+            intervalo_b = gamepad2.b;
 
-            if (gamepad1.right_trigger > 0.3 && !lF && !intervalo_RT) {
+            if (gamepad2.right_trigger > 0.3 && !lF && !intervalo_RT) {
                 l_right.setPower(shotP);
                 l_left.setPower(shotP);
                 lF = !lF;
-            } else if (gamepad1.right_trigger > 0.3 && lF && !intervalo_RT) {
+            } else if (gamepad2.right_trigger > 0.3 && lF && !intervalo_RT) {
                 l_right.setPower(0);
                 l_left.setPower(0);
                 lF = !lF;
             }
-            intervalo_RT = gamepad1.right_trigger > 0.3;
+            intervalo_RT = gamepad2.right_trigger > 0.3;
 
-            if (gamepad1.left_trigger > 0.3 && !reverseL) {
+            if (gamepad2.left_trigger > 0.3 && !reverseL) {
                 Rtime.reset();
                 reverseL = !reverseL;
             }
-            intervalo_LT = gamepad1.left_trigger > 0.3;
+            intervalo_LT = gamepad2.left_trigger > 0.3;
 
             if (reverseL) {
                 if (Rtime.milliseconds() < 200) {
@@ -179,17 +181,17 @@ public class TeleOp_Completo extends LinearOpMode {
                 wait(100);
                 intake.setPower(intakeP);
 
-            } else if(gamepad1.a && intakeF && !intervalo_a) {
+            } else if(gamepad1.a && intakeF && !i ntervalo_a) {
                 intake.setPower(0);
                 intakeF = !intakeF;
             }
             intervalo_a = gamepad1.a; */
 
-            if (gamepad1.dpad_up && !LastStats) {
+            if (gamepad2.dpad_up && !LastStats) {
                 intakeAtivo = !intakeAtivo;
                 temporizadorIntake.reset(); // Reinicia o tempo ao ligar
             }
-            LastStats = gamepad1.dpad_up;
+            LastStats = gamepad2.dpad_up;
 
             if (intakeAtivo) {
                 if ((temporizadorIntake.milliseconds() % (milisegundos * 2)) < milisegundos) {
@@ -200,73 +202,70 @@ public class TeleOp_Completo extends LinearOpMode {
             } else {
                 intake.setPower(0);
             }
-
-
             // ========================================================================================================================//
+            if (gamepad1.y && !slowMode && !intervalo_y) {
+                slowMode = !slowMode;
+                mode = "Slow";
+            } else if (gamepad1.y && slowMode && !intervalo_y) {
+                slowMode = !slowMode;
+                mode = "Normal";
+            }
+            intervalo_y = gamepad1.y;
 
-                if (gamepad1.y && !slowMode && !intervalo_y) {
-                    slowMode = !slowMode;
-                    mode = "Slow";
-                } else if (gamepad1.y && slowMode && !intervalo_y) {
-                    slowMode = !slowMode;
-                    mode = "Normal";
+            if (gamepad1.x && change == 0 && !intervalo_x) {
+                change = 1;
+                changeM = "Intake";
+            } else if (gamepad1.x && change == 1 && !intervalo_x) {
+                change = 2;
+                changeM = "Lançador";
+            } else if (gamepad1.x && change == 2 && !intervalo_x) {
+                change = 0;
+                changeM = "Movimentação";
+            }
+            intervalo_x = gamepad1.x;
+
+            if (change == 0) {
+                if (gamepad1.right_bumper && !intervalo_bumper) {
+                    slowModeMultiplier += 0.5;
+                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                    slowModeMultiplier -= 0.5;
                 }
-                intervalo_y = gamepad1.y;
+                slowModeMultiplier = Range.clip(slowModeMultiplier, 0.0, 1.0);
 
-                if (gamepad1.x && change == 0 && !intervalo_x) {
-                    change = 1;
-                    changeM = "Intake";
-                } else if (gamepad1.x && change == 1 && !intervalo_x) {
-                    change = 2;
-                    changeM = "Lançador";
-                } else if (gamepad1.x && change == 2 && !intervalo_x) {
-                    change = 0;
-                    changeM = "Movimentação";
+                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+            } else if (change == 1) {
+                if (gamepad1.right_bumper && !intervalo_bumper) {
+                    intakeP += 0.5;
+                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                    intakeP -= 0.5;
                 }
-                intervalo_x = gamepad1.x;
+                intakeP = Range.clip(intakeP, 0.0, 1.0);
 
-                if (change == 0) {
-                    if (gamepad1.right_bumper && !intervalo_bumper) {
-                        slowModeMultiplier += 0.5;
-                    } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                        slowModeMultiplier -= 0.5;
-                    }
-                    slowModeMultiplier = Range.clip(slowModeMultiplier, 0.0, 1.0);
-
-                    intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
-                } else if (change == 1) {
-                    if (gamepad1.right_bumper && !intervalo_bumper) {
-                        intakeP += 0.5;
-                    } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                        intakeP -= 0.5;
-                    }
-                    intakeP = Range.clip(intakeP, 0.0, 1.0);
-
-                    intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
-                } else if (change == 2) {
-                    if (gamepad1.right_bumper && !intervalo_bumper) {
-                        shotP += 0.5;
-                    } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                        shotP -= 0.5;
-                    }
-                    shotP = Range.clip(shotP, 0.0, 1.0);
-
-                    intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+            } else if (change == 2) {
+                if (gamepad1.right_bumper && !intervalo_bumper) {
+                    shotP += 0.5;
+                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                    shotP -= 0.5;
                 }
+                shotP = Range.clip(shotP, 0.0, 1.0);
 
-                if (intakeF) {
-                    intake.setPower(intakeP);
-                }
-                if (reverse) {
-                    intake.setPower(-intakeP);
-                    l_right.setPower(-shotP);
-                    l_left.setPower(-shotP);
-                }
-                if (lF) {
-                    l_right.setPower(shotP);
-                    l_left.setPower(shotP);
-                }
+                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+            }
+
+            if (intakeF) {
+                intake.setPower(intakeP);
+            }
+            if (reverse) {
+                intake.setPower(-intakeP);
+                l_right.setPower(-shotP);
+                l_left.setPower(-shotP);
+            }
+            if (lF) {
+                l_right.setPower(shotP);
+                l_left.setPower(shotP);
             }
         }
     }
+}
 
