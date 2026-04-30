@@ -33,7 +33,6 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean reverse = false;
     boolean reverseL = false;
     boolean lF = false;
-    boolean Rep = false;
 
     boolean intakeAtivo = false;
     boolean LastStats = false;
@@ -109,13 +108,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
             telemetry.update();
 
-            if (!slowMode) follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y,
-                    -gamepad1.left_stick_x,
-                    -gamepad1.right_stick_x,
-                    true
-            );
-            else follower.setTeleOpDrive(
+            follower.setTeleOpDrive(
                     -gamepad1.left_stick_y * slowModeMultiplier,
                     -gamepad1.left_stick_x * slowModeMultiplier,
                     -gamepad1.right_stick_x * slowModeMultiplier,
