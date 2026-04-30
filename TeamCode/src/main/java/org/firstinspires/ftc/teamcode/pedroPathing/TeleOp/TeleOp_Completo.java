@@ -18,7 +18,7 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
-@TeleOp (name = "TeleOp / (21%) Completo", group = "TeleOp")
+@TeleOp (name = "TeleOp / 1 player", group = "TeleOp")
 public class TeleOp_Completo extends LinearOpMode {
 
     boolean intervalo_a = false;

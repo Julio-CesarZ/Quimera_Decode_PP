@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
-@TeleOp (name = "TeleOp / 2 Jogadores", group = "TeleOp")
-public class players2 extends LinearOpMode {
+@TeleOp (name = "TeleOp / 2 players", group = "TeleOp")
+public class TeleOp_2 extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_b = false;
@@ -33,11 +33,9 @@ public class players2 extends LinearOpMode {
     boolean reverse = false;
     boolean reverseL = false;
     boolean lF = false;
-
-    boolean intakeAtivo = false;
-    boolean LastStats = false;
-    ElapsedTime temporizadorIntake = new ElapsedTime();
-    double milisegundos = 200;
+    boolean intakePulso = false;
+    ElapsedTime temporizadorPulsoIntake = new ElapsedTime();
+    double mSegundos = 200;
 
     // ^^ booleans para as funções de intervalo do robô ^^
     private Follower follower;
@@ -71,6 +69,7 @@ public class players2 extends LinearOpMode {
         DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
         DcMotorEx l_right = hardwareMap.get(DcMotorEx.class, "l_right");
         DcMotorEx l_left = hardwareMap.get(DcMotorEx.class, "l_left");
+        DcMotorEx tower = hardwareMap.get(DcMotorEx.class, "tower");
 
         Servo s1 = hardwareMap.get(Servo.class, "s1");
         Servo s2 = hardwareMap.get(Servo.class, "s2");
@@ -89,9 +88,9 @@ public class players2 extends LinearOpMode {
 
             follower.update();
 
-            // Telemetria para mostrar a potência dos Motores e Intakes
             telemetry.addLine("------------------------------ sistema de 2 Jogadores ------------------------------");
             telemetry.addLine();
+            // Telemetria para mostrar a potência dos Motores e Intakes
             telemetry.addLine("Valores de Potência");
             telemetry.addLine();
             telemetry.addData("Modo de Velocidade", mode);
@@ -115,11 +114,10 @@ public class players2 extends LinearOpMode {
                     -gamepad1.left_stick_x * slowModeMultiplier,
                     -gamepad1.right_stick_x * slowModeMultiplier,
                     true
-                    );
+            );
 
             // Gamepads do intakes e lançadores
             if (gamepad2.a && !intakeF && !intervalo_a) {
-                intake.setPower(intakeP);
                 intakeF = !intakeF;
             } else if (gamepad2.a && intakeF && !intervalo_a) {
                 intake.setPower(0);
@@ -128,9 +126,6 @@ public class players2 extends LinearOpMode {
             intervalo_a = gamepad2.a;
 
             if (gamepad2.b && !reverse && !intervalo_b) {
-                intake.setPower(-intakeP);
-                l_right.setPower(-shotP);
-                l_left.setPower(-shotP);
                 reverse = !reverse;
             } else if (gamepad2.b && reverse && !intervalo_b) {
                 intake.setPower(0);
@@ -141,8 +136,6 @@ public class players2 extends LinearOpMode {
             intervalo_b = gamepad2.b;
 
             if (gamepad2.right_trigger > 0.3 && !lF && !intervalo_RT) {
-                l_right.setPower(shotP);
-                l_left.setPower(shotP);
                 lF = !lF;
             } else if (gamepad2.right_trigger > 0.3 && lF && !intervalo_RT) {
                 l_right.setPower(0);
@@ -165,85 +158,70 @@ public class players2 extends LinearOpMode {
                     reverseL = !reverseL;
                 }
             }
-/*
-            if(gamepad1.dpad_up && !intakeF && !intervalo_bpad_up) {
-                intake.setPower(intakeP);
-                intakeF = !intakeF;
-                wait(100);
+
+            if (gamepad2.dpad_up && !intervalo_bpad_up) {
+                intakePulso = !intakePulso;
+                temporizadorPulsoIntake.reset(); // Reinicia o tempo ao ligar ou desligar
                 intake.setPower(0);
-                wait(100);
-                intake.setPower(intakeP);
-
-            } else if(gamepad1.a && intakeF && !i ntervalo_a) {
-                intake.setPower(0);
-                intakeF = !intakeF;
             }
-            intervalo_a = gamepad1.a; */
+            intervalo_bpad_up = gamepad2.dpad_up;
 
-            if (gamepad2.dpad_up && !LastStats) {
-                intakeAtivo = !intakeAtivo;
-                temporizadorIntake.reset(); // Reinicia o tempo ao ligar
-            }
-            LastStats = gamepad2.dpad_up;
-
-            if (intakeAtivo) {
-                if ((temporizadorIntake.milliseconds() % (milisegundos * 2)) < milisegundos) {
+            if (intakePulso && !intakeF) {
+                if ((temporizadorPulsoIntake.milliseconds() % (mSegundos * 2)) < mSegundos) {
                     intake.setPower(intakeP);
                 } else {
                     intake.setPower(0);
                 }
-            } else {
-                intake.setPower(0);
             }
-            // ========================================================================================================================//
-            if (gamepad1.y && !slowMode && !intervalo_y) {
+
+            if (gamepad2.y && !slowMode && !intervalo_y) {
                 slowMode = !slowMode;
                 mode = "Slow";
-            } else if (gamepad1.y && slowMode && !intervalo_y) {
+            } else if (gamepad2.y && slowMode && !intervalo_y) {
                 slowMode = !slowMode;
                 mode = "Normal";
             }
-            intervalo_y = gamepad1.y;
+            intervalo_y = gamepad2.y;
 
-            if (gamepad1.x && change == 0 && !intervalo_x) {
+            if (gamepad2.x && change == 0 && !intervalo_x) {
                 change = 1;
                 changeM = "Intake";
-            } else if (gamepad1.x && change == 1 && !intervalo_x) {
+            } else if (gamepad2.x && change == 1 && !intervalo_x) {
                 change = 2;
                 changeM = "Lançador";
-            } else if (gamepad1.x && change == 2 && !intervalo_x) {
+            } else if (gamepad2.x && change == 2 && !intervalo_x) {
                 change = 0;
                 changeM = "Movimentação";
             }
-            intervalo_x = gamepad1.x;
+            intervalo_x = gamepad2.x;
 
             if (change == 0) {
-                if (gamepad1.right_bumper && !intervalo_bumper) {
+                if (gamepad2.right_bumper && !intervalo_bumper) {
                     slowModeMultiplier += 0.5;
-                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                } else if (gamepad2.left_bumper && !intervalo_bumper) {
                     slowModeMultiplier -= 0.5;
                 }
                 slowModeMultiplier = Range.clip(slowModeMultiplier, 0.0, 1.0);
 
-                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+                intervalo_bumper = gamepad2.right_bumper || gamepad2.left_bumper;
             } else if (change == 1) {
-                if (gamepad1.right_bumper && !intervalo_bumper) {
+                if (gamepad2.right_bumper && !intervalo_bumper) {
                     intakeP += 0.5;
-                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                } else if (gamepad2.left_bumper && !intervalo_bumper) {
                     intakeP -= 0.5;
                 }
                 intakeP = Range.clip(intakeP, 0.0, 1.0);
 
-                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+                intervalo_bumper = gamepad2.right_bumper || gamepad2.left_bumper;
             } else if (change == 2) {
-                if (gamepad1.right_bumper && !intervalo_bumper) {
+                if (gamepad2.right_bumper && !intervalo_bumper) {
                     shotP += 0.5;
-                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                } else if (gamepad2.left_bumper && !intervalo_bumper) {
                     shotP -= 0.5;
                 }
                 shotP = Range.clip(shotP, 0.0, 1.0);
 
-                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+                intervalo_bumper = gamepad2.right_bumper || gamepad2.left_bumper;
             }
 
             if (intakeF) {
@@ -261,4 +239,3 @@ public class players2 extends LinearOpMode {
         }
     }
 }
-
