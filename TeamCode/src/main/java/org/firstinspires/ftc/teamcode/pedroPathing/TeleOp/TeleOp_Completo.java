@@ -33,11 +33,9 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean reverse = false;
     boolean reverseL = false;
     boolean lF = false;
-
-    boolean intakeAtivo = false;
-    boolean LastStats = false;
-    ElapsedTime temporizadorIntake = new ElapsedTime();
-    double milisegundos = 200;
+    boolean intakePulso = false;
+    ElapsedTime temporizadorPulsoIntake = new ElapsedTime();
+    double mSegundos = 200;
 
     // ^^ booleans para as funções de intervalo do robô ^^
     private Follower follower;
@@ -71,6 +69,7 @@ public class TeleOp_Completo extends LinearOpMode {
         DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
         DcMotorEx l_right = hardwareMap.get(DcMotorEx.class, "l_right");
         DcMotorEx l_left = hardwareMap.get(DcMotorEx.class, "l_left");
+        DcMotorEx tower = hardwareMap.get(DcMotorEx.class, "tower");
 
         Servo s1 = hardwareMap.get(Servo.class, "s1");
         Servo s2 = hardwareMap.get(Servo.class, "s2");
@@ -117,7 +116,6 @@ public class TeleOp_Completo extends LinearOpMode {
 
             // Gamepads do intakes e lançadores
             if (gamepad1.a && !intakeF && !intervalo_a) {
-                intake.setPower(intakeP);
                 intakeF = !intakeF;
             } else if (gamepad1.a && intakeF && !intervalo_a) {
                 intake.setPower(0);
@@ -126,9 +124,6 @@ public class TeleOp_Completo extends LinearOpMode {
             intervalo_a = gamepad1.a;
 
             if (gamepad1.b && !reverse && !intervalo_b) {
-                intake.setPower(-intakeP);
-                l_right.setPower(-shotP);
-                l_left.setPower(-shotP);
                 reverse = !reverse;
             } else if (gamepad1.b && reverse && !intervalo_b) {
                 intake.setPower(0);
@@ -139,8 +134,6 @@ public class TeleOp_Completo extends LinearOpMode {
             intervalo_b = gamepad1.b;
 
             if (gamepad1.right_trigger > 0.3 && !lF && !intervalo_RT) {
-                l_right.setPower(shotP);
-                l_left.setPower(shotP);
                 lF = !lF;
             } else if (gamepad1.right_trigger > 0.3 && lF && !intervalo_RT) {
                 l_right.setPower(0);
@@ -163,39 +156,21 @@ public class TeleOp_Completo extends LinearOpMode {
                     reverseL = !reverseL;
                 }
             }
-/*
-            if(gamepad1.dpad_up && !intakeF && !intervalo_bpad_up) {
-                intake.setPower(intakeP);
-                intakeF = !intakeF;
-                wait(100);
+
+            if (gamepad1.dpad_up && !intervalo_bpad_up) {
+                intakePulso = !intakePulso;
+                temporizadorPulsoIntake.reset(); // Reinicia o tempo ao ligar ou desligar
                 intake.setPower(0);
-                wait(100);
-                intake.setPower(intakeP);
-
-            } else if(gamepad1.a && intakeF && !intervalo_a) {
-                intake.setPower(0);
-                intakeF = !intakeF;
             }
-            intervalo_a = gamepad1.a; */
+            intervalo_bpad_up = gamepad1.dpad_up;
 
-            if (gamepad1.dpad_up && !LastStats) {
-                intakeAtivo = !intakeAtivo;
-                temporizadorIntake.reset(); // Reinicia o tempo ao ligar
-            }
-            LastStats = gamepad1.dpad_up;
-
-            if (intakeAtivo) {
-                if ((temporizadorIntake.milliseconds() % (milisegundos * 2)) < milisegundos) {
+            if (intakePulso && !intakeF) {
+                if ((temporizadorPulsoIntake.milliseconds() % (mSegundos * 2)) < mSegundos) {
                     intake.setPower(intakeP);
                 } else {
                     intake.setPower(0);
                 }
-            } else {
-                intake.setPower(0);
             }
-
-
-            // ========================================================================================================================//
 
                 if (gamepad1.y && !slowMode && !intervalo_y) {
                     slowMode = !slowMode;
