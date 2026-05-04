@@ -48,6 +48,7 @@ public class Constants {
             .maxPower(1)
             .xVelocity(61)
             .yVelocity(45)
+            .useBrakeModeInTeleOp(true)
             .rightFrontMotorName("rf") //0
             .rightRearMotorName("rr") //2
             .leftRearMotorName("lr") //3
@@ -58,8 +59,8 @@ public class Constants {
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            .forwardPodY(11.15)
-            .strafePodX(-2.14)
+            .forwardPodY(2.85) //11.15
+            .strafePodX(-7.20) //-2.14
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)

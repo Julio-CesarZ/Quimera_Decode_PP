@@ -18,8 +18,8 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.function.Supplier;
 
-@TeleOp (name = "TeleOp / 2 players", group = "TeleOp")
-public class TeleOp_2 extends LinearOpMode {
+@TeleOp (name = "TeleOp / 2 player", group = "TeleOp")
+public class TeleOp_Completo_2 extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_b = false;
@@ -29,6 +29,9 @@ public class TeleOp_2 extends LinearOpMode {
     boolean intervalo_LT = false;
     boolean intervalo_bumper = false;
     boolean intervalo_bpad_up = false;
+    boolean intervalo_bpad_right = false;
+    boolean intervalo_bpad_left = false;
+    boolean intervalo_bpad_down = false;
     boolean intakeF = false;
     boolean reverse = false;
     boolean reverseL = false;
@@ -41,13 +44,12 @@ public class TeleOp_2 extends LinearOpMode {
     private Follower follower;
     public static Pose startingPose;
     private Supplier<PathChain> pathChain;
-    private boolean slowMode = false;
-    private double slowModeMultiplier = 0.5;
-    private double shotP = 0.5;
+    private double slowModeMultiplier = 0.8;
+    private double shotP = 0.8;
     private double intakeP = 1;
+    private double towerP = 0.5;
     private int change = 0;
     private String changeM = "Movimentação";
-    private String mode = "Normal";
     // ^^ implementando motores e outros componentes do robô ^^
     private ElapsedTime Rtime = new ElapsedTime();
 
@@ -75,12 +77,17 @@ public class TeleOp_2 extends LinearOpMode {
         Servo s2 = hardwareMap.get(Servo.class, "s2");
 
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        l_right.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        l_left.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        l_right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        l_left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        l_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        l_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         intake.setDirection(DcMotor.Direction.REVERSE);
         l_right.setDirection(DcMotor.Direction.REVERSE);
         l_left.setDirection(DcMotor.Direction.REVERSE);
+
+        tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         waitForStart();
 
@@ -88,16 +95,14 @@ public class TeleOp_2 extends LinearOpMode {
 
             follower.update();
 
-            telemetry.addLine("------------------------------ sistema de 2 Jogadores ------------------------------");
-            telemetry.addLine();
             // Telemetria para mostrar a potência dos Motores e Intakes
             telemetry.addLine("Valores de Potência");
             telemetry.addLine();
-            telemetry.addData("Modo de Velocidade", mode);
             telemetry.addData("Troca de poder atual", changeM);
             telemetry.addData("Chassi Power", slowModeMultiplier);
             telemetry.addData("Intake Power", intakeP);
             telemetry.addData("Shot Power", shotP);
+            telemetry.addData("Tower Power", towerP);
             telemetry.addLine();
             telemetry.addLine("Valores de Posição");
             telemetry.addLine();
@@ -110,45 +115,45 @@ public class TeleOp_2 extends LinearOpMode {
             telemetry.update();
 
             follower.setTeleOpDrive(
-                    -gamepad1.left_stick_y * slowModeMultiplier,
-                    -gamepad1.left_stick_x * slowModeMultiplier,
-                    -gamepad1.right_stick_x * slowModeMultiplier,
+                    -gamepad2.left_stick_y * slowModeMultiplier,
+                    -gamepad2.left_stick_x * slowModeMultiplier,
+                    -gamepad2.right_stick_x * slowModeMultiplier,
                     true
             );
 
             // Gamepads do intakes e lançadores
-            if (gamepad2.a && !intakeF && !intervalo_a) {
+            if (gamepad1.a && !intakeF && !intervalo_a) {
                 intakeF = !intakeF;
-            } else if (gamepad2.a && intakeF && !intervalo_a) {
+            } else if (gamepad1.a && intakeF && !intervalo_a) {
                 intake.setPower(0);
                 intakeF = !intakeF;
             }
-            intervalo_a = gamepad2.a;
+            intervalo_a = gamepad1.a;
 
-            if (gamepad2.b && !reverse && !intervalo_b) {
+            if (gamepad1.b && !reverse && !intervalo_b) {
                 reverse = !reverse;
-            } else if (gamepad2.b && reverse && !intervalo_b) {
+            } else if (gamepad1.b && reverse && !intervalo_b) {
                 intake.setPower(0);
                 l_right.setPower(0);
                 l_left.setPower(0);
                 reverse = !reverse;
             }
-            intervalo_b = gamepad2.b;
+            intervalo_b = gamepad1.b;
 
-            if (gamepad2.right_trigger > 0.3 && !lF && !intervalo_RT) {
+            if (gamepad1.right_trigger > 0.3 && !lF && !intervalo_RT) {
                 lF = !lF;
-            } else if (gamepad2.right_trigger > 0.3 && lF && !intervalo_RT) {
+            } else if (gamepad1.right_trigger > 0.3 && lF && !intervalo_RT) {
                 l_right.setPower(0);
                 l_left.setPower(0);
                 lF = !lF;
             }
-            intervalo_RT = gamepad2.right_trigger > 0.3;
+            intervalo_RT = gamepad1.right_trigger > 0.3;
 
-            if (gamepad2.left_trigger > 0.3 && !reverseL) {
+            if (gamepad1.left_trigger > 0.3 && !reverseL) {
                 Rtime.reset();
                 reverseL = !reverseL;
             }
-            intervalo_LT = gamepad2.left_trigger > 0.3;
+            intervalo_LT = gamepad1.left_trigger > 0.3;
 
             if (reverseL) {
                 if (Rtime.milliseconds() < 200) {
@@ -159,12 +164,12 @@ public class TeleOp_2 extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.dpad_up && !intervalo_bpad_up) {
+            if (gamepad1.dpad_up && !intervalo_bpad_up) {
                 intakePulso = !intakePulso;
                 temporizadorPulsoIntake.reset(); // Reinicia o tempo ao ligar ou desligar
                 intake.setPower(0);
             }
-            intervalo_bpad_up = gamepad2.dpad_up;
+            intervalo_bpad_up = gamepad1.dpad_up;
 
             if (intakePulso && !intakeF) {
                 if ((temporizadorPulsoIntake.milliseconds() % (mSegundos * 2)) < mSegundos) {
@@ -174,54 +179,66 @@ public class TeleOp_2 extends LinearOpMode {
                 }
             }
 
-            if (gamepad2.y && !slowMode && !intervalo_y) {
-                slowMode = !slowMode;
-                mode = "Slow";
-            } else if (gamepad2.y && slowMode && !intervalo_y) {
-                slowMode = !slowMode;
-                mode = "Normal";
+            if (gamepad1.dpad_right) {
+                tower.setPower(-towerP);
+            } else if (gamepad1.dpad_left) {
+                tower.setPower(towerP);
+            } else {
+                tower.setPower(0);
             }
-            intervalo_y = gamepad2.y;
 
-            if (gamepad2.x && change == 0 && !intervalo_x) {
+
+            if (gamepad1.x && change == 0 && !intervalo_x) {
                 change = 1;
                 changeM = "Intake";
-            } else if (gamepad2.x && change == 1 && !intervalo_x) {
+            } else if (gamepad1.x && change == 1 && !intervalo_x) {
                 change = 2;
                 changeM = "Lançador";
-            } else if (gamepad2.x && change == 2 && !intervalo_x) {
+            } else if(gamepad1.x && change == 2 && !intervalo_x) {
+                change = 3;
+                changeM = "Torre";
+            } else if (gamepad1.x && change == 3 && !intervalo_x) {
                 change = 0;
                 changeM = "Movimentação";
             }
-            intervalo_x = gamepad2.x;
+            intervalo_x = gamepad1.x;
 
             if (change == 0) {
-                if (gamepad2.right_bumper && !intervalo_bumper) {
-                    slowModeMultiplier += 0.5;
-                } else if (gamepad2.left_bumper && !intervalo_bumper) {
-                    slowModeMultiplier -= 0.5;
+                if (gamepad1.right_bumper && !intervalo_bumper) {
+                    slowModeMultiplier += 0.05;
+                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                    slowModeMultiplier -= 0.05;
                 }
                 slowModeMultiplier = Range.clip(slowModeMultiplier, 0.0, 1.0);
 
-                intervalo_bumper = gamepad2.right_bumper || gamepad2.left_bumper;
+                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 1) {
-                if (gamepad2.right_bumper && !intervalo_bumper) {
-                    intakeP += 0.5;
-                } else if (gamepad2.left_bumper && !intervalo_bumper) {
-                    intakeP -= 0.5;
+                if (gamepad1.right_bumper && !intervalo_bumper) {
+                    intakeP += 0.05;
+                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                    intakeP -= 0.05;
                 }
                 intakeP = Range.clip(intakeP, 0.0, 1.0);
 
-                intervalo_bumper = gamepad2.right_bumper || gamepad2.left_bumper;
+                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 2) {
-                if (gamepad2.right_bumper && !intervalo_bumper) {
-                    shotP += 0.5;
-                } else if (gamepad2.left_bumper && !intervalo_bumper) {
-                    shotP -= 0.5;
+                if (gamepad1.right_bumper && !intervalo_bumper) {
+                    shotP += 0.05;
+                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                    shotP -= 0.05;
                 }
                 shotP = Range.clip(shotP, 0.0, 1.0);
 
-                intervalo_bumper = gamepad2.right_bumper || gamepad2.left_bumper;
+                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+            } else if (change == 3) {
+                if (gamepad1.right_bumper && !intervalo_bumper) {
+                    towerP += 0.05;
+                } else if (gamepad1.left_bumper && !intervalo_bumper) {
+                    towerP -= 0.05;
+                }
+                towerP = Range.clip(towerP, 0.0, 1.0);
+
+                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             }
 
             if (intakeF) {
@@ -239,3 +256,4 @@ public class TeleOp_2 extends LinearOpMode {
         }
     }
 }
+
