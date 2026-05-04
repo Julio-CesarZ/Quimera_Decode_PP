@@ -32,7 +32,7 @@ public class Constants {
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025, 0, 0.00001, 0.6, 0.01))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.000005, 0.6, 0.01))
             .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.05962, 0.00175))
-            .mass(7);
+            .mass(11);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 1, 3.5);
 
