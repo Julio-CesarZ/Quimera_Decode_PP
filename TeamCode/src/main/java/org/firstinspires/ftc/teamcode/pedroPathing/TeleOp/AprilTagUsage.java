@@ -36,7 +36,7 @@ public class AprilTagUsage extends OpMode {
 
         //if you're not using limelight you can follow the same steps: build an offset pose, put your heading offset, and generate a path etc
 
-        if (!following) {
+        /*if (!following) {
             follower.followPath(
                     follower.pathBuilder()
                             .addPath(new BezierLine(follower.getPose(), TARGET_LOCATION))
@@ -45,11 +45,16 @@ public class AprilTagUsage extends OpMode {
             );
         }
 
+         */
+
         //This uses the aprilTag to relocalize your robot
         //You can also create a custom AprilTag fusion Localizer for the follower if you want to use this by default for all your autos
         follower.setPose(getRobotPoseFromCamera());
 
         if (following && !follower.isBusy()) following = false;
+
+        telemetry.addData("Pose", getRobotPoseFromCamera());
+        telemetry.update();
     }
 
     private Pose getRobotPoseFromCamera() {
