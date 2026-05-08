@@ -86,6 +86,10 @@ public class SigleMotorTest extends LinearOpMode {
             telemetry.addData("Chassi Power", slowModeMultiplier);
             telemetry.addLine();
             telemetry.addLine("Valores de Posição");
+            telemetry.addLine("A = Right Rear");
+            telemetry.addLine("B = left Rear");
+            telemetry.addLine("Y = Right Front");
+            telemetry.addLine("X = Left Front");
             telemetry.addLine();
             telemetry.addData("X", follower.getPose().getX());
             telemetry.addData("Y", follower.getPose().getY());
