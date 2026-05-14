@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.Cam;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.hardware.dfrobot.HuskyLens;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,6 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.internal.system.Deadline;
 import java.util.concurrent.TimeUnit;
 
+@Disabled
 @Autonomous(name = "ID_Encoder_CameraTest", group = "Cam")
 public class ID_Move_Encoder extends LinearOpMode {
     private HuskyLens huskyLens;

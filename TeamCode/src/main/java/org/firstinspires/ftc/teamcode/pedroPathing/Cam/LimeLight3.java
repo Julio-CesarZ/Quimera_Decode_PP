@@ -12,6 +12,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.LLStatus;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -28,9 +29,10 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 import java.util.List;
 import java.util.function.Supplier;
+@Disabled
 
-@TeleOp (name = "LimeLightTest", group = "Cam")
-public class LimeLight_Test extends LinearOpMode {
+@TeleOp (name = "LimeLight3", group = "Cam")
+public class LimeLight3 extends LinearOpMode {
 
     Limelight3A limelight;
     private Follower follower;
