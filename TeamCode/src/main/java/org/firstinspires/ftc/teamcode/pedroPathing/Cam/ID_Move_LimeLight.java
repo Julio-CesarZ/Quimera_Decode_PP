@@ -3,10 +3,12 @@ package org.firstinspires.ftc.teamcode.pedroPathing.Cam;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 
+@Disabled
 @Autonomous(name = "Limelight_Encoder_Test", group = "Cam")
 public class ID_Move_LimeLight extends LinearOpMode {
 
@@ -27,7 +29,7 @@ public class ID_Move_LimeLight extends LinearOpMode {
 
         // Variáveis de Controle
         int target = 0;
-        double kP = 0.05; // Ajustado para trabalhar com graus (tx) em vez de pixels
+        double kP = 0.08; // Ajustado para trabalhar com graus (tx) em vez de pixels
         boolean guide = false;
         boolean lastRT = false; // Para evitar toggle infinito
 
@@ -78,7 +80,7 @@ public class ID_Move_LimeLight extends LinearOpMode {
                         target = hex.getCurrentPosition() + (int)(tx * 2.5);
 
                         // Limita o alvo para segurança
-                        target = Math.max(-150, Math.min(150, target));
+                        target = Math.max(-180, Math.min(180, target));
 
                         double power = Math.abs(tx) * kP;
                         power = Math.max(-0.2, Math.min(0.2, power)); // Clamp de potência

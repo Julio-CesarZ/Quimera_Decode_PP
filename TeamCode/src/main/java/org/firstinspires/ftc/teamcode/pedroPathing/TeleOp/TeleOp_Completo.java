@@ -6,10 +6,13 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.Path;
 import com.pedropathing.paths.PathChain;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -32,26 +35,32 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean intervalo_bpad_right = false;
     boolean intervalo_bpad_left = false;
     boolean intervalo_bpad_down = false;
+    boolean guide = false;
     boolean intakeF = false;
     boolean reverse = false;
     boolean reverseL = false;
     boolean lF = false;
     boolean intakePulso = false;
+    boolean targetVisible;
     ElapsedTime temporizadorPulsoIntake = new ElapsedTime();
-    double mSegundos = 200;
 
     // ^^ booleans para as funções de intervalo do robô ^^
     private Follower follower;
     public static Pose startingPose;
     private Supplier<PathChain> pathChain;
-    private double slowModeMultiplier = 0.8;
+    private double slowModeMultiplier = 0.5;
     private double shotP = 0.8;
     private double intakeP = 1;
     private double towerP = 0.5;
+    double kP = 0.1;
+    double limitPP = 0.8;
+    double limitPL = 0.5;
     private int change = 0;
+    private int target = 0;
     private String changeM = "Movimentação";
     // ^^ implementando motores e outros componentes do robô ^^
     private ElapsedTime Rtime = new ElapsedTime();
+    private ElapsedTime tick_intervalo = new ElapsedTime();
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -74,7 +83,6 @@ public class TeleOp_Completo extends LinearOpMode {
         DcMotorEx tower = hardwareMap.get(DcMotorEx.class, "tower");
 
         Servo s1 = hardwareMap.get(Servo.class, "s1");
-        Servo s2 = hardwareMap.get(Servo.class, "s2");
 
         intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
@@ -87,32 +95,24 @@ public class TeleOp_Completo extends LinearOpMode {
         l_right.setDirection(DcMotor.Direction.REVERSE);
         l_left.setDirection(DcMotor.Direction.REVERSE);
 
-        tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        tower.setTargetPosition(0);
+        tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
+
+        limelight.setPollRateHz(50);
+        limelight.start();
+        limelight.pipelineSwitch(1); //1 -> oficial 2 -> teste
 
         waitForStart();
 
         while (opModeIsActive()) {
+            LLResult result = limelight.getLatestResult();
+            targetVisible = (result != null && result.isValid());
 
             follower.update();
-
-            // Telemetria para mostrar a potência dos Motores e Intakes
-            telemetry.addLine("Valores de Potência");
-            telemetry.addLine();
-            telemetry.addData("Troca de poder atual", changeM);
-            telemetry.addData("Chassi Power", slowModeMultiplier);
-            telemetry.addData("Intake Power", intakeP);
-            telemetry.addData("Shot Power", shotP);
-            telemetry.addData("Tower Power", towerP);
-            telemetry.addLine();
-            telemetry.addLine("Valores de Posição");
-            telemetry.addLine();
-            telemetry.addData("X", follower.getPose().getX());
-            telemetry.addData("Y", follower.getPose().getY());
-            telemetry.addData("Heading", follower.getPose().getHeading());
-            telemetry.addLine();
-            telemetry.addData("Elapsed Time atual", Rtime.seconds());
-
-            telemetry.update();
 
             follower.setTeleOpDrive(
                     -gamepad1.left_stick_y * slowModeMultiplier,
@@ -164,6 +164,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 }
             }
 
+            /*
             if (gamepad1.dpad_up && !intervalo_bpad_up) {
                 intakePulso = !intakePulso;
                 temporizadorPulsoIntake.reset(); // Reinicia o tempo ao ligar ou desligar
@@ -172,21 +173,61 @@ public class TeleOp_Completo extends LinearOpMode {
             intervalo_bpad_up = gamepad1.dpad_up;
 
             if (intakePulso && !intakeF) {
-                if ((temporizadorPulsoIntake.milliseconds() % (mSegundos * 2)) < mSegundos) {
+                if ((temporizadorPulsoIntake.milliseconds() % (200 * 2)) < 200) {
                     intake.setPower(intakeP);
                 } else {
                     intake.setPower(0);
                 }
             }
 
-            if (gamepad1.dpad_right) {
-                tower.setPower(-towerP);
-            } else if (gamepad1.dpad_left) {
-                tower.setPower(towerP);
-            } else {
-                tower.setPower(0);
-            }
+             */
 
+            if (gamepad1.dpad_up && !intervalo_bpad_up) {
+                guide = !guide;
+            }
+            intervalo_bpad_up = gamepad1.dpad_up;
+
+            int limiteRotativo = 280;
+            if (!targetVisible) {
+                tick_intervalo.reset();
+                if (gamepad1.dpad_left && target > -limiteRotativo && (tick_intervalo.milliseconds() % (200 * 2)) < 200) {
+                    target -= 1;
+                    encoder(tower, target, towerP);
+                } else if (gamepad1.dpad_right && target < limiteRotativo && (tick_intervalo.milliseconds() % (200 * 2)) < 200) {
+                    target += 1;
+                    encoder(tower, target, towerP);
+                } else if (gamepad1.dpad_down && !intervalo_bpad_down) {
+                    target = 0;
+                    encoder(tower, target, towerP);
+                }
+                intervalo_bpad_down = gamepad1.dpad_down;
+            } else {
+                double tx = result.getTx();
+                double ta = result.getTa();
+
+                if (Math.abs(tx) > 1.0 && ta <= 1.5) {
+
+                    target = tower.getCurrentPosition() + (int)(tx * 2); // menor -> sensibilidade maior
+
+                    target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
+
+                    double power = Math.abs(tx) * kP;
+                    power = Math.max(-limitPL, Math.min(limitPL, power));
+
+                    encoder(tower, target, power);
+                } else if (Math.abs(tx) > 1.0 && ta > 1.5) {
+
+                    target = tower.getCurrentPosition() + (int)(tx * 2); // menor -> sensibilidade maior
+
+                    target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
+                    //
+
+                    double power = Math.abs(tx) * kP;
+                    power = Math.max(-limitPP, Math.min(limitPP, power));
+
+                    encoder(tower, target, power);
+                }
+            }
 
             if (gamepad1.x && change == 0 && !intervalo_x) {
                 change = 1;
@@ -253,7 +294,45 @@ public class TeleOp_Completo extends LinearOpMode {
                 l_right.setPower(shotP);
                 l_left.setPower(shotP);
             }
+
+            // Telemetria para mostrar a potência dos Motores e Intakes
+            telemetry.addLine("Valores de Potência");
+            telemetry.addLine();
+            telemetry.addData("Troca de poder atual", changeM);
+            telemetry.addData("Chassi Power", slowModeMultiplier);
+            telemetry.addData("Intake Power", intakeP);
+            telemetry.addData("Shot Power", shotP);
+            telemetry.addData("Tower Power", towerP);
+            telemetry.addLine();
+            telemetry.addLine("Valores de Posição");
+            telemetry.addLine();
+            telemetry.addData("X", follower.getPose().getX());
+            telemetry.addData("Y", follower.getPose().getY());
+            telemetry.addData("Heading", follower.getPose().getHeading());
+            telemetry.addLine();
+            telemetry.addData("Elapsed Time atual", Rtime.seconds());
+            telemetry.addLine();
+            telemetry.addLine("Lógica da câmera");
+            telemetry.addLine();
+            telemetry.addData("Modo Guia", guide);
+            if (targetVisible) {
+                telemetry.addData("Alvo Detectado", "Sim");
+                telemetry.addData("TX (Graus)", result.getTx());
+                telemetry.addData("TY (Graus)", result.getTy());
+                telemetry.addData("TA (Área)", result.getTa());
+            } else {
+                telemetry.addData("Alvo Detectado", "Não");
+            }
+            telemetry.addData("Posição Atual", tower.getCurrentPosition());
+            telemetry.addData("Alvo Encoder", target);
+
+            telemetry.update();
         }
+    }
+
+    private void encoder(DcMotor motor, int novoAlvo, double power) {
+        motor.setTargetPosition(novoAlvo);
+        motor.setPower(power);
     }
 }
 

@@ -40,7 +40,7 @@ import java.util.List;
  */
 @Disabled
 @TeleOp(name = "AprilTag Reader DECODE - Limelight 3A", group = "Sensor")
-public class AprilTagLimelightOpMode extends LinearOpMode {
+public class LimeLight_Test2 extends LinearOpMode {
 
     // -------------------------------------------------------
     // CONSTANTES DE CONFIGURAÇÃO
