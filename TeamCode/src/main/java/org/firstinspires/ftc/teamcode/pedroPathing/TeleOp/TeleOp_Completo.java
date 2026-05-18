@@ -51,10 +51,10 @@ public class TeleOp_Completo extends LinearOpMode {
     private double slowModeMultiplier = 0.5;
     private double shotP = 0.8;
     private double intakeP = 1;
-    private double towerP = 0.5;
+    private double towerP = 1;
     double kP = 0.1;
-    double limitPP = 0.8;
-    double limitPL = 0.5;
+    double limitPP = 1;
+    double limitPL = 1;
     private int change = 0;
     private int target = 0;
     private String changeM = "Movimentação";
@@ -104,7 +104,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
         limelight.setPollRateHz(50);
         limelight.start();
-        limelight.pipelineSwitch(1); //1 -> oficial 2 -> teste
+        limelight.pipelineSwitch(2); //1 -> oficial 2 -> teste
 
         waitForStart();
 
@@ -187,7 +187,7 @@ public class TeleOp_Completo extends LinearOpMode {
             }
             intervalo_bpad_up = gamepad1.dpad_up;
 
-            int limiteRotativo = 280;
+            int limiteRotativo = 280; //280
             if (!targetVisible) {
                 tick_intervalo.reset();
                 if (gamepad1.dpad_left && target > -limiteRotativo && (tick_intervalo.milliseconds() % (200 * 2)) < 200) {
