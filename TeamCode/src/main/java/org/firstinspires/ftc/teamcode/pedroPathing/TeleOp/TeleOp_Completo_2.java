@@ -49,12 +49,12 @@ public class TeleOp_Completo_2 extends LinearOpMode {
     public static Pose startingPose;
     private Supplier<PathChain> pathChain;
     private double slowModeMultiplier = 0.5;
-    private double shotP = 0.8;
+    private double shotP = 2000;
     private double intakeP = 1;
-    private double towerP = 0.5;
+    private double towerP = 1;
     double kP = 0.1;
-    double limitPP = 0.8;
-    double limitPL = 0.5;
+    double limitPP = 1;
+    double limitPL = 1;
     private int change = 0;
     private int target = 0;
     private String changeM = "Movimentação";
@@ -93,7 +93,7 @@ public class TeleOp_Completo_2 extends LinearOpMode {
 
         intake.setDirection(DcMotor.Direction.REVERSE);
         l_right.setDirection(DcMotor.Direction.REVERSE);
-        l_left.setDirection(DcMotor.Direction.REVERSE);
+        l_left.setDirection(DcMotor.Direction.FORWARD);
 
         tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -104,7 +104,7 @@ public class TeleOp_Completo_2 extends LinearOpMode {
 
         limelight.setPollRateHz(50);
         limelight.start();
-        limelight.pipelineSwitch(1); //1 -> oficial 2 -> teste
+        limelight.pipelineSwitch(2); //1 -> oficial 2 -> teste
 
         waitForStart();
 
@@ -143,8 +143,8 @@ public class TeleOp_Completo_2 extends LinearOpMode {
             if (gamepad1.right_trigger > 0.3 && !lF && !intervalo_RT) {
                 lF = !lF;
             } else if (gamepad1.right_trigger > 0.3 && lF && !intervalo_RT) {
-                l_right.setPower(0);
-                l_left.setPower(0);
+                l_right.setVelocity(0);
+                l_left.setVelocity(0);
                 lF = !lF;
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
@@ -187,7 +187,7 @@ public class TeleOp_Completo_2 extends LinearOpMode {
             }
             intervalo_bpad_up = gamepad1.dpad_up;
 
-            int limiteRotativo = 280;
+            int limiteRotativo = 280; //280
             if (!targetVisible) {
                 tick_intervalo.reset();
                 if (gamepad1.dpad_left && target > -limiteRotativo && (tick_intervalo.milliseconds() % (200 * 2)) < 200) {
@@ -264,11 +264,11 @@ public class TeleOp_Completo_2 extends LinearOpMode {
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 2) {
                 if (gamepad1.right_bumper && !intervalo_bumper) {
-                    shotP += 0.05;
+                    shotP += 100;
                 } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                    shotP -= 0.05;
+                    shotP -= 100;
                 }
-                shotP = Range.clip(shotP, 0.0, 1.0);
+                shotP = Range.clip(shotP, 0.0, 2800);
 
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 3) {
@@ -291,8 +291,8 @@ public class TeleOp_Completo_2 extends LinearOpMode {
                 l_left.setPower(-shotP);
             }
             if (lF) {
-                l_right.setPower(shotP);
-                l_left.setPower(shotP);
+                l_right.setVelocity(shotP);
+                l_left.setVelocity(shotP);
             }
 
             // Telemetria para mostrar a potência dos Motores e Intakes

@@ -49,7 +49,7 @@ public class TeleOp_Completo extends LinearOpMode {
     public static Pose startingPose;
     private Supplier<PathChain> pathChain;
     private double slowModeMultiplier = 0.5;
-    private double shotP = 0.8;
+    private double shotP = 2000;
     private double intakeP = 1;
     private double towerP = 1;
     double kP = 0.1;
@@ -93,7 +93,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
         intake.setDirection(DcMotor.Direction.REVERSE);
         l_right.setDirection(DcMotor.Direction.REVERSE);
-        l_left.setDirection(DcMotor.Direction.REVERSE);
+        l_left.setDirection(DcMotor.Direction.FORWARD);
 
         tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -143,8 +143,8 @@ public class TeleOp_Completo extends LinearOpMode {
             if (gamepad1.right_trigger > 0.3 && !lF && !intervalo_RT) {
                 lF = !lF;
             } else if (gamepad1.right_trigger > 0.3 && lF && !intervalo_RT) {
-                l_right.setPower(0);
-                l_left.setPower(0);
+                l_right.setVelocity(0);
+                l_left.setVelocity(0);
                 lF = !lF;
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
@@ -264,11 +264,11 @@ public class TeleOp_Completo extends LinearOpMode {
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 2) {
                 if (gamepad1.right_bumper && !intervalo_bumper) {
-                    shotP += 0.05;
+                    shotP += 100;
                 } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                    shotP -= 0.05;
+                    shotP -= 100;
                 }
-                shotP = Range.clip(shotP, 0.0, 1.0);
+                shotP = Range.clip(shotP, 0.0, 2800);
 
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 3) {
@@ -291,8 +291,8 @@ public class TeleOp_Completo extends LinearOpMode {
                 l_left.setPower(-shotP);
             }
             if (lF) {
-                l_right.setPower(shotP);
-                l_left.setPower(shotP);
+                l_right.setVelocity(shotP);
+                l_left.setVelocity(shotP);
             }
 
             // Telemetria para mostrar a potência dos Motores e Intakes
