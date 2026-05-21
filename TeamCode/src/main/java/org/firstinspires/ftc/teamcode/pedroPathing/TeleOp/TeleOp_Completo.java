@@ -51,14 +51,14 @@ public class TeleOp_Completo extends LinearOpMode {
     private double intakeP = 1;
     private double towerP = 0.5;
     double kP = 0.08;
-    double limitPP = 1;
-    double limitPL = 1;
+    double limitPL = 0.8;
     private int change = 0;
     private int target = 0;
     private String changeM = "Movimentação";
     // ^^ implementando motores e outros componentes do robô ^^
     private double tick_intervalo = 0;
     private double intervalo = 200;
+    double position = 0.5;
     ElapsedTime elapsedIntervalo = new ElapsedTime();
 
     @Override
@@ -103,7 +103,9 @@ public class TeleOp_Completo extends LinearOpMode {
 
         limelight.setPollRateHz(50);
         limelight.start();
-        limelight.pipelineSwitch(1); //1 -> oficial 2 -> teste
+        limelight.pipelineSwitch(1);
+
+        s1.setPosition(position);
 
         elapsedIntervalo.reset();
 
@@ -121,6 +123,16 @@ public class TeleOp_Completo extends LinearOpMode {
                     -gamepad1.right_stick_x * slowModeMultiplier,
                     true
             );
+
+            if(gamepad1.y) {
+                position += 0.1;
+                s1.setPosition(position);
+                sleep(200);
+            } else if(gamepad1.left_trigger > 0.3){
+                position -= 0.1;
+                s1.setPosition(position);
+                sleep(200);
+            }
 
             // Gamepads do intakes e lançadores
             if (gamepad1.a && !intakeF && !intervalo_a) {
@@ -266,6 +278,7 @@ public class TeleOp_Completo extends LinearOpMode {
             telemetry.addData("Intake Power", intakeP);
             telemetry.addData("Shot Power", shotP);
             telemetry.addData("Tower Power", towerP);
+            telemetry.addData("Servo", position);
             telemetry.addLine();
             telemetry.addLine("Valores de Posição");
             telemetry.addLine();
