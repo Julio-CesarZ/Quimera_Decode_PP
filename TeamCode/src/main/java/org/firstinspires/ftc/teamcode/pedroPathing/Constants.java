@@ -40,7 +40,7 @@ public class Constants {
         return new FollowerBuilder(followerConstants, hardwareMap)
                 .pathConstraints(pathConstraints)
                 .mecanumDrivetrain(driveConstants)
-                .pinpointLocalizer(localizerConstants)
+                .pinpointLocalizer(localizerConstants) //forward - X; Strafe - Y
                 .build();
     }
 
@@ -53,7 +53,7 @@ public class Constants {
             .rightRearMotorName("rr") //3
             .leftRearMotorName("lr") //2
             .leftFrontMotorName("lf") //1
-            .leftFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
+            .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
             .leftRearMotorDirection(DcMotorSimple.Direction.FORWARD)
             .rightFrontMotorDirection(DcMotorSimple.Direction.REVERSE)
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
