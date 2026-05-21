@@ -160,14 +160,14 @@ public class TeleOp_Completo extends LinearOpMode {
             }
             intervalo_bpad_up = gamepad1.dpad_up;
 
-            int limiteRotativo = 280;
+            int limiteRotativo = 2000;
             if (!targetVisible) {
                 if (gamepad1.dpad_left && target > -limiteRotativo && elapsedIntervalo.milliseconds() >= tick_intervalo) {
-                    target -= 1;
+                    target -= 8;
                     encoder(tower, target, towerP);
                     tick_intervalo = elapsedIntervalo.milliseconds() + intervalo;
                 } else if (gamepad1.dpad_right && target < limiteRotativo && elapsedIntervalo.milliseconds() >= tick_intervalo) {
-                    target += 1;
+                    target += 8;
                     encoder(tower, target, towerP);
                     tick_intervalo = elapsedIntervalo.milliseconds() + intervalo;
                 } else if (gamepad1.dpad_down && !intervalo_bpad_down) {
@@ -181,23 +181,12 @@ public class TeleOp_Completo extends LinearOpMode {
 
                 if (Math.abs(tx) > 1.0 && ta <= 1.5) {
 
-                    target = tower.getCurrentPosition() + (int)(tx * 2); // menor -> sensibilidade maior
+                    target = tower.getCurrentPosition() + (int)(tx * 14); // menor -> sensibilidade maior
 
                     target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
 
                     double power = Math.abs(tx) * kP;
                     power = Math.max(-limitPL, Math.min(limitPL, power));
-
-                    encoder(tower, target, power);
-                } else if (Math.abs(tx) > 1.0 && ta > 1.5) {
-
-                    target = tower.getCurrentPosition() + (int)(tx * 2); // menor -> sensibilidade maior
-
-                    target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
-                    //
-
-                    double power = Math.abs(tx) * kP;
-                    power = Math.max(-limitPP, Math.min(limitPP, power));
 
                     encoder(tower, target, power);
                 }
