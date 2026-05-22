@@ -40,26 +40,23 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean reverseL = false;
     boolean lF = false;
     boolean targetVisible;
-    ElapsedTime temporizadorPulsoIntake = new ElapsedTime();
-
-    // ^^ booleans para as funções de intervalo do robô ^^
-    private Follower follower;
-    public static Pose startingPose;
-    private Supplier<PathChain> pathChain;
+    boolean telemetria = false;
     private double slowModeMultiplier = 0.5;
     private double shotP = 2000;
     private double intakeP = 1;
     private double towerP = 0.5;
-    double kP = 0.08;
-    double limitPL = 0.8;
+    private double kP = 0.08;
+    private double limitPL = 0.8;
     private int change = 0;
     private int target = 0;
-    private String changeM = "Movimentação";
-    // ^^ implementando motores e outros componentes do robô ^^
     private double tick_intervalo = 0;
     private double intervalo = 200;
-    double position = 0.5;
+    private double position = 0.5;
     ElapsedTime elapsedIntervalo = new ElapsedTime();
+    private String changeM = "Movimentação";
+    private Follower follower;
+    public static Pose startingPose;
+    private Supplier<PathChain> pathChain;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -70,9 +67,8 @@ public class TeleOp_Completo extends LinearOpMode {
 
         pathChain = () -> follower.pathBuilder()
                 .addPath(new Path(new BezierLine(follower::getPose, new Pose(0, 0))))
-                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(45), 0.8))
+                .setHeadingInterpolation(HeadingInterpolator.linearFromPoint(follower::getHeading, Math.toRadians(0), 0.8))
                 .build();
-
 
         follower.startTeleopDrive();
 
@@ -125,17 +121,16 @@ public class TeleOp_Completo extends LinearOpMode {
             );
 
             if(gamepad1.y) {
-                position += 0.1;
+                position = 0.1;
                 s1.setPosition(position);
-                sleep(200);
-            } else if(gamepad1.left_trigger > 0.3){
-                position -= 0.1;
+            } else {
+                position = 0.4;
                 s1.setPosition(position);
-                sleep(200);
             }
+            intervalo_y = gamepad1.y;
 
-            // Gamepads do intakes e lançadores
             if (gamepad1.a && !intakeF && !intervalo_a) {
+                intake.setPower(intakeP);
                 intakeF = !intakeF;
             } else if (gamepad1.a && intakeF && !intervalo_a) {
                 intake.setPower(0);
@@ -144,63 +139,91 @@ public class TeleOp_Completo extends LinearOpMode {
             intervalo_a = gamepad1.a;
 
             if (gamepad1.b && !reverse && !intervalo_b) {
-                reverse = !reverse;
+                intake.setPower(-intakeP * 0.5);
+                l_right.setVelocity(-shotP * 0.8);
+                l_left.setVelocity(-shotP * 0.8);
+                reverse = true;
+                lF = false;
             } else if (gamepad1.b && reverse && !intervalo_b) {
                 intake.setPower(0);
-                l_right.setPower(0);
-                l_left.setPower(0);
-                reverse = !reverse;
+                l_right.setVelocity(0);
+                l_left.setVelocity(0);
+                reverse = false;
             }
             intervalo_b = gamepad1.b;
 
             if (gamepad1.right_trigger > 0.3 && !lF && !intervalo_RT) {
-                lF = !lF;
+                l_right.setVelocity(shotP);
+                l_left.setVelocity(shotP);
+                lF = true;
+                reverse = false;
             } else if (gamepad1.right_trigger > 0.3 && lF && !intervalo_RT) {
                 l_right.setVelocity(0);
                 l_left.setVelocity(0);
-                lF = !lF;
+                lF = false;
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
-            if (gamepad1.left_trigger > 0.3 && !reverseL) {
-                reverseL = !reverseL;
+
+            if (gamepad1.left_trigger > 0.3 && !intervalo_LT) {
+                telemetria = !telemetria;
             }
             intervalo_LT = gamepad1.left_trigger > 0.3;
 
+            /*
             if (gamepad1.dpad_up && !intervalo_bpad_up) {
 
             }
             intervalo_bpad_up = gamepad1.dpad_up;
 
+            if (gamepad1.dpad_right && !intervalo_bpad_right) {
+
+            }
+            intervalo_bpad_right = gamepad1.dpad_right;
+
+            if (gamepad1.dpad_left && !intervalo_bpad_left) {
+
+            }
+            intervalo_bpad_left = gamepad1.dpad_left;
+             */
+
             int limiteRotativo = 2000;
+
             if (!targetVisible) {
+
+                int novoTarget = target;
+
                 if (gamepad1.dpad_left && target > -limiteRotativo && elapsedIntervalo.milliseconds() >= tick_intervalo) {
-                    target -= 8;
-                    encoder(tower, target, towerP);
+                    novoTarget -= 8;
                     tick_intervalo = elapsedIntervalo.milliseconds() + intervalo;
                 } else if (gamepad1.dpad_right && target < limiteRotativo && elapsedIntervalo.milliseconds() >= tick_intervalo) {
-                    target += 8;
-                    encoder(tower, target, towerP);
+                    novoTarget += 8;
                     tick_intervalo = elapsedIntervalo.milliseconds() + intervalo;
                 } else if (gamepad1.dpad_down && !intervalo_bpad_down) {
-                    target = 0;
+                    novoTarget = 0;
                     encoder(tower, target, towerP);
                 }
                 intervalo_bpad_down = gamepad1.dpad_down;
+
+                if (Math.abs(novoTarget - tower.getCurrentPosition()) > 3) {
+                    target = novoTarget;
+                    encoder(tower, target, towerP);
+                }
+
             } else {
                 double tx = result.getTx();
                 double ta = result.getTa();
 
                 if (Math.abs(tx) > 1.0 && ta <= 1.5) {
 
-                    target = tower.getCurrentPosition() + (int)(tx * 14); // menor -> sensibilidade maior
+                    target = tower.getCurrentPosition() + (int)(tx * 3); // menor -> sensibilidade maior
 
                     target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
 
-                    double power = Math.abs(tx) * kP;
+                    double power = tx * kP;
                     power = Math.max(-limitPL, Math.min(limitPL, power));
 
-                    encoder(tower, target, power);
+                    encoder(tower, target, Math.abs(power));
                 }
             }
 
@@ -243,7 +266,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 } else if (gamepad1.left_bumper && !intervalo_bumper) {
                     shotP -= 100;
                 }
-                shotP = Range.clip(shotP, 0.0, 2800);
+                shotP = Range.clip(shotP, 0, 2700); //Utilizando 90% -> ticks por revolução - 28; RPM máximo - 6000
 
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 3) {
@@ -257,50 +280,38 @@ public class TeleOp_Completo extends LinearOpMode {
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             }
 
-            if (intakeF) {
-                intake.setPower(intakeP);
-            }
-            if (reverse) {
-                intake.setPower(-intakeP * 0.5);
-                l_right.setPower(-shotP * 0.5);
-                l_left.setPower(-shotP * 0.5);
-            }
-            if (lF) {
-                l_right.setVelocity(shotP);
-                l_left.setVelocity(shotP);
-            }
+            if(telemetria) {
+                telemetry.addLine("Telemetria Ativada");
+                telemetry.addLine();
+                telemetry.addLine("Valores de Potência");
+                telemetry.addLine();
+                telemetry.addData("Troca de poder atual", changeM);
+                telemetry.addData("Chassi Power", slowModeMultiplier);
+                telemetry.addData("Intake Power", intakeP);
+                telemetry.addData("Shot Power", shotP);
+                telemetry.addData("Tower Power", towerP);
+                telemetry.addData("Servo", position);
+                telemetry.addLine();
+                telemetry.addLine("Valores de Posição");
+                telemetry.addLine();
+                telemetry.addData("X", follower.getPose().getX()).addData("Y", follower.getPose().getY()).addData("Heading", follower.getPose().getHeading());
+                telemetry.addLine();
+                telemetry.addData("Posição Atual", tower.getCurrentPosition()).addData("Alvo Encoder", target);
+                telemetry.addLine();
+                telemetry.addLine("Lógica da câmera");
+                telemetry.addLine();
+                if (targetVisible) {
+                    telemetry.addData("Alvo Detectado", "Sim");
+                    telemetry.addData("TX (Graus)", result.getTx()).addData("TY (Graus)", result.getTy()).addData("TA (Área)", result.getTa());
+                } else {
+                    telemetry.addData("Alvo Detectado", "Não");
+                }
 
-            // Telemetria para mostrar a potência dos Motores e Intakes
-            telemetry.addLine("Valores de Potência");
-            telemetry.addLine();
-            telemetry.addData("Troca de poder atual", changeM);
-            telemetry.addData("Chassi Power", slowModeMultiplier);
-            telemetry.addData("Intake Power", intakeP);
-            telemetry.addData("Shot Power", shotP);
-            telemetry.addData("Tower Power", towerP);
-            telemetry.addData("Servo", position);
-            telemetry.addLine();
-            telemetry.addLine("Valores de Posição");
-            telemetry.addLine();
-            telemetry.addData("X", follower.getPose().getX());
-            telemetry.addData("Y", follower.getPose().getY());
-            telemetry.addData("Heading", follower.getPose().getHeading());
-            telemetry.addLine();
-            telemetry.addLine();
-            telemetry.addLine("Lógica da câmera");
-            telemetry.addLine();
-            if (targetVisible) {
-                telemetry.addData("Alvo Detectado", "Sim");
-                telemetry.addData("TX (Graus)", result.getTx());
-                telemetry.addData("TY (Graus)", result.getTy());
-                telemetry.addData("TA (Área)", result.getTa());
+                telemetry.update();
             } else {
-                telemetry.addData("Alvo Detectado", "Não");
+                telemetry.addLine("Telemetria Desativada");
+                telemetry.update();
             }
-            telemetry.addData("Posição Atual", tower.getCurrentPosition());
-            telemetry.addData("Alvo Encoder", target);
-
-            telemetry.update();
         }
     }
 
