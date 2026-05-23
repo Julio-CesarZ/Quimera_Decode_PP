@@ -23,8 +23,8 @@ public class Constants {
             .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
             .useSecondaryDrivePIDF(true)
-            .forwardZeroPowerAcceleration(-57)
-            .lateralZeroPowerAcceleration(-72)
+            .forwardZeroPowerAcceleration(-57) // reduzir os valores caso o tranco seja muito alto
+            .lateralZeroPowerAcceleration(-72) // conectar os caminhos sem o .build();
             .centripetalScaling(0)
             .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.05, 0.01))
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.5,0,0.08,0.01))
