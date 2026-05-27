@@ -27,6 +27,8 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean intervalo_bumper = false;
     boolean intervalo_dpad_down = false;
     boolean intervalo_dpad_up = false;
+    boolean intervalo_dpad_left = false;
+    boolean intervalo_dpad_right = false;
     boolean intakeF = false;
     boolean intakeSS = false;
     boolean reverse = false;
@@ -41,20 +43,18 @@ public class TeleOp_Completo extends LinearOpMode {
     private double towerP = 1;
     private double tx = 0;
     final double kP = 0.08;
-    private double tick_intervalo = 0;
     private double position = 0.75;
     private double velocityAtual = 0;
     private int change = 2;
     private int target = 0;
-    private int rUtilizada = 1;
-    ElapsedTime elapsedIntervaloTower = new ElapsedTime();
+    private int rUtilizada = 2;
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
     ElapsedTime elapsedSuavizador = new ElapsedTime();
     ElapsedTime elapsedintervaloL = new ElapsedTime();
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     private String changeM = "Lançador";
     public static Pose startingPose;
-    int[] limiteRotativo = {440, 550, 733};
+    int[] limiteRotativo = {440, 550, 735};
     int[] passoTarget = {30, 38, 50};
     int[] multiplicadorTx = {12, 15, 20};
 
@@ -118,7 +118,6 @@ public class TeleOp_Completo extends LinearOpMode {
 
         s1.setPosition(position);
 
-        elapsedIntervaloTower.reset();
         elapsedintervaloL.reset();
         elapsedIntervaloServo.reset();
         elapsedSuavizador.reset();
@@ -133,14 +132,15 @@ public class TeleOp_Completo extends LinearOpMode {
                 rUtilizada = 2;
             }
 
-            telemetry.addLine("=== SELEÇÃO DE REDUÇÃO DA TORRE ===");
-            telemetry.addLine("Padrão se nada for estipulado: 15:1");
+            telemetry.addLine("SELEÇÃO DE REDUÇÃO DA TORRE");
             telemetry.addLine();
             telemetry.addLine("[A] -> 12:1");
             telemetry.addLine("[X] -> 15:1");
             telemetry.addLine("[B] -> 20:1");
             telemetry.addLine("-----------------------------------");
             telemetry.addData("Redução ATUAL", rUtilizada == 0 ? "12:1" : rUtilizada == 1 ? "15:1" : "20:1");
+            telemetry.addLine();
+            telemetry.addLine("Padrão se nada for escolhido: 20:1");
             telemetry.addLine();
 
             if(modo_corrente) {
@@ -263,21 +263,10 @@ public class TeleOp_Completo extends LinearOpMode {
 
             if (!targetVisible) {
 
-                int novoTarget = target;
-
-                double intervalo = 200;
-                if (gamepad1.dpad_left && target > -limiteRotativo[rUtilizada] && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
-                    novoTarget -= passoTarget[rUtilizada];
-                    tick_intervalo = elapsedIntervaloTower.milliseconds() + intervalo;
-                    elapsedIntervaloTower.reset();
-                } else if (gamepad1.dpad_right && target < limiteRotativo[rUtilizada] && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
-                    novoTarget += passoTarget[rUtilizada];
-                    tick_intervalo = elapsedIntervaloTower.milliseconds() + intervalo;
-                    elapsedIntervaloTower.reset();
-                } else if (gamepad1.dpad_down && !intervalo_dpad_down) {
-                    novoTarget = 0;
-                }
+                int novoTarget = getTarget();
                 intervalo_dpad_down = gamepad1.dpad_down;
+                intervalo_dpad_left = gamepad1.dpad_left;
+                intervalo_dpad_right = gamepad1.dpad_right;
 
                 if (novoTarget != target) {
                     if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
@@ -406,6 +395,19 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.update();
             }
         }
+    }
+
+    private int getTarget() {
+        int novoTarget = target;
+
+        if (gamepad1.dpad_left && target > -limiteRotativo[rUtilizada] && !intervalo_dpad_left) {
+            novoTarget -= passoTarget[rUtilizada];
+        } else if (gamepad1.dpad_right && target < limiteRotativo[rUtilizada] && !intervalo_dpad_right) {
+            novoTarget += passoTarget[rUtilizada];
+        } else if (gamepad1.dpad_down && !intervalo_dpad_down) {
+            novoTarget = 0;
+        }
+        return novoTarget;
     }
 
     private void encoder(DcMotor motor, int novoAlvo, double power) {
