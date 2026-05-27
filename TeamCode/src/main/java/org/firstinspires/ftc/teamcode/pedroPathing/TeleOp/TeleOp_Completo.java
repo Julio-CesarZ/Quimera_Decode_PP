@@ -46,6 +46,7 @@ public class TeleOp_Completo extends LinearOpMode {
     private double velocityAtual = 0;
     private int change = 2;
     private int target = 0;
+    private int rUtilizada = 1;
     ElapsedTime elapsedIntervaloTower = new ElapsedTime();
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
     ElapsedTime elapsedSuavizador = new ElapsedTime();
@@ -53,6 +54,9 @@ public class TeleOp_Completo extends LinearOpMode {
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     private String changeM = "Lançador";
     public static Pose startingPose;
+    int[] limiteRotativo = {440, 550, 733};
+    int[] passoTarget = {30, 38, 50};
+    int[] multiplicadorTx = {12, 15, 20};
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -120,7 +124,35 @@ public class TeleOp_Completo extends LinearOpMode {
         elapsedSuavizador.reset();
         elapsedintervaloIntakeSS.reset();
 
-        waitForStart();
+        while (!isStarted() && !isStopRequested()) {
+            if (gamepad1.a) {
+                rUtilizada = 0;
+            } else if (gamepad1.x) {
+                rUtilizada = 1;
+            } else if (gamepad1.b) {
+                rUtilizada = 2;
+            }
+
+            telemetry.addLine("=== SELEÇÃO DE REDUÇÃO DA TORRE ===");
+            telemetry.addLine("Padrão se nada for estipulado: 15:1");
+            telemetry.addLine();
+            telemetry.addLine("[A] -> 12:1");
+            telemetry.addLine("[X] -> 15:1");
+            telemetry.addLine("[B] -> 20:1");
+            telemetry.addLine("-----------------------------------");
+            telemetry.addData("Redução ATUAL", rUtilizada == 0 ? "12:1" : rUtilizada == 1 ? "15:1" : "20:1");
+            telemetry.addLine();
+
+            if(modo_corrente) {
+                telemetry.addLine("Sistema de disparo: Correntes");
+            } else {
+                telemetry.addLine("Sistema de disparo: Motor Direto");
+            }
+
+            telemetry.update();
+        }
+
+        sleep(1000);
 
         while (opModeIsActive()) {
 
@@ -202,9 +234,9 @@ public class TeleOp_Completo extends LinearOpMode {
             intervalo_a = gamepad1.a;
 
             double intervaloSS = 325;
-            if (gamepad1.dpad_up && !intakeSS && intervalo_dpad_up) {
+            if (gamepad1.dpad_up && !intakeSS && !intervalo_dpad_up) {
                 intakeSS = true;
-            } else if (gamepad1.dpad_up && intakeSS && intervalo_dpad_up) {
+            } else if (gamepad1.dpad_up && intakeSS && !intervalo_dpad_up) {
                 intake.setPower(0);
                 intakeSS = false;
             }
@@ -229,57 +261,41 @@ public class TeleOp_Completo extends LinearOpMode {
                 reverse = false;
             }
 
-            int limiteRotativo = 440;
-
             if (!targetVisible) {
 
                 int novoTarget = target;
 
                 double intervalo = 200;
-                if (gamepad1.dpad_left && target > -limiteRotativo && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
-                    novoTarget -= 30;
-                    elapsedIntervaloTower.reset();
+                if (gamepad1.dpad_left && target > -limiteRotativo[rUtilizada] && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
+                    novoTarget -= passoTarget[rUtilizada];
                     tick_intervalo = elapsedIntervaloTower.milliseconds() + intervalo;
+                    elapsedIntervaloTower.reset();
+                } else if (gamepad1.dpad_right && target < limiteRotativo[rUtilizada] && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
+                    novoTarget += passoTarget[rUtilizada];
+                    tick_intervalo = elapsedIntervaloTower.milliseconds() + intervalo;
+                    elapsedIntervaloTower.reset();
+                } else if (gamepad1.dpad_down && !intervalo_dpad_down) {
+                    novoTarget = 0;
+                }
+                intervalo_dpad_down = gamepad1.dpad_down;
+
+                if (novoTarget != target) {
                     if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
                         target = novoTarget;
                         encoder(tower, target, towerP);
                     }
-
-                    if (!tower.isBusy()) {
-                        tower.setPower(0);
-                    }
-                } else if (gamepad1.dpad_right && target < limiteRotativo && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
-                    novoTarget += 30;
-                    elapsedIntervaloTower.reset();
-                    tick_intervalo = elapsedIntervaloTower.milliseconds() + intervalo;
-                    if (Math.abs(novoTarget - tower.getCurrentPosition()) > 10) {
-                        target = novoTarget;
-                        encoder(tower, target, towerP);
-                    }
-
-                    if (!tower.isBusy()) {
-                        tower.setPower(0);
-                    }
-                } else if (gamepad1.dpad_down && !intervalo_dpad_down) {
-                    novoTarget = 0;
-                    if (Math.abs(novoTarget - tower.getCurrentPosition()) > 10) {
-                        target = novoTarget;
-                        encoder(tower, target, towerP);
-                    }
-
-                    if (!tower.isBusy()) {
-                        tower.setPower(0);
-                    }
                 }
-                intervalo_dpad_down = gamepad1.dpad_down;
+                if (!tower.isBusy()) {
+                    tower.setPower(0);
+                }
 
             } else {
                 tx = result.getTx();
 
                 if (Math.abs(tx) > 1.5) {
-                    target = tower.getCurrentPosition() + (int) (tx * 12);
+                    target = tower.getCurrentPosition() + (int) (tx * multiplicadorTx[rUtilizada]);
 
-                    target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
+                    target = Math.max(-limiteRotativo[rUtilizada], Math.min(limiteRotativo[rUtilizada], target));
 
                     double power = tx * kP;
                     double limitPL = 1;
