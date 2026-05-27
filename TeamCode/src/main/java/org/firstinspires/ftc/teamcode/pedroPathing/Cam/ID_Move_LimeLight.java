@@ -13,19 +13,19 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 public class ID_Move_LimeLight extends LinearOpMode {
 
     private Limelight3A limelight;
-    private DcMotorEx hex;
+    private DcMotorEx tower;
 
     @Override
     public void runOpMode() {
         // Configuração do Hardware
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        hex = hardwareMap.get(DcMotorEx.class, "tower");
+        tower = hardwareMap.get(DcMotorEx.class, "tower");
 
         // Configuração do Motor
-        hex.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        hex.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        hex.setTargetPosition(0);
-        hex.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        tower.setTargetPosition(0);
+        tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         // Variáveis de Controle
         int target = 0;
@@ -58,15 +58,15 @@ public class ID_Move_LimeLight extends LinearOpMode {
                 // MODO MANUAL (Bumpers controlam o encoder)
                 if (gamepad1.x && target > -100) {
                     target -= 10;
-                    encoder(hex, target, 0.2);
+                    encoder(tower, target, 0.2);
                     sleep(150);
                 } else if (gamepad1.b && target < 100) {
                     target += 10;
-                    encoder(hex, target, 0.2);
+                    encoder(tower, target, 0.2);
                     sleep(150);
                 } else if (gamepad1.a) {
                     target = 0;
-                    encoder(hex, target, 0.2);
+                    encoder(tower, target, 0.2);
                 }
             } else {
                 // MODO AUTOMÁTICO (Limelight)
@@ -77,7 +77,7 @@ public class ID_Move_LimeLight extends LinearOpMode {
                     if (Math.abs(tx) > 1.0) {
                         // Calcula o novo alvo baseado no erro horizontal
                         // Ajuste o multiplicador 2 para aumentar a sensibilidade do movimento
-                        target = hex.getCurrentPosition() + (int)(tx * 2.5);
+                        target = tower.getCurrentPosition() + (int)(tx * 2.5);
 
                         // Limita o alvo para segurança
                         target = Math.max(-180, Math.min(180, target));
@@ -85,10 +85,10 @@ public class ID_Move_LimeLight extends LinearOpMode {
                         double power = Math.abs(tx) * kP;
                         power = Math.max(-0.2, Math.min(0.2, power)); // Clamp de potência
 
-                        encoder(hex, target, power);
+                        encoder(tower, target, power);
                     }
                 } else {
-                    hex.setPower(0); // Para o motor se perder o alvo
+                    tower.setPower(0); // Para o motor se perder o alvo
                 }
             }
 
@@ -101,7 +101,7 @@ public class ID_Move_LimeLight extends LinearOpMode {
             } else {
                 telemetry.addData("Alvo Detectado", "Não");
             }
-            telemetry.addData("Posição Atual", hex.getCurrentPosition());
+            telemetry.addData("Posição Atual", tower.getCurrentPosition());
             telemetry.addData("Alvo Encoder", target);
             telemetry.update();
         }

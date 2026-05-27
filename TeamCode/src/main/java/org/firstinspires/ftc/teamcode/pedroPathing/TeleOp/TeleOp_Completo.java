@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -18,35 +19,38 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 @TeleOp(name = "TeleOp", group = "TeleOp")
 public class TeleOp_Completo extends LinearOpMode {
 
+    boolean modo_corrente = false;
     boolean intervalo_a = false;
     boolean intervalo_y = false;
     boolean intervalo_x = false;
     boolean intervalo_RT = false;
     boolean intervalo_bumper = false;
-    boolean intervalo_bpad_down = false;
+    boolean intervalo_dpad_down = false;
+    boolean intervalo_dpad_up = false;
     boolean intakeF = false;
+    boolean intakeSS = false;
     boolean reverse = false;
     boolean lF = false;
     boolean targetVisible;
     boolean telemetria = true;
     boolean mode_2 = false;
-    private double velocityMultipleir = 0.9;
-    private double shotP = 1800;
+    private double velocityMultipleir = 0.95;
+    private double shotP = 1850;
     private double velocityShot = 0;
     private double intakeP = 1;
-    private double towerP = 0.5;
+    private double towerP = 1;
     private double tx = 0;
-    private double ta = 0;
     final double kP = 0.08;
     private double tick_intervalo = 0;
-    private double position = 0.3;
+    private double position = 0.75;
     private double velocityAtual = 0;
     private int change = 2;
     private int target = 0;
-    ElapsedTime elapsedIntervaloCam = new ElapsedTime();
+    ElapsedTime elapsedIntervaloTower = new ElapsedTime();
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
     ElapsedTime elapsedSuavizador = new ElapsedTime();
     ElapsedTime elapsedintervaloL = new ElapsedTime();
+    ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     private String changeM = "Lançador";
     public static Pose startingPose;
 
@@ -75,7 +79,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
         intake.setDirection(DcMotor.Direction.FORWARD);
         l_right.setDirection(DcMotor.Direction.REVERSE);
-        l_left.setDirection(DcMotor.Direction.FORWARD);
+        l_left.setDirection(DcMotor.Direction.REVERSE);
 
         PIDFCoefficients coefficientsRightMotor = l_right.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -94,23 +98,27 @@ public class TeleOp_Completo extends LinearOpMode {
                 coefficientsLeftMotor.f * 1.5
         ));
 
+        tower.setDirection(DcMotorSimple.Direction.REVERSE);
         tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        tower.setTargetPosition(0);
         tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        tower.setTargetPosition(target);
+        tower.setPower(0);
+        tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         limelight.setPollRateHz(50);
         limelight.start();
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(1);
 
         s1.setPosition(position);
 
-        elapsedIntervaloCam.reset();
+        elapsedIntervaloTower.reset();
         elapsedintervaloL.reset();
         elapsedIntervaloServo.reset();
         elapsedSuavizador.reset();
+        elapsedintervaloIntakeSS.reset();
 
         waitForStart();
 
@@ -164,8 +172,8 @@ public class TeleOp_Completo extends LinearOpMode {
                 velocityAtual += Math.signum(erroGeral) * maxChange;
             }
 
-            if(!reverse) {
-                if(elapsedintervaloL.seconds() <= 1) {
+            if (!reverse) {
+                if (elapsedintervaloL.seconds() <= 1 && modo_corrente) {
                     l_right.setVelocity(velocityAtual);
                     l_left.setVelocity(velocityAtual);
                 } else {
@@ -176,15 +184,15 @@ public class TeleOp_Completo extends LinearOpMode {
 
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (elapsedIntervaloServo.milliseconds() > 500) {
-                    position = -0.3;
+                    position = 0.65;
                     s1.setPosition(position);
                 }
             } else {
-                position = 0.1;
+                position = 0.75;
                 s1.setPosition(position);
             }
 
-            if (gamepad1.a && !intakeF && !intervalo_a) {
+            if (gamepad1.a && !intakeF && !intervalo_a && !intakeSS) {
                 intake.setPower(intakeP);
                 intakeF = !intakeF;
             } else if (gamepad1.a && intakeF && !intervalo_a) {
@@ -193,7 +201,24 @@ public class TeleOp_Completo extends LinearOpMode {
             }
             intervalo_a = gamepad1.a;
 
-            if (gamepad1.b && !intakeF && !lF) {
+            double intervaloSS = 325;
+            if (gamepad1.dpad_up && !intakeSS && intervalo_dpad_up) {
+                intakeSS = true;
+            } else if (gamepad1.dpad_up && intakeSS && intervalo_dpad_up) {
+                intake.setPower(0);
+                intakeSS = false;
+            }
+            intervalo_dpad_up = gamepad1.dpad_up;
+
+            if (intakeSS) {
+                if (elapsedintervaloIntakeSS.milliseconds() % (intervaloSS * 2) <= intervaloSS) {
+                    intake.setPower(intakeP);
+                } else {
+                    intake.setPower(0);
+                }
+            }
+
+            if (gamepad1.b && !intakeF && !lF && !intakeSS) {
                 intake.setPower(-intakeP * 0.5);
                 l_right.setVelocity(-600);
                 l_left.setVelocity(-600);
@@ -204,47 +229,65 @@ public class TeleOp_Completo extends LinearOpMode {
                 reverse = false;
             }
 
-            int limiteRotativo = 2000;
+            int limiteRotativo = 440;
 
             if (!targetVisible) {
 
                 int novoTarget = target;
 
                 double intervalo = 200;
-                if (gamepad1.dpad_left && target > -limiteRotativo && elapsedIntervaloCam.milliseconds() >= tick_intervalo) {
-                    novoTarget -= 8;
-                    tick_intervalo = elapsedIntervaloCam.milliseconds() + intervalo;
-                } else if (gamepad1.dpad_right && target < limiteRotativo && elapsedIntervaloCam.milliseconds() >= tick_intervalo) {
-                    novoTarget += 8;
-                    tick_intervalo = elapsedIntervaloCam.milliseconds() + intervalo;
-                } else if (gamepad1.dpad_down && !intervalo_bpad_down) {
-                    novoTarget = 0;
-                    encoder(tower, target, towerP);
-                }
-                intervalo_bpad_down = gamepad1.dpad_down;
+                if (gamepad1.dpad_left && target > -limiteRotativo && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
+                    novoTarget -= 30;
+                    elapsedIntervaloTower.reset();
+                    tick_intervalo = elapsedIntervaloTower.milliseconds() + intervalo;
+                    if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
+                        target = novoTarget;
+                        encoder(tower, target, towerP);
+                    }
 
-                if (Math.abs(novoTarget - tower.getCurrentPosition()) > 3) {
-                    target = novoTarget;
-                    encoder(tower, target, towerP);
+                    if (!tower.isBusy()) {
+                        tower.setPower(0);
+                    }
+                } else if (gamepad1.dpad_right && target < limiteRotativo && elapsedIntervaloTower.milliseconds() >= tick_intervalo) {
+                    novoTarget += 30;
+                    elapsedIntervaloTower.reset();
+                    tick_intervalo = elapsedIntervaloTower.milliseconds() + intervalo;
+                    if (Math.abs(novoTarget - tower.getCurrentPosition()) > 10) {
+                        target = novoTarget;
+                        encoder(tower, target, towerP);
+                    }
+
+                    if (!tower.isBusy()) {
+                        tower.setPower(0);
+                    }
+                } else if (gamepad1.dpad_down && !intervalo_dpad_down) {
+                    novoTarget = 0;
+                    if (Math.abs(novoTarget - tower.getCurrentPosition()) > 10) {
+                        target = novoTarget;
+                        encoder(tower, target, towerP);
+                    }
+
+                    if (!tower.isBusy()) {
+                        tower.setPower(0);
+                    }
                 }
+                intervalo_dpad_down = gamepad1.dpad_down;
 
             } else {
-                if (result != null) {
-                    tx = result.getTx();
-                    ta = result.getTa();
-                }
+                tx = result.getTx();
 
-                if (Math.abs(tx) > 1.0 && ta <= 1.5) {
-
-                    target = tower.getCurrentPosition() + (int) (tx * 3); // menor -> sensibilidade maior
+                if (Math.abs(tx) > 1.5) {
+                    target = tower.getCurrentPosition() + (int) (tx * 12);
 
                     target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
 
                     double power = tx * kP;
-                    double limitPL = 0.8;
+                    double limitPL = 1;
                     power = Math.max(-limitPL, Math.min(limitPL, power));
 
                     encoder(tower, target, Math.abs(power));
+                } else {
+                    tower.setPower(0);
                 }
             }
 
@@ -288,9 +331,9 @@ public class TeleOp_Completo extends LinearOpMode {
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 2) {
                 if (gamepad1.right_bumper && !intervalo_bumper) {
-                    shotP += 100;
+                    shotP += 50;
                 } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                    shotP -= 100;
+                    shotP -= 50;
                 }
                 shotP = Range.clip(shotP, 0, 2800); //Utilizando 100% -> ticks por revolução - 28; RPM máximo - 6000
                 if (lF) {
@@ -330,14 +373,13 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addData("RPM da Roda do Lançador", Math.max(l_right.getVelocity(), l_left.getVelocity()) * 2.857);
                 telemetry.addData("Tower Power", towerP);
                 telemetry.addData("Servo", position);
+                telemetry.addData("Posição da Torre", tower.getCurrentPosition()).addData("Alvo da Torre", target);
                 telemetry.addLine();
                 telemetry.addData("X", follower.getPose().getX()).addData("Y", follower.getPose().getY()).addData("Heading", follower.getPose().getHeading());
                 telemetry.addLine();
-                telemetry.addData("Posição da Torre", tower.getCurrentPosition()).addData("Alvo da Torre", target);
-                telemetry.addLine();
                 if (targetVisible) {
                     telemetry.addData("Alvo Detectado", "Sim");
-                    telemetry.addData("TX (Graus)", tx).addData("TA (Área)", ta);
+                    telemetry.addData("TX (Graus)", tx);
                 } else {
                     telemetry.addData("Alvo Detectado", "Não");
                 }
