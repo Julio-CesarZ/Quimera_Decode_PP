@@ -36,7 +36,8 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean targetVisible;
     boolean telemetria = true;
     boolean mode_2 = false;
-    private double velocityMultipleir = 0.95;
+    boolean modo_continuo = false;
+    private double velocityMultipleir = 0.8;
     private double shotP = 1850;
     private double velocityShot = 0;
     private double intakeP = 1;
@@ -52,11 +53,12 @@ public class TeleOp_Completo extends LinearOpMode {
     ElapsedTime elapsedSuavizador = new ElapsedTime();
     ElapsedTime elapsedintervaloL = new ElapsedTime();
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
+    ElapsedTime elapsedIntervaloC = new ElapsedTime();
     private String changeM = "Lançador";
     public static Pose startingPose;
-    int[] limiteRotativo = {440, 550, 735};
+    int[] limiteRotativo = {440, 550, 700};
     int[] passoTarget = {30, 38, 50};
-    int[] multiplicadorTx = {12, 15, 20};
+    int[] multiplicadorTx = {12, 15, 7};
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -122,6 +124,7 @@ public class TeleOp_Completo extends LinearOpMode {
         elapsedIntervaloServo.reset();
         elapsedSuavizador.reset();
         elapsedintervaloIntakeSS.reset();
+        elapsedIntervaloC.reset();
 
         while (!isStarted() && !isStopRequested()) {
             if (gamepad1.a) {
@@ -143,16 +146,34 @@ public class TeleOp_Completo extends LinearOpMode {
             telemetry.addLine("Padrão se nada for escolhido: 20:1");
             telemetry.addLine();
 
-            if(modo_corrente) {
+            if (modo_corrente) {
                 telemetry.addLine("Sistema de disparo: Correntes");
             } else {
                 telemetry.addLine("Sistema de disparo: Motor Direto");
             }
 
+            telemetry.addLine();
+            telemetry.addLine("Pressione [Y] para alterar a rotação manual da torre");
+            telemetry.addLine();
+
+            if (gamepad1.y && !modo_continuo) {
+                modo_continuo = true;
+                sleep(100);
+            } else if (gamepad1.y && modo_continuo) {
+                modo_continuo = false;
+                sleep(100);
+            }
+
+            if (modo_continuo) {
+                telemetry.addLine("Modo Manual da Torre: Segurar o botão");
+            } else {
+                telemetry.addLine("Modo Manual da Torre: Pressionar o botão");
+            }
+
             telemetry.update();
         }
 
-        sleep(1000);
+        sleep(200);
 
         while (opModeIsActive()) {
 
@@ -220,7 +241,7 @@ public class TeleOp_Completo extends LinearOpMode {
                     s1.setPosition(position);
                 }
             } else {
-                position = 0.75;
+                position = 0.82;
                 s1.setPosition(position);
             }
 
@@ -400,13 +421,26 @@ public class TeleOp_Completo extends LinearOpMode {
     private int getTarget() {
         int novoTarget = target;
 
-        if (gamepad1.dpad_left && target > -limiteRotativo[rUtilizada] && !intervalo_dpad_left) {
-            novoTarget -= passoTarget[rUtilizada];
-        } else if (gamepad1.dpad_right && target < limiteRotativo[rUtilizada] && !intervalo_dpad_right) {
-            novoTarget += passoTarget[rUtilizada];
-        } else if (gamepad1.dpad_down && !intervalo_dpad_down) {
-            novoTarget = 0;
+        if (modo_continuo) {
+            if (elapsedIntervaloC.milliseconds() >= 20) {
+                if (gamepad1.dpad_left && target > -limiteRotativo[rUtilizada]) {
+                    novoTarget -= 25;
+                    elapsedIntervaloC.reset();
+                } else if (gamepad1.dpad_right && target < limiteRotativo[rUtilizada]) {
+                    novoTarget += 25;
+                    elapsedIntervaloC.reset();
+                }
+            }
+        } else {
+            if (gamepad1.dpad_left && target > -limiteRotativo[rUtilizada] && !intervalo_dpad_left) {
+                novoTarget -= passoTarget[rUtilizada];
+            } else if (gamepad1.dpad_right && target < limiteRotativo[rUtilizada] && !intervalo_dpad_right) {
+                novoTarget += passoTarget[rUtilizada];
+            } else if (gamepad1.dpad_down && !intervalo_dpad_down) {
+                novoTarget = 0;
+            }
         }
+
         return novoTarget;
     }
 

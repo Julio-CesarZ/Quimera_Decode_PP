@@ -34,20 +34,20 @@ public class Constants {
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.000005, 0.6, 0.01))
             .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.05962, 0.00175))
             */
-            .useSecondaryTranslationalPIDF(true)
             .useSecondaryHeadingPIDF(true)
+            .useSecondaryTranslationalPIDF(true)
             .useSecondaryDrivePIDF(true)
-            //.forwardZeroPowerAcceleration(0)
-            //.lateralZeroPowerAcceleration(0)
+            .forwardZeroPowerAcceleration(-54)
+            .lateralZeroPowerAcceleration(-80)
             .centripetalScaling(0)
-            .headingPIDFCoefficients(new PIDFCoefficients(0, 0, 0, 0))
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0,0,0,0))
+            .headingPIDFCoefficients(new PIDFCoefficients(1.75, 0, 0.02, 0.01))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.1,0.01))
             .translationalPIDFCoefficients(new PIDFCoefficients(0,0,0,0))
             .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0, 0, 0, 0))
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0, 0, 0, 0, 0))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0, 0, 0, 0, 0))
             .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0, 0, 0))
-            .mass(0);
+            .mass(12.3);
 
     public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 0.75, 3.5);
 
@@ -61,13 +61,11 @@ public class Constants {
 
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
-            //.xVelocity(61)
-            //.yVelocity(45)
-            //.xVelocity(0)
-            //.yVelocity(0)
+            .xVelocity(62)
+            .yVelocity(49.4)
             .useBrakeModeInTeleOp(true)
             .rightFrontMotorName("rf") //0
-            .rightRearMotorName("rr") //3
+            .rightRearMotorName("rr") //3z
             .leftRearMotorName("lr") //2
             .leftFrontMotorName("lf") //1
             .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
@@ -76,10 +74,8 @@ public class Constants {
             .rightRearMotorDirection(DcMotorSimple.Direction.REVERSE);
 
     public static PinpointConstants localizerConstants = new PinpointConstants()
-            //.forwardPodY(2.85)
-            //.strafePodX(-7.20)
-            .forwardPodY(0)
-            .strafePodX(0)
+            .forwardPodY(4.35)
+            .strafePodX(-6.41)
             .distanceUnit(DistanceUnit.INCH)
             .hardwareMapName("pinpoint")
             .encoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD)
