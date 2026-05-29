@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
 
+import com.bylazar.configurables.annotations.IgnoreConfigurable;
+import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -32,6 +34,7 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean intakeF = false;
     boolean intakeSS = false;
     boolean reverse = false;
+    boolean reverseL = false;
     boolean lF = false;
     boolean targetVisible;
     boolean telemetria = true;
@@ -43,6 +46,7 @@ public class TeleOp_Completo extends LinearOpMode {
     private double intakeP = 1;
     private double towerP = 1;
     private double tx = 0;
+    private double ta = 0;
     final double kP = 0.08;
     private double position = 0.75;
     private double velocityAtual = 0;
@@ -56,7 +60,7 @@ public class TeleOp_Completo extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
     private String changeM = "Lançador";
     public static Pose startingPose;
-    int[] limiteRotativo = {440, 550, 700};
+    int[] limiteRotativo = {440, 550, 650};
     int[] passoTarget = {30, 38, 50};
     int[] multiplicadorTx = {12, 15, 7};
 
@@ -170,6 +174,24 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addLine("Modo Manual da Torre: Pressionar o botão");
             }
 
+            telemetry.addLine();
+            telemetry.addLine("Pressione [RT] para definir o estado da telemetria");
+            telemetry.addLine();
+
+            if (gamepad1.y && !telemetria) {
+                telemetria = true;
+                sleep(100);
+            } else if (gamepad1.y && telemetria) {
+                telemetria = false;
+                sleep(100);
+            }
+
+            if (telemetria) {
+                telemetry.addLine("Telemetria: Ativada");
+            } else {
+                telemetry.addLine("Telemetria: Desativada");
+            }
+
             telemetry.update();
         }
 
@@ -225,7 +247,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 velocityAtual += Math.signum(erroGeral) * maxChange;
             }
 
-            if (!reverse) {
+            if (!reverse && !reverseL) {
                 if (elapsedintervaloL.seconds() <= 1 && modo_corrente) {
                     l_right.setVelocity(velocityAtual);
                     l_left.setVelocity(velocityAtual);
@@ -273,8 +295,8 @@ public class TeleOp_Completo extends LinearOpMode {
 
             if (gamepad1.b && !intakeF && !lF && !intakeSS) {
                 intake.setPower(-intakeP * 0.5);
-                l_right.setVelocity(-600);
-                l_left.setVelocity(-600);
+                l_right.setVelocity(-1000);
+                l_left.setVelocity(-1000);
                 reverse = true;
             } else if (!gamepad1.b && reverse) {
                 intake.setPower(0);
@@ -301,6 +323,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
             } else {
                 tx = result.getTx();
+                ta = result.getTa();
 
                 if (Math.abs(tx) > 1.5) {
                     target = tower.getCurrentPosition() + (int) (tx * multiplicadorTx[rUtilizada]);
@@ -315,12 +338,30 @@ public class TeleOp_Completo extends LinearOpMode {
                 } else {
                     tower.setPower(0);
                 }
+
+                if(lF) {
+                    if (ta >= 0.27 && ta <= 0.28) {
+                        shotP = 2000;
+                    } else if (ta >= 0.33 && ta <= 0.34) {
+                        shotP = 1850;
+                    } else if (ta >= 2.52 && ta <= 2.54) {
+                        shotP = 1450;
+                    }
+
+                    velocityShot = shotP;
+                } else {
+                    velocityShot = 0;
+                }
             }
 
-            if (gamepad1.y && !intervalo_y) {
-                telemetria = !telemetria;
+            if (gamepad1.y && !intakeF && !lF && !intakeSS && !reverse) {
+                l_right.setVelocity(-1000);
+                l_left.setVelocity(-1000);
+                reverseL = true;
+            } else if(!gamepad1.y && reverseL) {
+                velocityShot = 0;
+                reverseL = false;
             }
-            intervalo_y = gamepad1.y;
 
             if (gamepad1.x && change == 0 && !intervalo_x) {
                 change = 1;
@@ -406,6 +447,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 if (targetVisible) {
                     telemetry.addData("Alvo Detectado", "Sim");
                     telemetry.addData("TX (Graus)", tx);
+                    telemetry.addData("TA (Area)", ta);
                 } else {
                     telemetry.addData("Alvo Detectado", "Não");
                 }

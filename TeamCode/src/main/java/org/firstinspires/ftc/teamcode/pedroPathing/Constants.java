@@ -51,7 +51,7 @@ public class Constants {
     public static MecanumConstants driveConstants = new MecanumConstants()
             .maxPower(1)
             .xVelocity(62)
-            .yVelocity(49.4)
+            .yVelocity(49)
             .useBrakeModeInTeleOp(true)
             .rightFrontMotorName("rf") //0
             .rightRearMotorName("rr") //3
