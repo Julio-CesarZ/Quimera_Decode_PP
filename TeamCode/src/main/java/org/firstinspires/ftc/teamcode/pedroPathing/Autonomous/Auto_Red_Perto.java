@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous.Tests; // make sure this aligns with class location
+package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous;
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
@@ -6,7 +6,6 @@ import com.pedropathing.ivy.Command;
 import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
 import static com.pedropathing.ivy.Scheduler.schedule;
@@ -15,24 +14,19 @@ import static com.pedropathing.ivy.groups.Groups.*;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Disabled
-@Autonomous(name = "Teste de Linha Angular", group = "Auto")
-public class AutoLineAngular extends OpMode {
+@Autonomous(name = "RED - Auto de Perto", group = "Auto")
+public class Auto_Red_Perto extends OpMode {
     private Follower follower;
 
-    private final Pose startPose = new Pose(72, 72, Math.toRadians(270)); // Start Pose of our robot.
-    private final Pose scorePose = new Pose(72, 23, Math.toRadians(180)); // Scoring Pose of our robot. It is facing the goal at a 135 degree angle.
+    private final Pose startPose = new Pose(108.63, 134.58, Math.toRadians(0));
+    private final Pose scorePose = new Pose(72, 72, Math.toRadians(0));
     private PathChain scorePreload;
 
     public void buildPaths() {
-        /* This is our scorePreload path. We are using a BezierLine, which is a straight line. */
         scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
-                .setLinearHeadingInterpolation(startPose.getHeading(), scorePose.getHeading())
+                .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
-
-    /* Here is an example for Constant Interpolation
-    scorePreload.setConstantInterpolation(startPose.getHeading()); */
 
     }
     public Command autoRoutine() {

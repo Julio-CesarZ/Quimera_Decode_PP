@@ -30,8 +30,8 @@ public class Constants {
             .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.1, 0.01))
             //Abaixo - Sem o predictive braking
             .useSecondaryTranslationalPIDF(true)
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.012, 0.04))
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.01))
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.12, 0, 0.012, 0.04))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.15, 0, 0.01, 0.02))
             .useSecondaryDrivePIDF(true)
             .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.0072, 0.0001, 0.00008, 0.6, 0.03))
             .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0, 0.0001, 0.6, 0.03))

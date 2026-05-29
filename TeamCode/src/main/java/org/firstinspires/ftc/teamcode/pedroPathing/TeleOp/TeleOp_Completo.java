@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrent;
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.drawCurrentAndHistory;
+
 import com.bylazar.configurables.annotations.IgnoreConfigurable;
 import com.bylazar.telemetry.TelemetryManager;
 import com.pedropathing.follower.Follower;
@@ -40,6 +43,7 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean telemetria = true;
     boolean mode_2 = false;
     boolean modo_continuo = false;
+    boolean modo_TorreA = true;
     private double velocityMultipleir = 0.8;
     private double shotP = 1850;
     private double velocityShot = 0;
@@ -59,7 +63,7 @@ public class TeleOp_Completo extends LinearOpMode {
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
     private String changeM = "Lançador";
-    public static Pose startingPose;
+    private final Pose startingPose = new Pose(108.63, 134.58, Math.toRadians(0));
     int[] limiteRotativo = {440, 550, 650};
     int[] passoTarget = {30, 38, 50};
     int[] multiplicadorTx = {12, 15, 7};
@@ -68,10 +72,10 @@ public class TeleOp_Completo extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         Follower follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startingPose == null ? new Pose() : startingPose);
+        follower.setStartingPose(startingPose);
         follower.update();
-
         follower.startTeleopDrive();
+        follower.update();
 
         DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
         DcMotorEx l_right = hardwareMap.get(DcMotorEx.class, "l_right");
@@ -156,32 +160,45 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addLine("Sistema de disparo: Motor Direto");
             }
 
-            telemetry.addLine();
-            telemetry.addLine("Pressione [Y] para alterar a rotação manual da torre");
-            telemetry.addLine();
+            if (!modo_TorreA) {
+                telemetry.addLine();
+                telemetry.addLine("Pressione [Y] para alterar a rotação manual da torre");
+                telemetry.addLine();
 
-            if (gamepad1.y && !modo_continuo) {
-                modo_continuo = true;
-                sleep(100);
-            } else if (gamepad1.y && modo_continuo) {
-                modo_continuo = false;
-                sleep(100);
-            }
+                if (gamepad1.y && !modo_continuo) {
+                    modo_continuo = true;
+                    sleep(100);
+                } else if (gamepad1.y && modo_continuo) {
+                    modo_continuo = false;
+                    sleep(100);
+                }
 
-            if (modo_continuo) {
-                telemetry.addLine("Modo Manual da Torre: Segurar o botão");
+                if (modo_continuo) {
+                    telemetry.addLine("Modo Manual da Torre: Segurar o botão");
+                } else {
+                    telemetry.addLine("Modo Manual da Torre: Pressionar o botão");
+                }
+
             } else {
-                telemetry.addLine("Modo Manual da Torre: Pressionar o botão");
+                telemetry.addLine();
+                telemetry.addLine("Modo Auto da Torre Ativado");
+                telemetry.addLine();
+                telemetry.addLine("Pressione [LT] para desativar o modo Auto da Torre");
+
+                if (gamepad1.left_trigger > 0.3) {
+                    modo_TorreA = false;
+                    sleep(100);
+                }
             }
 
             telemetry.addLine();
             telemetry.addLine("Pressione [RT] para definir o estado da telemetria");
             telemetry.addLine();
 
-            if (gamepad1.y && !telemetria) {
+            if (gamepad1.right_trigger > 0.3 && !telemetria) {
                 telemetria = true;
                 sleep(100);
-            } else if (gamepad1.y && telemetria) {
+            } else if (gamepad1.right_trigger > 0.3 && telemetria) {
                 telemetria = false;
                 sleep(100);
             }
@@ -204,8 +221,6 @@ public class TeleOp_Completo extends LinearOpMode {
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
 
-            follower.update();
-
             double forward;
             double strafe;
             double turn;
@@ -220,6 +235,7 @@ public class TeleOp_Completo extends LinearOpMode {
             }
 
             follower.setTeleOpDrive(forward, strafe, turn, true);
+            follower.update();
 
             double deltaTime = elapsedSuavizador.seconds();
             elapsedSuavizador.reset();
@@ -306,17 +322,36 @@ public class TeleOp_Completo extends LinearOpMode {
 
             if (!targetVisible) {
 
-                int novoTarget = getTarget();
-                intervalo_dpad_down = gamepad1.dpad_down;
-                intervalo_dpad_left = gamepad1.dpad_left;
-                intervalo_dpad_right = gamepad1.dpad_right;
+                if (!modo_TorreA) {
+                    int novoTarget = getTarget();
+                    intervalo_dpad_down = gamepad1.dpad_down;
+                    intervalo_dpad_left = gamepad1.dpad_left;
+                    intervalo_dpad_right = gamepad1.dpad_right;
 
-                if (novoTarget != target) {
-                    if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
-                        target = novoTarget;
-                        encoder(tower, target, towerP);
+                    if (novoTarget != target) {
+                        if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
+                            target = novoTarget;
+                            encoder(tower, target, towerP);
+                        }
                     }
+                } else {
+                    double heading = Math.toDegrees(follower.getPose().getHeading());
+
+                    if (heading < 15 && heading > -15) {
+                        target = -224;
+                    } else if (heading < 105 && heading > 85) {
+                        target = 298;
+                    } else if (heading < 60 && heading > 40) {
+                        target = 19;
+                    } else if (heading < -40 && heading > -60) {
+                        target = -502;
+                    } else if (heading < 150 && heading > 130) {
+                        target = 503;
+                    }
+
+                    encoder(tower, target, towerP);
                 }
+
                 if (!tower.isBusy()) {
                     tower.setPower(0);
                 }
@@ -339,18 +374,10 @@ public class TeleOp_Completo extends LinearOpMode {
                     tower.setPower(0);
                 }
 
-                if(lF) {
-                    if (ta >= 0.27 && ta <= 0.28) {
-                        shotP = 2000;
-                    } else if (ta >= 0.33 && ta <= 0.34) {
-                        shotP = 1850;
-                    } else if (ta >= 2.52 && ta <= 2.54) {
-                        shotP = 1450;
-                    }
-
-                    velocityShot = shotP;
-                } else {
-                    velocityShot = 0;
+                if (ta <= 1) {
+                    shotP = 2000;
+                } else if (ta > 1) {
+                    shotP = 1450;
                 }
             }
 
@@ -358,7 +385,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 l_right.setVelocity(-1000);
                 l_left.setVelocity(-1000);
                 reverseL = true;
-            } else if(!gamepad1.y && reverseL) {
+            } else if (!gamepad1.y && reverseL) {
                 velocityShot = 0;
                 reverseL = false;
             }
@@ -442,7 +469,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addData("Servo", position);
                 telemetry.addData("Posição da Torre", tower.getCurrentPosition()).addData("Alvo da Torre", target);
                 telemetry.addLine();
-                telemetry.addData("X", follower.getPose().getX()).addData("Y", follower.getPose().getY()).addData("Heading", follower.getPose().getHeading());
+                telemetry.addData("X", follower.getPose().getX()).addData("Y", follower.getPose().getY()).addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
                 telemetry.addLine();
                 if (targetVisible) {
                     telemetry.addData("Alvo Detectado", "Sim");
