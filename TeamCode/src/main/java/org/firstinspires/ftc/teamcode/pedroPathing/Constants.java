@@ -19,37 +19,26 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
-            /*
-            .useSecondaryTranslationalPIDF(true)
-            .useSecondaryHeadingPIDF(true)
-            .useSecondaryDrivePIDF(true)
-            .forwardZeroPowerAcceleration(-57) // reduzir os valores caso o tranco seja muito alto
-            .lateralZeroPowerAcceleration(-72) // conectar os caminhos sem o .build();
-            .centripetalScaling(0)
-            .headingPIDFCoefficients(new PIDFCoefficients(1, 0, 0.05, 0.01))
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.5,0,0.08,0.01))
-            .translationalPIDFCoefficients(new PIDFCoefficients(0.1,0,0.01,0.035))
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.3, 0, 0.01, 0.015))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.025, 0, 0.00001, 0.6, 0.01))
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.02, 0, 0.000005, 0.6, 0.01))
-            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.1, 0.05962, 0.00175))
-            */
-            .useSecondaryHeadingPIDF(true)
-            .useSecondaryTranslationalPIDF(true)
-            .useSecondaryDrivePIDF(true)
+            //.useSecondaryTranslationalPIDF(false)
+            //.useSecondaryDrivePIDF(false)
             .forwardZeroPowerAcceleration(-54)
             .lateralZeroPowerAcceleration(-80)
-            .centripetalScaling(0)
+            //.centripetalScaling(0)
+            //.predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.08, 0.0748824, 0.00128367))
+            .useSecondaryHeadingPIDF(true)
             .headingPIDFCoefficients(new PIDFCoefficients(1.75, 0, 0.02, 0.01))
-            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1,0,0.1,0.01))
-            .translationalPIDFCoefficients(new PIDFCoefficients(0,0,0,0))
-            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0, 0, 0, 0))
-            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0, 0, 0, 0, 0))
-            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0, 0, 0, 0, 0))
-            .predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0, 0, 0))
+            .secondaryHeadingPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.1, 0.01))
+            //Abaixo - Sem o predictive braking
+            .useSecondaryTranslationalPIDF(true)
+            .translationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.012, 0.04))
+            .secondaryTranslationalPIDFCoefficients(new PIDFCoefficients(0.1, 0, 0.01, 0.01))
+            .useSecondaryDrivePIDF(true)
+            .drivePIDFCoefficients(new FilteredPIDFCoefficients(0.0072, 0.0001, 0.00008, 0.6, 0.03))
+            .secondaryDrivePIDFCoefficients(new FilteredPIDFCoefficients(0.01, 0, 0.0001, 0.6, 0.03))
+            .centripetalScaling(0.0005)
             .mass(12.3);
 
-    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 0.75, 3.5);
+    public static PathConstraints pathConstraints = new PathConstraints(0.99, 100, 0.8, 1);
 
     public static Follower createFollower(HardwareMap hardwareMap) {
         return new FollowerBuilder(followerConstants, hardwareMap)
@@ -65,7 +54,7 @@ public class Constants {
             .yVelocity(49.4)
             .useBrakeModeInTeleOp(true)
             .rightFrontMotorName("rf") //0
-            .rightRearMotorName("rr") //3z
+            .rightRearMotorName("rr") //3
             .leftRearMotorName("lr") //2
             .leftFrontMotorName("lf") //1
             .leftFrontMotorDirection(DcMotorSimple.Direction.FORWARD)
