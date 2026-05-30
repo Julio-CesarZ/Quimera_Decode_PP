@@ -229,18 +229,18 @@ public class TeleOp_Completo extends LinearOpMode {
             double strafe;
             double turn;
             if (mode_2) {
-                forward = Math.pow(-gamepad2.left_stick_y * velocityMultipleir, 3);
+                forward = Math.pow(gamepad2.left_stick_y * velocityMultipleir, 3);
                 strafe = Math.pow(-gamepad2.left_stick_x * velocityMultipleir, 3);
                 turn = Math.pow(-gamepad2.right_stick_x * velocityMultipleir, 3);
             } else {
-                forward = Math.pow(-gamepad1.left_stick_y * velocityMultipleir, 3);
+                forward = Math.pow(gamepad1.left_stick_y * velocityMultipleir, 3);
                 strafe = Math.pow(-gamepad1.left_stick_x * velocityMultipleir, 3);
                 turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
             }
 
-            fieldCentric = heading < -90 || heading > 90;
+            //fieldCentric = heading < -90 || heading > 90;
 
-            follower.setTeleOpDrive(forward, strafe, turn, fieldCentric);
+            follower.setTeleOpDrive(forward, strafe, turn, true);
             follower.update();
 
             double deltaTime = elapsedSuavizador.seconds();
@@ -496,6 +496,14 @@ public class TeleOp_Completo extends LinearOpMode {
 
                 telemetry.addLine();
                 telemetry.addData("Modo Automático da Torre", modo_TorreA);
+                telemetry.addLine();
+
+                if(fieldCentric) {
+                    telemetry.addLine("Orientação do robô: Arena");
+                } else {
+                    telemetry.addLine("Orientação do robô: Robô");
+                }
+
                 telemetry.update();
             } else {
                 telemetry.addLine("Telemetria Desativada");
