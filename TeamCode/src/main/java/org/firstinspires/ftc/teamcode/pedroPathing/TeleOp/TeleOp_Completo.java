@@ -36,7 +36,6 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean targetVisible;
     boolean telemetria = true;
     boolean mode_2 = false;
-    boolean modo_continuo = true;
     boolean modo_TorreA = true;
     boolean notFieldCentric = true;
     boolean modo_ShotPA = true;
@@ -140,30 +139,31 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addLine("Gamepad 1 - Controle Geral");
             }
 
-            if (!modo_TorreA) {
-                telemetry.addLine("Pressione [Y] para alterar a rotação manual da torre");
+            if (notFieldCentric) {
+                telemetry.addLine("Pressione [RB] e [LB] simultaneamente para definir a orientação para a Arena");
                 telemetry.addLine();
 
-                if (gamepad1.y && !modo_continuo) {
-                    modo_continuo = true;
-                    sleep(500);
-                } else if (gamepad1.y && modo_continuo) {
-                    modo_continuo = false;
-                    sleep(500);
+                if (gamepad1.right_bumper && gamepad1.left_bumper) {
+                    notFieldCentric = false;
+                    sleep(1000);
                 }
+            } else {
+                telemetry.addLine("Pressione [RB] e [LB] simultaneamente para definir a orientação para o robô");
+                telemetry.addLine();
 
-                if (modo_continuo) {
-                    telemetry.addLine("Modo Manual da Torre: Segurar o botão");
-                } else {
-                    telemetry.addLine("Modo Manual da Torre: Pressionar o botão");
+                if (gamepad1.right_bumper && gamepad1.left_bumper) {
+                    notFieldCentric = true;
+                    sleep(1000);
                 }
+            }
 
+            if (!modo_TorreA) {
                 telemetry.addLine();
                 telemetry.addLine("Pressione [LT] para ativar o modo Auto da Torre");
 
                 if (gamepad1.left_trigger > 0.3) {
                     modo_TorreA = true;
-                    sleep(500);
+                    sleep(1000);
                 }
 
             } else {
@@ -174,7 +174,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
                 if (gamepad1.left_trigger > 0.3) {
                     modo_TorreA = false;
-                    sleep(500);
+                    sleep(1000);
                 }
             }
 
@@ -317,23 +317,16 @@ public class TeleOp_Completo extends LinearOpMode {
                 if (!modo_TorreA) {
                     int novoTarget = target;
 
-                    if (modo_continuo) {
-                        if (elapsedIntervaloC.milliseconds() >= 50) {
-                            if (gamepad1.dpad_left && target > -limiteRotativo) {
-                                novoTarget -= 20;
-                                elapsedIntervaloC.reset();
-                            } else if (gamepad1.dpad_right && target < limiteRotativo) {
-                                novoTarget += 20;
-                                elapsedIntervaloC.reset();
-                            }
-                        }
-                    } else {
-                        if (gamepad1.dpad_left && target > -limiteRotativo && !intervalo_dpad_left) {
+                    if (elapsedIntervaloC.milliseconds() >= 50) {
+                        if (gamepad1.dpad_left && target > -limiteRotativo) {
                             novoTarget -= 20;
-                        } else if (gamepad1.dpad_right && target < limiteRotativo && !intervalo_dpad_right) {
+                            elapsedIntervaloC.reset();
+                        } else if (gamepad1.dpad_right && target < limiteRotativo) {
                             novoTarget += 20;
+                            elapsedIntervaloC.reset();
                         }
                     }
+
                     intervalo_dpad_down = gamepad1.dpad_down;
                     intervalo_dpad_left = gamepad1.dpad_left;
                     intervalo_dpad_right = gamepad1.dpad_right;
@@ -386,7 +379,7 @@ public class TeleOp_Completo extends LinearOpMode {
                     double limitPL = 1;
                     power = Math.max(-limitPL, Math.min(limitPL, power));
 
-                    if(result.getTimestamp() != lastStamp) {
+                    if (result.getTimestamp() != lastStamp) {
                         encoder(tower, target, Math.abs(power));
                     }
 
