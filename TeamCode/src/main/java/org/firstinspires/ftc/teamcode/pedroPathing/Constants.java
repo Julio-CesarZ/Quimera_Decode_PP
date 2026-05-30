@@ -21,8 +21,8 @@ public class Constants {
     public static FollowerConstants followerConstants = new FollowerConstants()
             //.useSecondaryTranslationalPIDF(false)
             //.useSecondaryDrivePIDF(false)
-            .forwardZeroPowerAcceleration(-54)
-            .lateralZeroPowerAcceleration(-80)
+            .forwardZeroPowerAcceleration(-30) //-54
+            .lateralZeroPowerAcceleration(-80) //-80
             //.centripetalScaling(0)
             //.predictiveBrakingCoefficients(new PredictiveBrakingCoefficients(0.08, 0.0748824, 0.00128367))
             .useSecondaryHeadingPIDF(true)
