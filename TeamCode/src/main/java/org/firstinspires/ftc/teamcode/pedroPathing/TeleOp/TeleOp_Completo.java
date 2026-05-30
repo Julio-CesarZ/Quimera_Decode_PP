@@ -390,6 +390,8 @@ public class TeleOp_Completo extends LinearOpMode {
                     tower.setPower(0);
                 }
 
+                //todo: Aumentar a flexibilidade da lógica abaixo com o objetivo de permitir um controle mais fino de potência por toda a arena
+
                 if (ta <= 1) {
                     shotP = 2000;
                 } else if (ta > 1) {
