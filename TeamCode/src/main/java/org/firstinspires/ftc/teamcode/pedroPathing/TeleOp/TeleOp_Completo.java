@@ -50,6 +50,7 @@ public class TeleOp_Completo extends LinearOpMode {
     private double position = 0.75;
     private double velocityAtual = 0;
     private double lastStamp = 0;
+    final double tickDegreeTower = 6.2;
     final double kP = 0.08;
     private int change = 2;
     private int target = 0;
@@ -96,14 +97,14 @@ public class TeleOp_Completo extends LinearOpMode {
                 coefficientsRightMotor.p,
                 coefficientsRightMotor.i,
                 coefficientsRightMotor.d,
-                coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.f
         ));
 
         l_left.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
                 coefficientsLeftMotor.p,
                 coefficientsLeftMotor.i,
                 coefficientsLeftMotor.d,
-                coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.f
         ));
 
         tower.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -228,10 +229,22 @@ public class TeleOp_Completo extends LinearOpMode {
             telemetry.update();
         }
 
+        double lastHeading = Math.toDegrees(follower.getHeading());
+
         sleep(200);
 
         while (opModeIsActive()) {
             double heading = Math.toDegrees(follower.getPose().getHeading());
+            double x = follower.getPose().getX();
+            double y = follower.getPose().getY();
+
+            double deltaHeading = -(heading - lastHeading);
+            //if (deltaHeading > 180)  deltaHeading -= 360;
+            //if (deltaHeading < -180) deltaHeading += 360;
+
+            int compensacaoTicks = (int) (deltaHeading * tickDegreeTower);
+
+            lastHeading = heading;
 
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
@@ -241,11 +254,11 @@ public class TeleOp_Completo extends LinearOpMode {
             double turn;
             if (mode_2) {
                 forward = Math.pow(gamepad2.left_stick_y * velocityMultipleir, 3);
-                strafe = Math.pow(-gamepad2.left_stick_x * velocityMultipleir, 3);
+                strafe = Math.pow(gamepad2.left_stick_x * velocityMultipleir, 3);
                 turn = Math.pow(-gamepad2.right_stick_x * velocityMultipleir, 3);
             } else {
                 forward = Math.pow(gamepad1.left_stick_y * velocityMultipleir, 3);
-                strafe = Math.pow(-gamepad1.left_stick_x * velocityMultipleir, 3);
+                strafe = Math.pow(gamepad1.left_stick_x * velocityMultipleir, 3);
                 turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
             }
 
@@ -340,11 +353,11 @@ public class TeleOp_Completo extends LinearOpMode {
                 }
             }
 
-            int limiteRotativo = 650;
+            int limiteRotativo = 750;
             if (!targetVisible) {
 
                 if (!modo_TorreA) {
-                    int novoTarget = target;
+                    int novoTarget = target - compensacaoTicks  ;
 
                     if (elapsedIntervaloC.milliseconds() >= 50) {
                         if (gamepad1.dpad_left && target > -limiteRotativo) {
@@ -362,27 +375,30 @@ public class TeleOp_Completo extends LinearOpMode {
 
                     if (novoTarget != target) {
                         if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
-                            target = novoTarget;
+                            target = Range.clip(novoTarget, -limiteRotativo, limiteRotativo);;
                             encoder(tower, target, towerP);
                         }
                     }
                 } else {
 
+                    int novoTarget = target - compensacaoTicks;
+
                     if (camera) {
                         if (heading < 15 && heading > -15) {
-                            target = -224;
+                            novoTarget = -224;
                         } else if (heading < 105 && heading > 85) {
-                            target = 298;
+                            novoTarget = 298;
                         } else if (heading < 60 && heading > 40) {
-                            target = 19;
+                            novoTarget = 19;
                         } else if (heading < -40 && heading > -60) {
-                            target = -502;
+                            novoTarget = -502;
                         } else if (heading < 150 && heading > 130) {
-                            target = 503;
+                            novoTarget = 503;
                         } else if (heading < -165 || heading > 165) {
-                            target = 650;
+                            novoTarget = 650;
                         }
 
+                        target = Range.clip(novoTarget, -limiteRotativo, limiteRotativo);
                         encoder(tower, target, towerP);
                     }
                 }
@@ -395,7 +411,7 @@ public class TeleOp_Completo extends LinearOpMode {
                     if (Math.abs(tx) > 1) {
 
                         int position = tower.getCurrentPosition();
-                        int alvo = position + (int) (tx * 7);
+                        int alvo = position + (int) (tx * 7) - compensacaoTicks;
 
                         alvo = Math.max(-limiteRotativo, Math.min(limiteRotativo, alvo));
 
@@ -418,20 +434,14 @@ public class TeleOp_Completo extends LinearOpMode {
                         lastStamp = result.getTimestamp();
 
                     } else {
-                        tower.setPower(0);
-                    }
-
-                    //todo: Aumentar a flexibilidade da lógica abaixo com o objetivo de permitir um controle mais fino de potência por toda a arena
-
-                    /*
-                    if (modo_ShotPA) {
-                        if (ta <= 1) {
-                            shotP = 2000;
-                        } else if (ta > 1) {
-                            shotP = 1450;
+                        if (Math.abs(compensacaoTicks) > 0) {
+                            target -= compensacaoTicks;
+                            target = Range.clip(target, -limiteRotativo, limiteRotativo);
+                            encoder(tower, target, 0.3);
+                        } else {
+                            tower.setPower(0);
                         }
                     }
-                    */
                 }
             }
 
@@ -456,6 +466,22 @@ public class TeleOp_Completo extends LinearOpMode {
                 changeM = "Movimentação";
             }
             intervalo_x = gamepad1.x;
+
+            if(modo_ShotPA) {
+                if (91 <= x && x < 104 && 98 <= y && y <= 135) {
+                    shotP = 1350;
+                } else if (46 <= x && x < 91 && 66 <= y && y <= 135) {
+                    shotP = 1600;
+                } else if (32 <= x && x < 46 && 100 <= y && y <= 135) {
+                    shotP = 1700;
+                } else if (74 <= x && 7 <= y && y <= 30) {
+                    shotP = 1850;
+                } else if (64 <= x && x < 74 && 7 <= y && y <= 30) {
+                    shotP = 1900;
+                } else if (54 <= x && x < 64 && 7 <= y && y <= 20) {
+                    shotP = 2000;
+                }
+            }
 
             if (change == 0) {
                 if (gamepad1.right_bumper && !intervalo_bumper) {
@@ -513,7 +539,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addData("Servo", position);
                 telemetry.addData("Posição da Torre", tower.getCurrentPosition()).addData("Alvo da Torre", target);
                 telemetry.addLine();
-                telemetry.addData("X", follower.getPose().getX()).addData("Y", follower.getPose().getY()).addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
+                telemetry.addData("X", x).addData("Y", y).addData("Heading", heading);
                 telemetry.addLine();
 
                 if (camera) {
