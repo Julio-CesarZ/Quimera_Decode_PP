@@ -39,8 +39,9 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean notFieldCentric = true;
     boolean modo_ShotPA = true;
-    private double velocityMultipleir = 0.8;
-    private double shotP = 1850;
+    boolean camera = true;
+    private double velocityMultipleir = 0.7;
+    private double shotP = 1450;
     private double velocityShot = 0;
     private double intakeP = 1;
     private double towerP = 1;
@@ -59,7 +60,7 @@ public class TeleOp_Completo extends LinearOpMode {
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
     private String changeM = "Lançador";
-    private final Pose startingPose = new Pose(72, 72, Math.toRadians(0));
+    private final Pose startingPose = new Pose(108.63, 134.58, Math.toRadians(0));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -140,43 +141,71 @@ public class TeleOp_Completo extends LinearOpMode {
             }
 
             if (notFieldCentric) {
+                telemetry.addLine();
                 telemetry.addLine("Pressione [RB] e [LB] simultaneamente para definir a orientação para a Arena");
                 telemetry.addLine();
 
                 if (gamepad1.right_bumper && gamepad1.left_bumper) {
                     notFieldCentric = false;
-                    sleep(1000);
+                    sleep(500);
                 }
+
+                telemetry.addLine("Orientação atual: Robô");
             } else {
+                telemetry.addLine();
                 telemetry.addLine("Pressione [RB] e [LB] simultaneamente para definir a orientação para o robô");
                 telemetry.addLine();
 
                 if (gamepad1.right_bumper && gamepad1.left_bumper) {
                     notFieldCentric = true;
-                    sleep(1000);
+                    sleep(500);
+                }
+
+                telemetry.addLine("Orientação atual: Arena");
+            }
+
+            if (camera) {
+                if (!modo_TorreA) {
+                    telemetry.addLine();
+                    telemetry.addLine("Pressione [LT] para ativar o modo Auto da Torre");
+                    telemetry.addLine("Também é possível pressionar os analógicos simultaneamente durante o loop para alternar");
+
+                    if (gamepad1.left_trigger > 0.3) {
+                        modo_TorreA = true;
+                        sleep(500);
+                    }
+
+                } else {
+                    telemetry.addLine();
+                    telemetry.addLine("Pressione [LT] para desativar o modo Auto da Torre");
+                    telemetry.addLine("Também é possível pressionar os analógicos simultaneamente durante o loop para alternar");
+
+                    if (gamepad1.left_trigger > 0.3) {
+                        modo_TorreA = false;
+                        sleep(500);
+                    }
                 }
             }
 
-            if (!modo_TorreA) {
+            if (camera) {
                 telemetry.addLine();
-                telemetry.addLine("Pressione [LT] para ativar o modo Auto da Torre");
-
-                if (gamepad1.left_trigger > 0.3) {
-                    modo_TorreA = true;
-                    sleep(1000);
-                }
-
+                telemetry.addLine("Câmera Ativada");
+                telemetry.addLine();
             } else {
-                telemetry.addLine("Modo Auto da Torre Ativado");
                 telemetry.addLine();
-                telemetry.addLine("Pressione [LT] para desativar o modo Auto da Torre");
-                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente durante o loop para alternar");
-
-                if (gamepad1.left_trigger > 0.3) {
-                    modo_TorreA = false;
-                    sleep(1000);
-                }
+                telemetry.addLine("Câmera Desativada");
+                telemetry.addLine();
             }
+
+            if (gamepad1.y && camera) {
+                camera = false;
+                sleep(500);
+            } else if (gamepad1.y && !camera) {
+                camera = true;
+                sleep(500);
+            }
+
+            telemetry.addLine("Pressione [Y] para ativar ou desativar a câmera");
 
             telemetry.addLine();
             telemetry.addLine("Pressione [RT] para definir o estado da telemetria");
@@ -184,10 +213,10 @@ public class TeleOp_Completo extends LinearOpMode {
 
             if (gamepad1.right_trigger > 0.3 && !telemetria) {
                 telemetria = true;
-                sleep(100);
+                sleep(500);
             } else if (gamepad1.right_trigger > 0.3 && telemetria) {
                 telemetria = false;
-                sleep(100);
+                sleep(500);
             }
 
             if (telemetria) {
@@ -293,7 +322,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 elapsedintervaloL.reset();
             }
 
-            double intervaloSS = 325;
+            double intervaloSS = 300;
             if (gamepad1.dpad_up && !intakeSS && !intervalo_dpad_up) {
                 intakeSS = true;
                 elapsedintervaloIntakeSS.reset();
@@ -339,64 +368,70 @@ public class TeleOp_Completo extends LinearOpMode {
                     }
                 } else {
 
-                    if (heading < 15 && heading > -15) {
-                        target = -224;
-                    } else if (heading < 105 && heading > 85) {
-                        target = 298;
-                    } else if (heading < 60 && heading > 40) {
-                        target = 19;
-                    } else if (heading < -40 && heading > -60) {
-                        target = -502;
-                    } else if (heading < 150 && heading > 130) {
-                        target = 503;
-                    } else if (heading < -165 || heading > 165) {
-                        target = 650;
-                    }
+                    if (camera) {
+                        if (heading < 15 && heading > -15) {
+                            target = -224;
+                        } else if (heading < 105 && heading > 85) {
+                            target = 298;
+                        } else if (heading < 60 && heading > 40) {
+                            target = 19;
+                        } else if (heading < -40 && heading > -60) {
+                            target = -502;
+                        } else if (heading < 150 && heading > 130) {
+                            target = 503;
+                        } else if (heading < -165 || heading > 165) {
+                            target = 650;
+                        }
 
-                    encoder(tower, target, towerP);
+                        encoder(tower, target, towerP);
+                    }
                 }
 
             } else {
-                tx = result.getTx();
-                ta = result.getTa();
+                if (camera) {
+                    tx = result.getTx();
+                    ta = result.getTa();
 
-                if (Math.abs(tx) > 1) {
+                    if (Math.abs(tx) > 1) {
 
-                    int position = tower.getCurrentPosition();
-                    int alvo = position + (int) (tx * 7);
+                        int position = tower.getCurrentPosition();
+                        int alvo = position + (int) (tx * 7);
 
-                    alvo = Math.max(-limiteRotativo, Math.min(limiteRotativo, alvo));
+                        alvo = Math.max(-limiteRotativo, Math.min(limiteRotativo, alvo));
 
-                    int delta = alvo - target;
+                        int delta = alvo - target;
 
-                    delta = Range.clip(delta, -maxChangeTick, maxChangeTick);
+                        delta = Range.clip(delta, -maxChangeTick, maxChangeTick);
 
-                    target += delta;
+                        target += delta;
 
-                    target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
+                        target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
 
-                    double power = tx * kP;
-                    double limitPL = 1;
-                    power = Math.max(-limitPL, Math.min(limitPL, power));
+                        double power = tx * kP;
+                        double limitPL = 1;
+                        power = Math.max(-limitPL, Math.min(limitPL, power));
 
-                    if (result.getTimestamp() != lastStamp) {
-                        encoder(tower, target, Math.abs(power));
+                        if (result.getTimestamp() != lastStamp) {
+                            encoder(tower, target, Math.abs(power));
+                        }
+
+                        lastStamp = result.getTimestamp();
+
+                    } else {
+                        tower.setPower(0);
                     }
 
-                    lastStamp = result.getTimestamp();
+                    //todo: Aumentar a flexibilidade da lógica abaixo com o objetivo de permitir um controle mais fino de potência por toda a arena
 
-                } else {
-                    tower.setPower(0);
-                }
-
-                //todo: Aumentar a flexibilidade da lógica abaixo com o objetivo de permitir um controle mais fino de potência por toda a arena
-
-                if (modo_ShotPA) {
-                    if (ta <= 1) {
-                        shotP = 2000;
-                    } else if (ta > 1) {
-                        shotP = 1450;
+                    /*
+                    if (modo_ShotPA) {
+                        if (ta <= 1) {
+                            shotP = 2000;
+                        } else if (ta > 1) {
+                            shotP = 1450;
+                        }
                     }
+                    */
                 }
             }
 
@@ -481,12 +516,16 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addData("X", follower.getPose().getX()).addData("Y", follower.getPose().getY()).addData("Heading", Math.toDegrees(follower.getPose().getHeading()));
                 telemetry.addLine();
 
-                if (targetVisible) {
-                    telemetry.addData("Alvo Detectado", "Sim");
-                    telemetry.addData("TX (Graus)", tx);
-                    telemetry.addData("TA (Area)", ta);
+                if (camera) {
+                    if (targetVisible) {
+                        telemetry.addData("Alvo Detectado", "Sim");
+                        telemetry.addData("TX (Graus)", tx);
+                        telemetry.addData("TA (Area)", ta);
+                    } else {
+                        telemetry.addData("Alvo Detectado", "Não");
+                    }
                 } else {
-                    telemetry.addData("Alvo Detectado", "Não");
+                    telemetry.addLine("Câmera Desativada");
                 }
 
                 telemetry.addLine();
