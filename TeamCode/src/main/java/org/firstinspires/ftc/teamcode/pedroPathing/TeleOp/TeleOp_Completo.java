@@ -16,15 +16,18 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp", group = "TeleOp")
+@TeleOp(name = "TeleOp Completo", group = "TeleOp")
 public class TeleOp_Completo extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;
     boolean intervalo_RT = false;
+    boolean intervalo_LT = false;
+    boolean intervalo_y = false;
     boolean intervalo_bumper = false;
     boolean intervalo_dpad_up = false;
     boolean intervalo_stick = false;
+
     boolean intakeF = false;
     boolean intakeSS = false;
     boolean reverse = false;
@@ -36,25 +39,29 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
+
     private double velocityMultipleir = 0.8;
     private double shotP = 1450;
     private double velocityShot = 0;
     private double tx = 0;
     private double ta = 0;
-    private double position = 0.75;
+    private double positionS = 0.82;
     private double velocityAtual = 0;
     private double lastStamp = 0;
     final double kP = 0.08;
     private int change = 0;
     private int target = 0;
+    final int towerP = 1;
     final int maxChangeTick = 15;
     final int limiteRotativo = 750;
     final int tickDegreeTower = 7;
+
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
     ElapsedTime elapsedSuavizador = new ElapsedTime();
     ElapsedTime elapsedintervaloL = new ElapsedTime();
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
+
     private String changeM = "Movimentação";
     private final Pose startingPose = new Pose(105.63, 135.58, Math.toRadians(0));
 
@@ -65,7 +72,6 @@ public class TeleOp_Completo extends LinearOpMode {
         follower.setStartingPose(startingPose);
         follower.update();
         follower.startTeleopDrive();
-        follower.update();
 
         DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
         DcMotorEx l_right = hardwareMap.get(DcMotorEx.class, "l_right");
@@ -89,34 +95,26 @@ public class TeleOp_Completo extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p,
-                coefficientsRightMotor.i,
-                coefficientsRightMotor.d,
-                coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
         ));
 
         l_left.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p,
-                coefficientsLeftMotor.i,
-                coefficientsLeftMotor.d,
-                coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
         ));
 
         tower.setDirection(DcMotorSimple.Direction.REVERSE);
         tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        tower.setTargetPosition(0);
         tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        tower.setTargetPosition(target);
         tower.setPower(0);
         tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
-
-        limelight.setPollRateHz(50);
+        limelight.setPollRateHz(60);
         limelight.start();
         limelight.pipelineSwitch(1);
 
-        s1.setPosition(position);
+        s1.setPosition(positionS);
 
         elapsedintervaloL.reset();
         elapsedIntervaloServo.reset();
@@ -126,100 +124,51 @@ public class TeleOp_Completo extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
 
-            mode_2 = gamepad2.id != -1;
+            mode_2 = gamepad1.getUser() != null && gamepad2.getUser() != null;
 
             if (mode_2) {
                 telemetry.addLine("Modo para dois jogadores");
-                telemetry.addLine("Gamepad 1 - Controle das funções. Gamepad 2 - Controle do Chassi");
+                telemetry.addLine("Gamepad 1 - Funções | Gamepad 2 - Chassi");
             } else {
                 telemetry.addLine("Modo para um jogador");
                 telemetry.addLine("Gamepad 1 - Controle Geral");
             }
             telemetry.addLine();
 
-            if (camera) {
-                telemetry.addLine("Câmera Ativada");
-            } else {
-                telemetry.addLine("Câmera Desativada");
+            if (gamepad1.y && !intervalo_y) {
+                camera = !camera;
             }
-            telemetry.addLine("Pressione [Y] para ativar ou desativar a câmera");
-            telemetry.addLine();
+            intervalo_y = gamepad1.y;
 
-            if (gamepad1.y && camera) {
-                camera = false;
-                sleep(500);
-            } else if (gamepad1.y && !camera) {
-                camera = true;
-                sleep(500);
+            telemetry.addLine(camera ? "Câmera Ativada" : "Câmera Desativada");
+            telemetry.addLine("Pressione [Y] para alternar a câmera\n");
+
+            if (gamepad1.left_trigger > 0.3 && !intervalo_LT) {
+                modo_TorreA = !modo_TorreA;
             }
+            intervalo_LT = gamepad1.left_trigger > 0.3;
 
-            if (!modo_TorreA) {
-                telemetry.addLine("Pressione [LT] para ativar o modo Auto da Torre");
-                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
-                telemetry.addLine("Change precisar ser igual a Movimentação");
+            telemetry.addLine(modo_TorreA ? "Pressione [LT] para DESATIVAR o modo Auto da Torre" : "Pressione [LT] para ATIVAR o modo Auto da Torre");
+            telemetry.addLine("Change precisa ser igual a Movimentação\n");
 
-                if (gamepad1.left_trigger > 0.3) {
-                    modo_TorreA = true;
-                    sleep(500);
-                }
-
-            } else {
-                telemetry.addLine("Pressione [LT] para desativar o modo Auto da Torre");
-                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
-                telemetry.addLine("Change precisar ser igual a Movimentação");
-
-                if (gamepad1.left_trigger > 0.3) {
-                    modo_TorreA = false;
-                    sleep(500);
-                }
+            if (gamepad1.right_trigger > 0.3 && !intervalo_RT) {
+                modo_ShotPA = !modo_ShotPA;
             }
-            telemetry.addLine();
+            intervalo_RT = gamepad1.right_trigger > 0.3;
 
-            if (!modo_ShotPA) {
-                telemetry.addLine("Pressione [RT] para ativar o modo Auto do Shot");
-                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
-                telemetry.addLine("Change precisar ser igual ao Lançador");
+            telemetry.addLine(modo_ShotPA ? "Pressione [RT] para DESATIVAR o modo Auto do Shot" : "Pressione [RT] para ATIVAR o modo Auto do Shot");
+            telemetry.addLine("Change precisa ser igual ao Lançador\n");
 
-                if (gamepad1.right_trigger > 0.3) {
-                    modo_ShotPA = true;
-                    sleep(500);
-                }
-
-            } else {
-                telemetry.addLine("Pressione [RT] para desativar o modo Auto da Torre");
-                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
-                telemetry.addLine("Change precisar ser igual ao Lançador");
-
-                if (gamepad1.right_trigger > 0.3) {
-                    modo_ShotPA = false;
-                    sleep(500);
-                }
+            if (gamepad1.right_bumper && !intervalo_bumper) {
+                telemetria = !telemetria;
             }
-            telemetry.addLine();
+            intervalo_bumper = gamepad1.right_bumper;
 
-            telemetry.addLine("Pressione [RT] para definir o estado da telemetria");
-            telemetry.addLine();
-
-            if (gamepad1.right_trigger > 0.3 && !telemetria) {
-                telemetria = true;
-                sleep(500);
-            } else if (gamepad1.right_trigger > 0.3 && telemetria) {
-                telemetria = false;
-                sleep(500);
-            }
-
-            if (telemetria) {
-                telemetry.addLine("Telemetria: Ativada");
-            } else {
-                telemetry.addLine("Telemetria: Desativada");
-            }
-
+            telemetry.addLine(telemetria ? "Telemetria: Ativada" : "Telemetria: Desativada");
             telemetry.update();
         }
 
         double lastHeading = Math.toDegrees(follower.getHeading());
-
-        sleep(200);
 
         while (opModeIsActive()) {
             follower.update();
@@ -228,23 +177,20 @@ public class TeleOp_Completo extends LinearOpMode {
             double x = follower.getPose().getX();
             double y = follower.getPose().getY();
 
-            double deltaHeading = -(heading - lastHeading);
+            if (!modo_TorreA) {
+                double deltaHeading = -(heading - lastHeading);
+                int compensacaoTicks = (int) (deltaHeading * tickDegreeTower);
+                lastHeading = heading;
 
-            int compensacaoTicks = (int) (deltaHeading * tickDegreeTower);
-
-            lastHeading = heading;
-
-            target = Range.clip(target - compensacaoTicks, -limiteRotativo, limiteRotativo);
-            double towerP = 1;
-            encoder(tower, target, towerP);
+                target = Range.clip(target - compensacaoTicks, -limiteRotativo, limiteRotativo);
+                encoder(tower, target, towerP);
+            }
 
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
 
-            double forward;
-            double strafe;
-            double turn;
-
+            // Movimentação do Chassi
+            double forward, strafe, turn;
             if (mode_2) {
                 forward = Math.pow(gamepad2.left_stick_y * velocityMultipleir, 3);
                 strafe = Math.pow(gamepad2.left_stick_x * velocityMultipleir, 3);
@@ -257,19 +203,21 @@ public class TeleOp_Completo extends LinearOpMode {
 
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
+            // Servo s1
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (elapsedIntervaloServo.milliseconds() > 500) {
-                    position = 0.65;
-                    s1.setPosition(position);
+                    positionS = 0.65;
+                    s1.setPosition(positionS);
                 }
             } else {
-                position = 0.82;
-                s1.setPosition(position);
+                positionS = 0.82;
+                s1.setPosition(positionS);
             }
 
             double deltaTime = elapsedSuavizador.seconds();
             elapsedSuavizador.reset();
 
+            // Gatilho do Lançador (Shot)
             if (gamepad1.right_trigger > 0.3 && !lF && !reverse && !reverseL && !intervalo_RT) {
                 velocityShot = shotP;
                 elapsedIntervaloServo.reset();
@@ -282,35 +230,20 @@ public class TeleOp_Completo extends LinearOpMode {
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
+            // Suavização da aceleração dos motores de lançamento
             double erroGeral = velocityShot - velocityAtual;
-
-            double maxAccelerationPerS = 700;
-            double maxAccelerationPerS_D = 1000;
+            double maxAccelerationPerS = (y > 60) ? 700 : 1000;
             double maxChange = maxAccelerationPerS * deltaTime;
-            double maxChange_D = maxAccelerationPerS_D * deltaTime;
 
-            if (y > 60) {
-                if (Math.abs(erroGeral) <= maxChange) {
-                    velocityAtual = velocityShot;
-                } else {
-                    velocityAtual += Math.signum(erroGeral) * maxChange;
-                }
-
-                if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
-                    l_right.setVelocity(velocityAtual);
-                    l_left.setVelocity(velocityAtual);
-                }
+            if (Math.abs(erroGeral) <= maxChange) {
+                velocityAtual = velocityShot;
             } else {
-                if (Math.abs(erroGeral) <= maxChange_D) {
-                    velocityAtual = velocityShot;
-                } else {
-                    velocityAtual += Math.signum(erroGeral) * maxChange_D;
-                }
+                velocityAtual += Math.signum(erroGeral) * maxChange;
+            }
 
-                if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
-                    l_right.setVelocity(velocityAtual);
-                    l_left.setVelocity(velocityAtual);
-                }
+            if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
+                l_right.setVelocity(velocityAtual);
+                l_left.setVelocity(velocityAtual);
             }
 
             if (gamepad1.y && !intakeF && !lF && !intakeSS && !reverse) {
@@ -327,10 +260,10 @@ public class TeleOp_Completo extends LinearOpMode {
             double intakeP = 1;
             if (gamepad1.a && !intakeF && !intervalo_a && !intakeSS) {
                 intake.setPower(intakeP);
-                intakeF = !intakeF;
+                intakeF = true;
             } else if (gamepad1.a && intakeF && !intervalo_a) {
                 intake.setPower(0);
-                intakeF = !intakeF;
+                intakeF = false;
             }
             intervalo_a = gamepad1.a;
 
@@ -368,7 +301,6 @@ public class TeleOp_Completo extends LinearOpMode {
             if (!targetVisible) {
                 if (!modo_TorreA) {
                     int novoTarget = target;
-
                     if (elapsedIntervaloC.milliseconds() >= 50) {
                         if (gamepad1.dpad_left && target > -limiteRotativo) {
                             novoTarget -= 20;
@@ -384,166 +316,109 @@ public class TeleOp_Completo extends LinearOpMode {
                     }
                 } else {
                     if (y > 60 && x > 72) {
-                        if (heading > -10 && heading < 10) {
-                            target = -240;
-                        } else if (heading > 35 && heading < 55) {
-                            target = 15;
-                        } else if (heading > 80 && heading < 100) {
-                            target = 270;
-                        } else if (heading > 125 && heading < 145) {
-                            target = 490;
-                        } else if (heading > 160 || heading < -140) {
-                            target = 750;
-                        } else if (heading > -55 && heading < -35) {
-                            target = -560;
-                        } else if (heading > -100 && heading < -80) {
-                            target = -750;
-                        }
+                        if (heading > -10 && heading < 10) target = -240;
+                        else if (heading > 35 && heading < 55) target = 15;
+                        else if (heading > 80 && heading < 100) target = 270;
+                        else if (heading > 125 && heading < 145) target = 490;
+                        else if (heading > 160 || heading < -140) target = 750;
+                        else if (heading > -55 && heading < -35) target = -560;
+                        else if (heading > -100 && heading < -80) target = -750;
                     } else if (y > 60 && x <= 72) {
-                        if (heading > -10 && heading < 10) {
-                            target = -110;
-                        } else if (heading > 35 && heading < 55) {
-                            target = 120;
-                        } else if (heading > 80 && heading < 100) {
-                            target = 370;
-                        } else if (heading > 125 && heading < 145) {
-                            target = 670;
-                        } else if (heading > 160 || heading < -160) {
-                            target = 750;
-                        } else if (heading > -55 && heading < -35) {
-                            target = -360;
-                        } else if (heading > -150 && heading < -80) {
-                            target = -720;
-                        }
+                        if (heading > -10 && heading < 10) target = -110;
+                        else if (heading > 35 && heading < 55) target = 120;
+                        else if (heading > 80 && heading < 100) target = 370;
+                        else if (heading > 125 && heading < 145) target = 670;
+                        else if (heading > 160 || heading < -160) target = 750;
+                        else if (heading > -55 && heading < -35) target = -360;
+                        else if (heading > -150 && heading < -80) target = -720;
                     } else if (y <= 60) {
-                        if (heading > -10 && heading < 10) {
-                            target = -330;
-                        } else if (heading > 35 && heading < 55) {
-                            target = -70;
-                        } else if (heading > 80 && heading < 100) {
-                            target = 150;
-                        } else if (heading > 125 && heading < 145) {
-                            target = 450;
-                        } else if (heading > 170 || heading < -140) {
-                            target = 715;
-                        } else if (heading > -55 && heading < -35) {
-                            target = -630;
-                        } else if (heading > -135 && heading < -60) {
-                            target = -750;
-                        }
+                        if (heading > -10 && heading < 10) target = -330;
+                        else if (heading > 35 && heading < 55) target = -70;
+                        else if (heading > 80 && heading < 100) target = 150;
+                        else if (heading > 125 && heading < 145) target = 450;
+                        else if (heading > 170 || heading < -140) target = 715;
+                        else if (heading > -55 && heading < -35) target = -630;
+                        else if (heading > -135 && heading < -60) target = -750;
                     }
-
                     target = Range.clip(target, -limiteRotativo, limiteRotativo);
                     encoder(tower, target, towerP);
                 }
-
             } else {
                 if (camera) {
                     tx = result.getTx();
                     ta = result.getTa();
 
                     if (Math.abs(tx) > 1) {
-
                         int position = tower.getCurrentPosition();
                         int alvo = position + (int) (tx * 7);
-
                         alvo = Range.clip(alvo, -limiteRotativo, limiteRotativo);
 
-                        int delta = alvo - target;
-
-                        delta = Range.clip(delta, -maxChangeTick, maxChangeTick);
-
+                        int delta = Range.clip(alvo - target, -maxChangeTick, maxChangeTick);
                         target += delta;
-
                         target = Range.clip(target, -limiteRotativo, limiteRotativo);
 
-                        double power = tx * kP;
-                        double limitPL = 1;
-                        power = Range.clip(power, -limitPL, limitPL);
+                        double power = Range.clip(tx * kP, -1.0, 1.0);
 
                         if (result.getTimestamp() != lastStamp) {
                             encoder(tower, target, Math.abs(power));
                         }
-
                         lastStamp = result.getTimestamp();
-
                     } else {
-                        tower.setPower(0);
+                        encoder(tower, tower.getCurrentPosition(), 0.2);
                     }
                 } else {
-                    tower.setPower(0);
+                    encoder(tower, tower.getCurrentPosition(), 0.2);
                 }
             }
 
-            if (gamepad1.right_stick_button && gamepad1.left_stick_button && modo_TorreA && !intervalo_stick && change == 0) {
-                modo_TorreA = false;
-            } else if (gamepad1.right_stick_button && gamepad1.left_stick_button && !modo_TorreA && !intervalo_stick && !lF && change == 0) {
-                modo_TorreA = true;
+            boolean sticksPressionados = gamepad1.right_stick_button && gamepad1.left_stick_button;
+            if (sticksPressionados && !intervalo_stick && !lF) {
+                if (change == 0) modo_TorreA = !modo_TorreA;
+                if (change == 1) modo_ShotPA = !modo_ShotPA;
             }
-            if (gamepad1.right_stick_button && gamepad1.left_stick_button && modo_ShotPA && !intervalo_stick && change == 1) {
-                modo_ShotPA = false;
-            } else if (gamepad1.right_stick_button && gamepad1.left_stick_button && !modo_ShotPA && !intervalo_stick && !lF && change == 1) {
-                modo_ShotPA = true;
-            }
-            intervalo_stick = gamepad1.right_stick_button || gamepad1.left_stick_button;
+            intervalo_stick = sticksPressionados;
 
             if (modo_ShotPA) {
-                if (82 <= x && x < 104 && 98 <= y && y <= 135) {
-                    shotP = 1350;
-                } else if (46 <= x && x < 82 && 66 <= y && y <= 135) {
-                    shotP = 1600;
-                } else if (32 <= x && x < 46 && 100 <= y && y <= 135) {
-                    shotP = 1700;
-                } else if (74 <= x && 7 <= y && y <= 30) {
-                    shotP = 1850;
-                } else if (64 <= x && x < 74 && 7 <= y && y <= 30) {
-                    shotP = 1900;
-                } else if (54 <= x && x < 64 && 7 <= y && y <= 20) {
-                    shotP = 2000;
-                }
+                if (82 <= x && x < 104 && 98 <= y && y <= 135) shotP = 1350;
+                else if (46 <= x && x < 82 && 66 <= y && y <= 135) shotP = 1600;
+                else if (32 <= x && x < 46 && 100 <= y && y <= 135) shotP = 1700;
+                else if (74 <= x && 7 <= y && y <= 30) shotP = 1850;
+                else if (64 <= x && x < 74 && 7 <= y && y <= 30) shotP = 1900;
+                else if (54 <= x && x < 64 && 7 <= y && y <= 20) shotP = 2000;
             }
 
-            if (gamepad1.x && change == 0 && !intervalo_x) {
-                change = 1;
-                changeM = "Lançador";
-            } else if (gamepad1.x && change == 1 && !intervalo_x) {
-                change = 0;
-                changeM = "Movimentação";
+            if (gamepad1.x && !intervalo_x) {
+                if (change == 0) {
+                    change = 1;
+                    changeM = "Lançador";
+                } else {
+                    change = 0;
+                    changeM = "Movimentação";
+                }
             }
             intervalo_x = gamepad1.x;
 
-            if (change == 0) {
-                if (gamepad1.right_bumper && !intervalo_bumper) {
-                    velocityMultipleir += 0.05;
-                } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                    velocityMultipleir -= 0.05;
+            if (gamepad1.right_bumper || gamepad1.left_bumper) {
+                if (!intervalo_bumper) {
+                    if (change == 0) {
+                        velocityMultipleir += gamepad1.right_bumper ? 0.05 : -0.05;
+                        velocityMultipleir = Range.clip(velocityMultipleir, 0.0, 1.0);
+                    } else if (change == 1) {
+                        shotP += gamepad1.right_bumper ? 50 : -50;
+                        shotP = Range.clip(shotP, 0, 2800);
+                        if (lF) velocityShot = shotP;
+                    }
                 }
-                velocityMultipleir = Range.clip(velocityMultipleir, 0.0, 1.0);
-
-                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
-            } else if (change == 1) {
-                if (gamepad1.right_bumper && !intervalo_bumper) {
-                    shotP += 50;
-                } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                    shotP -= 50;
-                }
-                shotP = Range.clip(shotP, 0, 2800); //Utilizando 100% -> ticks por revolução - 28; RPM máximo - 6000
-                if (lF) {
-                    velocityShot = shotP;
-                }
-
-                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
+                intervalo_bumper = true;
+            } else {
+                intervalo_bumper = false;
             }
 
             if (telemetria) {
                 if (targetVisible) {
-                    telemetry.addLine("🟢 🟢 🟢 🟢 🟢 🟢 🟢 🟢");
                     telemetry.addLine("🟢 Telemetria  Ativada 🟢");
-                    telemetry.addLine("🟢 🟢 🟢 🟢 🟢 🟢 🟢 🟢");
                 } else {
-                    telemetry.addLine("🔴 🔴 🔴 🔴 🔴 🔴 🔴 🔴");
                     telemetry.addLine("🔴 Telemetria  Ativada 🔴");
-                    telemetry.addLine("🔴 🔴 🔴 🔴 🔴 🔴 🔴 🔴");
                 }
                 telemetry.addLine();
 
@@ -558,15 +433,14 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addData("Troca de poder atual", changeM);
                 telemetry.addData("Chassi Power", velocityMultipleir);
                 telemetry.addData("Variável ShotP", shotP);
-                telemetry.addData("Ticks/s do Motor da Direita", l_right.getVelocity());
-                telemetry.addData("Ticks/s do Motor da Esquerda", l_left.getVelocity());
-                telemetry.addData("Posição da Torre", tower.getCurrentPosition()).addData("Alvo da Torre", target);
+                telemetry.addData("Ticks/s Dir", l_right.getVelocity());
+                telemetry.addData("Ticks/s Esq", l_left.getVelocity());
+                telemetry.addData("Posição Torre", tower.getCurrentPosition()).addData("Alvo Torre", target);
                 telemetry.addLine();
                 telemetry.addData("X", x).addData("Y", y).addData("Heading", heading);
                 telemetry.addLine();
                 telemetry.addData("Modo Automático da Torre", modo_TorreA);
-                telemetry.addData("Modo Automático da calibração de shotP", modo_ShotPA);
-
+                telemetry.addData("Modo Automático de shotP", modo_ShotPA);
                 telemetry.update();
             } else {
                 telemetry.addLine("Telemetria Desativada");
@@ -579,7 +453,6 @@ public class TeleOp_Completo extends LinearOpMode {
         if (motor.getTargetPosition() != novoAlvo) {
             motor.setTargetPosition(novoAlvo);
         }
-
         if (Math.abs(motor.getPower() - power) > 0.05) {
             motor.setPower(power);
         }
