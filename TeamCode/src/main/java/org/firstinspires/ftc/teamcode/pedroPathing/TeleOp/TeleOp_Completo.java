@@ -34,26 +34,22 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean telemetria = true;
     boolean mode_2 = false;
     boolean modo_TorreA = true;
-    boolean modo_ShotPA = false;
+    boolean modo_ShotPA = true;
     boolean camera = true;
-    boolean isFront = false;
-    boolean notFieldCentric = true;
     private double velocityMultipleir = 0.8;
     private double shotP = 1450;
     private double velocityShot = 0;
-    private double intakeP = 1;
-    private double towerP = 1;
     private double tx = 0;
     private double ta = 0;
     private double position = 0.75;
     private double velocityAtual = 0;
     private double lastStamp = 0;
-    final double tickDegreeTower = 6.2;
     final double kP = 0.08;
     private int change = 0;
     private int target = 0;
-    final int maxChangeTick = 10;
+    final int maxChangeTick = 15;
     final int limiteRotativo = 750;
+    final int tickDegreeTower = 7;
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
     ElapsedTime elapsedSuavizador = new ElapsedTime();
     ElapsedTime elapsedintervaloL = new ElapsedTime();
@@ -139,39 +135,15 @@ public class TeleOp_Completo extends LinearOpMode {
                 telemetry.addLine("Modo para um jogador");
                 telemetry.addLine("Gamepad 1 - Controle Geral");
             }
+            telemetry.addLine();
 
             if (camera) {
-                if (!modo_TorreA) {
-                    telemetry.addLine();
-                    telemetry.addLine("Pressione [LT] para ativar o modo Auto da Torre");
-                    telemetry.addLine("Também é possível pressionar os analógicos simultaneamente durante o loop para alternar");
-
-                    if (gamepad1.left_trigger > 0.3) {
-                        modo_TorreA = true;
-                        sleep(500);
-                    }
-
-                } else {
-                    telemetry.addLine();
-                    telemetry.addLine("Pressione [LT] para desativar o modo Auto da Torre");
-                    telemetry.addLine("Também é possível pressionar os analógicos simultaneamente durante o loop para alternar");
-
-                    if (gamepad1.left_trigger > 0.3) {
-                        modo_TorreA = false;
-                        sleep(500);
-                    }
-                }
-            }
-
-            if (camera) {
-                telemetry.addLine();
                 telemetry.addLine("Câmera Ativada");
-                telemetry.addLine();
             } else {
-                telemetry.addLine();
                 telemetry.addLine("Câmera Desativada");
-                telemetry.addLine();
             }
+            telemetry.addLine("Pressione [Y] para ativar ou desativar a câmera");
+            telemetry.addLine();
 
             if (gamepad1.y && camera) {
                 camera = false;
@@ -181,9 +153,50 @@ public class TeleOp_Completo extends LinearOpMode {
                 sleep(500);
             }
 
-            telemetry.addLine("Pressione [Y] para ativar ou desativar a câmera");
+            if (!modo_TorreA) {
+                telemetry.addLine("Pressione [LT] para ativar o modo Auto da Torre");
+                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
+                telemetry.addLine("Change precisar ser igual a Movimentação");
 
+                if (gamepad1.left_trigger > 0.3) {
+                    modo_TorreA = true;
+                    sleep(500);
+                }
+
+            } else {
+                telemetry.addLine("Pressione [LT] para desativar o modo Auto da Torre");
+                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
+                telemetry.addLine("Change precisar ser igual a Movimentação");
+
+                if (gamepad1.left_trigger > 0.3) {
+                    modo_TorreA = false;
+                    sleep(500);
+                }
+            }
             telemetry.addLine();
+
+            if (!modo_ShotPA) {
+                telemetry.addLine("Pressione [RT] para ativar o modo Auto do Shot");
+                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
+                telemetry.addLine("Change precisar ser igual ao Lançador");
+
+                if (gamepad1.right_trigger > 0.3) {
+                    modo_ShotPA = true;
+                    sleep(500);
+                }
+
+            } else {
+                telemetry.addLine("Pressione [RT] para desativar o modo Auto da Torre");
+                telemetry.addLine("Também é possível pressionar os analógicos simultaneamente para alternar");
+                telemetry.addLine("Change precisar ser igual ao Lançador");
+
+                if (gamepad1.right_trigger > 0.3) {
+                    modo_ShotPA = false;
+                    sleep(500);
+                }
+            }
+            telemetry.addLine();
+
             telemetry.addLine("Pressione [RT] para definir o estado da telemetria");
             telemetry.addLine();
 
@@ -209,6 +222,8 @@ public class TeleOp_Completo extends LinearOpMode {
         sleep(200);
 
         while (opModeIsActive()) {
+            follower.update();
+
             double heading = Math.toDegrees(follower.getPose().getHeading());
             double x = follower.getPose().getX();
             double y = follower.getPose().getY();
@@ -220,6 +235,7 @@ public class TeleOp_Completo extends LinearOpMode {
             lastHeading = heading;
 
             target = Range.clip(target - compensacaoTicks, -limiteRotativo, limiteRotativo);
+            double towerP = 1;
             encoder(tower, target, towerP);
 
             LLResult result = limelight.getLatestResult();
@@ -229,30 +245,17 @@ public class TeleOp_Completo extends LinearOpMode {
             double strafe;
             double turn;
 
-            if (!isFront) {
-                if (mode_2) {
-                    forward = Math.pow(-gamepad2.left_stick_y * velocityMultipleir, 3);
-                    strafe = Math.pow(-gamepad2.left_stick_x * velocityMultipleir, 3);
-                    turn = Math.pow(-gamepad2.right_stick_x * velocityMultipleir, 3);
-                } else {
-                    forward = Math.pow(-gamepad1.left_stick_y * velocityMultipleir, 3);
-                    strafe = Math.pow(-gamepad1.left_stick_x * velocityMultipleir, 3);
-                    turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
-                }
+            if (mode_2) {
+                forward = Math.pow(gamepad2.left_stick_y * velocityMultipleir, 3);
+                strafe = Math.pow(gamepad2.left_stick_x * velocityMultipleir, 3);
+                turn = Math.pow(-gamepad2.right_stick_x * velocityMultipleir, 3);
             } else {
-                if (mode_2) {
-                    forward = Math.pow(gamepad2.left_stick_y * velocityMultipleir, 3);
-                    strafe = Math.pow(gamepad2.left_stick_x * velocityMultipleir, 3);
-                    turn = Math.pow(-gamepad2.right_stick_x * velocityMultipleir, 3);
-                } else {
-                    forward = Math.pow(gamepad1.left_stick_y * velocityMultipleir, 3);
-                    strafe = Math.pow(gamepad1.left_stick_x * velocityMultipleir, 3);
-                    turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
-                }
+                forward = Math.pow(gamepad1.left_stick_y * velocityMultipleir, 3);
+                strafe = Math.pow(gamepad1.left_stick_x * velocityMultipleir, 3);
+                turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
             }
 
-            follower.setTeleOpDrive(forward, strafe, turn, notFieldCentric);
-            follower.update();
+            follower.setTeleOpDrive(forward, strafe, turn, true);
 
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (elapsedIntervaloServo.milliseconds() > 500) {
@@ -281,7 +284,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
             double erroGeral = velocityShot - velocityAtual;
 
-            double maxAccelerationPerS = 750;
+            double maxAccelerationPerS = 700;
             double maxAccelerationPerS_D = 1000;
             double maxChange = maxAccelerationPerS * deltaTime;
             double maxChange_D = maxAccelerationPerS_D * deltaTime;
@@ -315,11 +318,13 @@ public class TeleOp_Completo extends LinearOpMode {
                 l_left.setVelocity(-1000);
                 reverseL = true;
             } else if (!gamepad1.y && reverseL) {
-                velocityShot = 0;
+                l_right.setVelocity(0);
+                l_left.setVelocity(0);
                 reverseL = false;
                 elapsedintervaloL.reset();
             }
 
+            double intakeP = 1;
             if (gamepad1.a && !intakeF && !intervalo_a && !intakeSS) {
                 intake.setPower(intakeP);
                 intakeF = !intakeF;
@@ -336,7 +341,8 @@ public class TeleOp_Completo extends LinearOpMode {
                 reverse = true;
             } else if (!gamepad1.b && reverse) {
                 intake.setPower(0);
-                velocityShot = 0;
+                l_right.setVelocity(0);
+                l_left.setVelocity(0);
                 reverse = false;
                 elapsedintervaloL.reset();
             }
@@ -360,7 +366,6 @@ public class TeleOp_Completo extends LinearOpMode {
             }
 
             if (!targetVisible) {
-
                 if (!modo_TorreA) {
                     int novoTarget = target;
 
@@ -373,12 +378,9 @@ public class TeleOp_Completo extends LinearOpMode {
                             elapsedIntervaloC.reset();
                         }
                     }
-
-                    if (novoTarget != target) {
-                        if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
-                            target = Range.clip(novoTarget, -limiteRotativo, limiteRotativo);
-                            encoder(tower, target, towerP);
-                        }
+                    if (novoTarget != target && Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
+                        target = Range.clip(novoTarget, -limiteRotativo, limiteRotativo);
+                        encoder(tower, target, towerP);
                     }
                 } else {
                     if (y > 60 && x > 72) {
@@ -468,30 +470,22 @@ public class TeleOp_Completo extends LinearOpMode {
                     } else {
                         tower.setPower(0);
                     }
+                } else {
+                    tower.setPower(0);
                 }
             }
 
-            if (gamepad1.right_stick_button && gamepad1.left_stick_button && modo_TorreA && !intervalo_stick) {
+            if (gamepad1.right_stick_button && gamepad1.left_stick_button && modo_TorreA && !intervalo_stick && change == 0) {
                 modo_TorreA = false;
-            } else if (gamepad1.right_stick_button && gamepad1.left_stick_button && !modo_TorreA && !intervalo_stick && !lF) {
+            } else if (gamepad1.right_stick_button && gamepad1.left_stick_button && !modo_TorreA && !intervalo_stick && !lF && change == 0) {
                 modo_TorreA = true;
             }
-            intervalo_stick = gamepad1.right_stick_button || gamepad1.left_stick_button;
-
-            if (gamepad1.x && change == 0 && !intervalo_x) {
-                change = 1;
-                changeM = "Intake";
-            } else if (gamepad1.x && change == 1 && !intervalo_x) {
-                change = 2;
-                changeM = "Lançador";
-            } else if (gamepad1.x && change == 2 && !intervalo_x) {
-                change = 3;
-                changeM = "Torre";
-            } else if (gamepad1.x && change == 3 && !intervalo_x) {
-                change = 0;
-                changeM = "Movimentação";
+            if (gamepad1.right_stick_button && gamepad1.left_stick_button && modo_ShotPA && !intervalo_stick && change == 1) {
+                modo_ShotPA = false;
+            } else if (gamepad1.right_stick_button && gamepad1.left_stick_button && !modo_ShotPA && !intervalo_stick && !lF && change == 1) {
+                modo_ShotPA = true;
             }
-            intervalo_x = gamepad1.x;
+            intervalo_stick = gamepad1.right_stick_button || gamepad1.left_stick_button;
 
             if (modo_ShotPA) {
                 if (82 <= x && x < 104 && 98 <= y && y <= 135) {
@@ -509,6 +503,15 @@ public class TeleOp_Completo extends LinearOpMode {
                 }
             }
 
+            if (gamepad1.x && change == 0 && !intervalo_x) {
+                change = 1;
+                changeM = "Lançador";
+            } else if (gamepad1.x && change == 1 && !intervalo_x) {
+                change = 0;
+                changeM = "Movimentação";
+            }
+            intervalo_x = gamepad1.x;
+
             if (change == 0) {
                 if (gamepad1.right_bumper && !intervalo_bumper) {
                     velocityMultipleir += 0.05;
@@ -520,15 +523,6 @@ public class TeleOp_Completo extends LinearOpMode {
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             } else if (change == 1) {
                 if (gamepad1.right_bumper && !intervalo_bumper) {
-                    intakeP += 0.05;
-                } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                    intakeP -= 0.05;
-                }
-                intakeP = Range.clip(intakeP, 0.0, 1.0);
-
-                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
-            } else if (change == 2) {
-                if (gamepad1.right_bumper && !intervalo_bumper) {
                     shotP += 50;
                 } else if (gamepad1.left_bumper && !intervalo_bumper) {
                     shotP -= 50;
@@ -537,15 +531,6 @@ public class TeleOp_Completo extends LinearOpMode {
                 if (lF) {
                     velocityShot = shotP;
                 }
-
-                intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
-            } else if (change == 3) {
-                if (gamepad1.right_bumper && !intervalo_bumper) {
-                    towerP += 0.05;
-                } else if (gamepad1.left_bumper && !intervalo_bumper) {
-                    towerP -= 0.05;
-                }
-                towerP = Range.clip(towerP, 0.0, 1.0);
 
                 intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
             }
@@ -560,6 +545,7 @@ public class TeleOp_Completo extends LinearOpMode {
                     telemetry.addLine("🔴 Telemetria  Ativada 🔴");
                     telemetry.addLine("🔴 🔴 🔴 🔴 🔴 🔴 🔴 🔴");
                 }
+                telemetry.addLine();
 
                 if (camera) {
                     telemetry.addData("TX (Graus)", tx);
@@ -567,23 +553,18 @@ public class TeleOp_Completo extends LinearOpMode {
                 } else {
                     telemetry.addLine("Câmera Desativada");
                 }
+                telemetry.addLine();
 
                 telemetry.addData("Troca de poder atual", changeM);
                 telemetry.addData("Chassi Power", velocityMultipleir);
-                telemetry.addData("Intake Power", intakeP);
                 telemetry.addData("Variável ShotP", shotP);
-                telemetry.addData("Valor de Referência dos Motores", velocityAtual);
                 telemetry.addData("Ticks/s do Motor da Direita", l_right.getVelocity());
                 telemetry.addData("Ticks/s do Motor da Esquerda", l_left.getVelocity());
-                telemetry.addData("RPM da Roda do Lançador", Math.max(l_right.getVelocity(), l_left.getVelocity()) * 2.14);
-                telemetry.addData("Tower Power", towerP);
-                telemetry.addData("Servo", position);
                 telemetry.addData("Posição da Torre", tower.getCurrentPosition()).addData("Alvo da Torre", target);
                 telemetry.addLine();
                 telemetry.addData("X", x).addData("Y", y).addData("Heading", heading);
                 telemetry.addLine();
                 telemetry.addData("Modo Automático da Torre", modo_TorreA);
-                telemetry.addLine();
                 telemetry.addData("Modo Automático da calibração de shotP", modo_ShotPA);
 
                 telemetry.update();
@@ -595,7 +576,12 @@ public class TeleOp_Completo extends LinearOpMode {
     }
 
     private void encoder(DcMotor motor, int novoAlvo, double power) {
-        motor.setTargetPosition(novoAlvo);
-        motor.setPower(power);
+        if (motor.getTargetPosition() != novoAlvo) {
+            motor.setTargetPosition(novoAlvo);
+        }
+
+        if (Math.abs(motor.getPower() - power) > 0.05) {
+            motor.setPower(power);
+        }
     }
 }
