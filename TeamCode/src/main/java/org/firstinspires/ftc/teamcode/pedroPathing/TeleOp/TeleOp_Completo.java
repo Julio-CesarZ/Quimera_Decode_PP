@@ -23,10 +23,7 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean intervalo_x = false;
     boolean intervalo_RT = false;
     boolean intervalo_bumper = false;
-    boolean intervalo_dpad_down = false;
     boolean intervalo_dpad_up = false;
-    boolean intervalo_dpad_left = false;
-    boolean intervalo_dpad_right = false;
     boolean intervalo_stick = false;
     boolean intakeF = false;
     boolean intakeSS = false;
@@ -37,7 +34,7 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean telemetria = true;
     boolean mode_2 = false;
     boolean modo_TorreA = true;
-    boolean modo_ShotPA = true;
+    boolean modo_ShotPA = false;
     boolean camera = true;
     boolean isFront = false;
     boolean notFieldCentric = true;
@@ -56,13 +53,14 @@ public class TeleOp_Completo extends LinearOpMode {
     private int change = 0;
     private int target = 0;
     final int maxChangeTick = 10;
+    final int limiteRotativo = 750;
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
     ElapsedTime elapsedSuavizador = new ElapsedTime();
     ElapsedTime elapsedintervaloL = new ElapsedTime();
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
     private String changeM = "Movimentação";
-    private final Pose startingPose = new Pose(108.63, 134.58, Math.toRadians(0));
+    private final Pose startingPose = new Pose(105.63, 135.58, Math.toRadians(0));
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -118,7 +116,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        limelight.setPollRateHz(60);
+        limelight.setPollRateHz(50);
         limelight.start();
         limelight.pipelineSwitch(1);
 
@@ -221,15 +219,15 @@ public class TeleOp_Completo extends LinearOpMode {
 
             lastHeading = heading;
 
+            target = Range.clip(target - compensacaoTicks, -limiteRotativo, limiteRotativo);
+            encoder(tower, target, towerP);
+
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
 
             double forward;
             double strafe;
             double turn;
-
-            //h
-            // ´´isFront = (heading > 150 || heading < -150) && notFieldCentric;
 
             if (!isFront) {
                 if (mode_2) {
@@ -361,11 +359,10 @@ public class TeleOp_Completo extends LinearOpMode {
                 }
             }
 
-            int limiteRotativo = 750;
             if (!targetVisible) {
 
                 if (!modo_TorreA) {
-                    int novoTarget = target - compensacaoTicks;
+                    int novoTarget = target;
 
                     if (elapsedIntervaloC.milliseconds() >= 50) {
                         if (gamepad1.dpad_left && target > -limiteRotativo) {
@@ -377,55 +374,65 @@ public class TeleOp_Completo extends LinearOpMode {
                         }
                     }
 
-                    intervalo_dpad_down = gamepad1.dpad_down;
-                    intervalo_dpad_left = gamepad1.dpad_left;
-                    intervalo_dpad_right = gamepad1.dpad_right;
-
                     if (novoTarget != target) {
                         if (Math.abs(novoTarget - tower.getCurrentPosition()) > 5) {
                             target = Range.clip(novoTarget, -limiteRotativo, limiteRotativo);
-                            ;
                             encoder(tower, target, towerP);
                         }
                     }
                 } else {
-
-                    int novoTarget = target - compensacaoTicks;
-
-                    if (camera) {
-                        if (y > 60) {
-                            if (heading < 15 && heading > -15) {
-                                novoTarget = -224;
-                            } else if (heading < 105 && heading > 85) {
-                                novoTarget = 298;
-                            } else if (heading < 60 && heading > 40) {
-                                novoTarget = 19;
-                            } else if (heading < -40 && heading > -60) {
-                                novoTarget = -502;
-                            } else if (heading < 150 && heading > 130) {
-                                novoTarget = 503;
-                            } else if (heading < -165 || heading > 165) {
-                                novoTarget = 650;
-                            }
-                        } else {
-                            if (heading < 15 && heading > -15) {
-                                novoTarget = -400;
-                            } else if (heading < 105 && heading > 85) {
-                                novoTarget = 145;
-                            } else if (heading < 60 && heading > 40) {
-                                novoTarget = -135;
-                            } else if (heading < -40 && heading > -60) {
-                                novoTarget = -675;
-                            } else if (heading < 150 && heading > 130) {
-                                novoTarget = 400;
-                            } else if (heading < -165 || heading > 165) {
-                                novoTarget = 650;
-                            }
+                    if (y > 60 && x > 72) {
+                        if (heading > -10 && heading < 10) {
+                            target = -240;
+                        } else if (heading > 35 && heading < 55) {
+                            target = 15;
+                        } else if (heading > 80 && heading < 100) {
+                            target = 270;
+                        } else if (heading > 125 && heading < 145) {
+                            target = 490;
+                        } else if (heading > 160 || heading < -140) {
+                            target = 750;
+                        } else if (heading > -55 && heading < -35) {
+                            target = -560;
+                        } else if (heading > -100 && heading < -80) {
+                            target = -750;
                         }
-
-                        target = Range.clip(novoTarget, -limiteRotativo, limiteRotativo);
-                        encoder(tower, target, towerP);
+                    } else if (y > 60 && x <= 72) {
+                        if (heading > -10 && heading < 10) {
+                            target = -110;
+                        } else if (heading > 35 && heading < 55) {
+                            target = 120;
+                        } else if (heading > 80 && heading < 100) {
+                            target = 370;
+                        } else if (heading > 125 && heading < 145) {
+                            target = 670;
+                        } else if (heading > 160 || heading < -160) {
+                            target = 750;
+                        } else if (heading > -55 && heading < -35) {
+                            target = -360;
+                        } else if (heading > -150 && heading < -80) {
+                            target = -720;
+                        }
+                    } else if (y <= 60) {
+                        if (heading > -10 && heading < 10) {
+                            target = -330;
+                        } else if (heading > 35 && heading < 55) {
+                            target = -70;
+                        } else if (heading > 80 && heading < 100) {
+                            target = 150;
+                        } else if (heading > 125 && heading < 145) {
+                            target = 450;
+                        } else if (heading > 170 || heading < -140) {
+                            target = 715;
+                        } else if (heading > -55 && heading < -35) {
+                            target = -630;
+                        } else if (heading > -135 && heading < -60) {
+                            target = -750;
+                        }
                     }
+
+                    target = Range.clip(target, -limiteRotativo, limiteRotativo);
+                    encoder(tower, target, towerP);
                 }
 
             } else {
@@ -436,9 +443,9 @@ public class TeleOp_Completo extends LinearOpMode {
                     if (Math.abs(tx) > 1) {
 
                         int position = tower.getCurrentPosition();
-                        int alvo = position + (int) (tx * 7) - compensacaoTicks;
+                        int alvo = position + (int) (tx * 7);
 
-                        alvo = Math.max(-limiteRotativo, Math.min(limiteRotativo, alvo));
+                        alvo = Range.clip(alvo, -limiteRotativo, limiteRotativo);
 
                         int delta = alvo - target;
 
@@ -446,11 +453,11 @@ public class TeleOp_Completo extends LinearOpMode {
 
                         target += delta;
 
-                        target = Math.max(-limiteRotativo, Math.min(limiteRotativo, target));
+                        target = Range.clip(target, -limiteRotativo, limiteRotativo);
 
                         double power = tx * kP;
                         double limitPL = 1;
-                        power = Math.max(-limitPL, Math.min(limitPL, power));
+                        power = Range.clip(power, -limitPL, limitPL);
 
                         if (result.getTimestamp() != lastStamp) {
                             encoder(tower, target, Math.abs(power));
@@ -459,20 +466,14 @@ public class TeleOp_Completo extends LinearOpMode {
                         lastStamp = result.getTimestamp();
 
                     } else {
-                        if (Math.abs(compensacaoTicks) > 0) {
-                            target -= compensacaoTicks;
-                            target = Range.clip(target, -limiteRotativo, limiteRotativo);
-                            encoder(tower, target, 0.3);
-                        } else {
-                            tower.setPower(0);
-                        }
+                        tower.setPower(0);
                     }
                 }
             }
 
-            if ((gamepad1.right_stick_button || gamepad1.left_stick_button) && modo_TorreA && !intervalo_stick) {
+            if (gamepad1.right_stick_button && gamepad1.left_stick_button && modo_TorreA && !intervalo_stick) {
                 modo_TorreA = false;
-            } else if ((gamepad1.right_stick_button || gamepad1.left_stick_button) && !modo_TorreA && !intervalo_stick && !lF) {
+            } else if (gamepad1.right_stick_button && gamepad1.left_stick_button && !modo_TorreA && !intervalo_stick && !lF) {
                 modo_TorreA = true;
             }
             intervalo_stick = gamepad1.right_stick_button || gamepad1.left_stick_button;
@@ -493,9 +494,9 @@ public class TeleOp_Completo extends LinearOpMode {
             intervalo_x = gamepad1.x;
 
             if (modo_ShotPA) {
-                if (91 <= x && x < 104 && 98 <= y && y <= 135) {
+                if (82 <= x && x < 104 && 98 <= y && y <= 135) {
                     shotP = 1350;
-                } else if (46 <= x && x < 91 && 66 <= y && y <= 135) {
+                } else if (46 <= x && x < 82 && 66 <= y && y <= 135) {
                     shotP = 1600;
                 } else if (32 <= x && x < 46 && 100 <= y && y <= 135) {
                     shotP = 1700;
