@@ -189,7 +189,6 @@ public class TeleOp_Completo extends LinearOpMode {
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
 
-            // Movimentação do Chassi
             double forward, strafe, turn;
             if (mode_2) {
                 forward = Math.pow(gamepad2.left_stick_y * velocityMultipleir, 3);
@@ -203,7 +202,6 @@ public class TeleOp_Completo extends LinearOpMode {
 
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
-            // Servo s1
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (elapsedIntervaloServo.milliseconds() > 500) {
                     positionS = 0.65;
@@ -217,20 +215,16 @@ public class TeleOp_Completo extends LinearOpMode {
             double deltaTime = elapsedSuavizador.seconds();
             elapsedSuavizador.reset();
 
-            // Gatilho do Lançador (Shot)
             if (gamepad1.right_trigger > 0.3 && !lF && !reverse && !reverseL && !intervalo_RT) {
                 velocityShot = shotP;
                 elapsedIntervaloServo.reset();
                 lF = true;
-                modo_TorreA = false;
-            } else if (gamepad1.right_trigger > 0.3 && lF && !intervalo_RT) {
+            } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
                 velocityShot = 0;
                 lF = false;
-                modo_TorreA = true;
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
-            // Suavização da aceleração dos motores de lançamento
             double erroGeral = velocityShot - velocityAtual;
             double maxAccelerationPerS = (y > 60) ? 700 : 1000;
             double maxChange = maxAccelerationPerS * deltaTime;
@@ -315,33 +309,35 @@ public class TeleOp_Completo extends LinearOpMode {
                         encoder(tower, target, towerP);
                     }
                 } else {
-                    if (y > 60 && x > 72) {
-                        if (heading > -10 && heading < 10) target = -240;
-                        else if (heading > 35 && heading < 55) target = 15;
-                        else if (heading > 80 && heading < 100) target = 270;
-                        else if (heading > 125 && heading < 145) target = 490;
-                        else if (heading > 160 || heading < -140) target = 750;
-                        else if (heading > -55 && heading < -35) target = -560;
-                        else if (heading > -100 && heading < -80) target = -750;
-                    } else if (y > 60 && x <= 72) {
-                        if (heading > -10 && heading < 10) target = -110;
-                        else if (heading > 35 && heading < 55) target = 120;
-                        else if (heading > 80 && heading < 100) target = 370;
-                        else if (heading > 125 && heading < 145) target = 670;
-                        else if (heading > 160 || heading < -160) target = 750;
-                        else if (heading > -55 && heading < -35) target = -360;
-                        else if (heading > -150 && heading < -80) target = -720;
-                    } else if (y <= 60) {
-                        if (heading > -10 && heading < 10) target = -330;
-                        else if (heading > 35 && heading < 55) target = -70;
-                        else if (heading > 80 && heading < 100) target = 150;
-                        else if (heading > 125 && heading < 145) target = 450;
-                        else if (heading > 170 || heading < -140) target = 715;
-                        else if (heading > -55 && heading < -35) target = -630;
-                        else if (heading > -135 && heading < -60) target = -750;
+                    if (!lF) {
+                        if (y > 60 && x > 72) {
+                            if (heading > -10 && heading < 10) target = -240;
+                            else if (heading > 35 && heading < 55) target = 15;
+                            else if (heading > 80 && heading < 100) target = 270;
+                            else if (heading > 125 && heading < 145) target = 490;
+                            else if (heading > 160 || heading < -140) target = 750;
+                            else if (heading > -55 && heading < -35) target = -560;
+                            else if (heading > -100 && heading < -80) target = -750;
+                        } else if (y > 60 && x <= 72) {
+                            if (heading > -10 && heading < 10) target = -110;
+                            else if (heading > 35 && heading < 55) target = 120;
+                            else if (heading > 80 && heading < 100) target = 370;
+                            else if (heading > 125 && heading < 145) target = 670;
+                            else if (heading > 160 || heading < -160) target = 750;
+                            else if (heading > -55 && heading < -35) target = -360;
+                            else if (heading > -150 && heading < -80) target = -720;
+                        } else if (y <= 60) {
+                            if (heading > -10 && heading < 10) target = -330;
+                            else if (heading > 35 && heading < 55) target = -70;
+                            else if (heading > 80 && heading < 100) target = 150;
+                            else if (heading > 125 && heading < 145) target = 450;
+                            else if (heading > 170 || heading < -140) target = 715;
+                            else if (heading > -55 && heading < -35) target = -630;
+                            else if (heading > -135 && heading < -60) target = -750;
+                        }
+                        target = Range.clip(target, -limiteRotativo, limiteRotativo);
+                        encoder(tower, target, towerP);
                     }
-                    target = Range.clip(target, -limiteRotativo, limiteRotativo);
-                    encoder(tower, target, towerP);
                 }
             } else {
                 if (camera) {
@@ -364,7 +360,7 @@ public class TeleOp_Completo extends LinearOpMode {
                         }
                         lastStamp = result.getTimestamp();
                     } else {
-                        encoder(tower, tower.getCurrentPosition(), 0.2);
+                        encoder(tower, target, 0.2);
                     }
                 } else {
                     encoder(tower, tower.getCurrentPosition(), 0.2);
@@ -398,21 +394,17 @@ public class TeleOp_Completo extends LinearOpMode {
             }
             intervalo_x = gamepad1.x;
 
-            if (gamepad1.right_bumper || gamepad1.left_bumper) {
-                if (!intervalo_bumper) {
-                    if (change == 0) {
-                        velocityMultipleir += gamepad1.right_bumper ? 0.05 : -0.05;
-                        velocityMultipleir = Range.clip(velocityMultipleir, 0.0, 1.0);
-                    } else if (change == 1) {
-                        shotP += gamepad1.right_bumper ? 50 : -50;
-                        shotP = Range.clip(shotP, 0, 2800);
-                        if (lF) velocityShot = shotP;
-                    }
+            if ((gamepad1.right_bumper || gamepad1.left_bumper) && !intervalo_bumper) {
+                if (change == 0) {
+                    velocityMultipleir += gamepad1.right_bumper ? 0.05 : -0.05;
+                    velocityMultipleir = Range.clip(velocityMultipleir, 0.0, 1.0);
+                } else if (change == 1) {
+                    shotP += gamepad1.right_bumper ? 50 : -50;
+                    shotP = Range.clip(shotP, 0, 2800);
+                    if (lF) velocityShot = shotP;
                 }
-                intervalo_bumper = true;
-            } else {
-                intervalo_bumper = false;
             }
+            intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
 
             if (telemetria) {
                 if (targetVisible) {
