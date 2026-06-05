@@ -1,0 +1,139 @@
+package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous;
+
+import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierLine;
+import com.pedropathing.geometry.Pose;
+import com.pedropathing.ivy.Command;
+import com.pedropathing.paths.PathChain;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.pedropathing.ivy.Scheduler;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.*;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+
+import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
+
+@Autonomous(name = "RED Auto - Perto", group = "Test")
+public class Auto_Red_Perto_SOLO extends LinearOpMode {
+
+    Follower follower;
+    private final Pose startPose = new Pose(108.1, 133.91, 0);
+    private final Pose scorePose = new Pose(93.74, 85.37, 0);
+    private final Pose takePose_1 = new Pose(125.65, 84.76, 0);
+    PathChain scorePreload;
+
+    @Override
+    public void runOpMode() {
+        Scheduler.reset();
+
+        follower = Constants.createFollower(hardwareMap);
+        follower.setStartingPose(startPose);
+        follower.update();
+
+        DcMotorEx intake = hardwareMap.get(DcMotorEx.class, "intake");
+        DcMotorEx l_right = hardwareMap.get(DcMotorEx.class, "l_right");
+        DcMotorEx l_left = hardwareMap.get(DcMotorEx.class, "l_left");
+        DcMotorEx tower = hardwareMap.get(DcMotorEx.class, "tower");
+        Servo s1 = hardwareMap.get(Servo.class, "s1");
+
+        intake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intake.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+        l_right.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        l_left.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        l_right.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        l_left.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        intake.setDirection(DcMotorEx.Direction.REVERSE);
+        l_right.setDirection(DcMotorEx.Direction.REVERSE);
+        l_left.setDirection(DcMotorEx.Direction.REVERSE);
+
+        PIDFCoefficients coefficientsRightMotor = l_right.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
+
+        l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
+        ));
+
+        l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
+        ));
+
+        tower.setDirection(DcMotorEx.Direction.FORWARD);
+        tower.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        tower.setTargetPosition(0);
+        tower.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
+        tower.setPower(0);
+        tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        s1.setPosition(0.82);
+
+        scorePreload = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, scorePose))
+                .setConstantHeadingInterpolation(startPose.getHeading())
+                .build();
+
+        Command goScore = follow(follower, scorePreload);
+
+        Command onIntake = instant(() -> intake.setPower(1));
+        Command offIntake = instant(() -> intake.setPower(0));
+
+        Command abrirTrava = instant(() -> s1.setPosition(0.6));
+        Command fecharTrava = instant(() -> s1.setPosition(0.82));
+
+        Command mirar = instant(() -> encoder(tower, -280, 0.5));
+
+        Command onShotR = instant(() -> l_right.setVelocity(1450));
+        Command onShotL = instant(() -> l_left.setVelocity(1450));
+        Command offShotR = instant(() -> l_right.setVelocity(0));
+        Command offShotL = instant(() -> l_left.setVelocity(0));
+
+        Command shot_on = parallel(
+                onShotR,
+                onShotL
+        );
+
+        Command shot_off = parallel(
+                offShotR,
+                offShotL
+        );
+
+        Command toShot = parallel(
+                goScore,
+                mirar,
+                shot_on
+        );
+
+        Command sequence = sequential(
+                toShot,
+                abrirTrava,
+                onIntake,
+                waitMs(3000),
+                shot_off,
+                fecharTrava,
+                offIntake
+        );
+
+        waitForStart();
+
+        schedule(sequence);
+
+        while (opModeIsActive()) {
+            follower.update();
+            Scheduler.execute();
+        }
+    }
+    private void encoder(DcMotorEx motor, int novoAlvo, double power) {
+        if (motor.getMode() == DcMotorEx.RunMode.RUN_TO_POSITION) {
+            motor.setTargetPosition(novoAlvo);
+            motor.setPower(power);
+        }
+    }
+}
