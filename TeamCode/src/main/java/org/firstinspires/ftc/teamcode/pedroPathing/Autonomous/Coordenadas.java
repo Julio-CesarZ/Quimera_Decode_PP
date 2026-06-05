@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous.Tests;
+package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -32,6 +32,7 @@ public class Coordenadas extends LinearOpMode {
         Follower follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose);
         follower.update();
+        follower.startTeleopDrive();
 
         while (opModeIsActive()) {
             follower.update();
@@ -41,6 +42,12 @@ public class Coordenadas extends LinearOpMode {
             double y = follower.getPose().getY();
 
             telemetria(x, y, heading);
+
+            double forward = Math.pow(-gamepad1.left_stick_y * 0.6, 3);
+            double strafe = Math.pow(-gamepad1.left_stick_x * 0.6, 3);
+            double turn = Math.pow(-gamepad1.right_stick_x * 0.6, 3);
+
+            follower.setTeleOpDrive(forward, strafe, turn, true);
         }
     }
 

@@ -26,8 +26,8 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     Follower follower;
     private final Pose startPose = new Pose(108.1, 133.91, 0);
     private final Pose scorePose = new Pose(93.74, 85.37, 0);
-    private final Pose takePose_1 = new Pose(125.65, 84.76, 0);
-    PathChain scorePreload;
+    private final Pose takePose_1 = new Pose(126.65, 84.76, 0);
+    PathChain scorePreload, take1;
 
     @Override
     public void runOpMode() {
@@ -79,8 +79,13 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 .addPath(new BezierLine(startPose, scorePose))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+        take1 = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, takePose_1))
+                .setConstantHeadingInterpolation(startPose.getHeading())
+                .build();
 
         Command goScore = follow(follower, scorePreload);
+        Command toTake_1 = follow(follower, take1);
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
@@ -88,7 +93,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.6));
         Command fecharTrava = instant(() -> s1.setPosition(0.82));
 
-        Command mirar = instant(() -> encoder(tower, -280, 0.5));
+        Command mirar = instant(() -> encoder(tower, -320, 0.5));
 
         Command onShotR = instant(() -> l_right.setVelocity(1450));
         Command onShotL = instant(() -> l_left.setVelocity(1450));
@@ -107,15 +112,24 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
 
         Command toShot = parallel(
                 goScore,
-                mirar,
-                shot_on
+                shot_on,
+                abrirTrava
         );
 
         Command sequence = sequential(
-                toShot,
-                abrirTrava,
+                parallel(
+                        toShot,
+                        mirar
+                ),
                 onIntake,
-                waitMs(3000),
+                waitMs(2000),
+                shot_off,
+                fecharTrava,
+                toTake_1,
+                offIntake,
+                toShot,
+                onIntake,
+                waitMs(2000),
                 shot_off,
                 fecharTrava,
                 offIntake
