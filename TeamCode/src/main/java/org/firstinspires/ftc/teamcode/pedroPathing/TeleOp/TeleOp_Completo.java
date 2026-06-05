@@ -360,7 +360,7 @@ public class TeleOp_Completo extends LinearOpMode {
             elapsedIntervaloServo.reset();
             lF = true;
         } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
-            velocityShot = 0;
+            velocityShot = 750;
             lF = false;
         }
         intervalo_RT = gamepad1.right_trigger > 0.3;

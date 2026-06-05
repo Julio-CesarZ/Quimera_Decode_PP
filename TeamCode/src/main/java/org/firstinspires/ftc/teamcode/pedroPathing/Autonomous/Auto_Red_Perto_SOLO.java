@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous;
 
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
@@ -26,8 +27,9 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     Follower follower;
     private final Pose startPose = new Pose(108.1, 133.91, 0);
     private final Pose scorePose = new Pose(93.74, 85.37, 0);
-    private final Pose takePose_1 = new Pose(125.65, 84.76, 0);
-    PathChain scorePreload, take1;
+    private final Pose takePose_1 = new Pose(126, 84.76, 0);
+    private final Pose takePose_2 = new Pose(130.95, 59.5, 0);
+    PathChain score1, take1, take2, score2;
 
     @Override
     public void runOpMode() {
@@ -75,7 +77,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
 
         s1.setPosition(0.82);
 
-        scorePreload = follower.pathBuilder()
+        score1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
@@ -83,9 +85,31 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 .addPath(new BezierLine(scorePose, takePose_1))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+        take2 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                scorePose,
+                                new Pose(94.205, 54.922),
+                                takePose_2
+                        )
+                )
+                .setConstantHeadingInterpolation(startPose.getHeading())
+                .build();
+        score2 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                takePose_2,
+                                new Pose(94.205, 54.922),
+                                scorePose
+                        )
+                )
+                .setConstantHeadingInterpolation(startPose.getHeading())
+                .build();
 
-        Command goScore = follow(follower, scorePreload);
+        Command goScore_1 = follow(follower, score1);
         Command toTake_1 = follow(follower, take1);
+        Command toTake_2 = follow(follower, take2);
+        Command goScore_2 = follow(follower, score2);
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
@@ -108,7 +132,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         );
 
         Command toShot_1400 = parallel(
-                goScore,
+                goScore_1,
                 shot_on_1400,
                 abrirTrava
         );
@@ -119,7 +143,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         );
 
         Command toShot_1450 = parallel(
-                goScore,
+                goScore_1,
                 shot_on_1450,
                 abrirTrava
         );
@@ -141,16 +165,33 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                         mirar,
                         firstShot
                 ),
-                onIntake,
-                toTake_1,
-                fecharTrava,
+                waitMs(400),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        toTake_1
+                ),
+                waitMs(200),
                 offIntake,
                 toShot_1450,
                 onIntake,
+                waitMs(1500),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        toTake_2
+                ),
+                waitMs(200),
+                offIntake,
+                abrirTrava,
+                goScore_2,
+                onIntake,
                 waitMs(2000),
-                shot_off,
-                fecharTrava,
-                offIntake
+                parallel(
+                        offIntake,
+                        fecharTrava,
+                        shot_off
+                )
         );
 
         waitForStart();
