@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous;
+package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous.Tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierLine;
@@ -19,8 +19,8 @@ import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RED Auto - Perto", group = "Test")
-public class Auto_Red_Perto extends LinearOpMode {
+@Autonomous(name = "Action Test", group = "Test")
+public class ActionTest extends LinearOpMode {
 
     Follower follower;
     private final Pose startPose = new Pose(108.1, 133.91, 0);

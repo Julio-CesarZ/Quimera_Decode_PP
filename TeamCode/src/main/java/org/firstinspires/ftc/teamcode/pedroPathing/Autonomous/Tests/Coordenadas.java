@@ -28,7 +28,7 @@ public class Coordenadas extends LinearOpMode {
             telemetry.update();
         }
 
-        startingPose = startPose ? new Pose(109.31, 133.91, 0) : new Pose(72, 72, 0);
+        startingPose = startPose ? new Pose(108.1, 133.91, 0) : new Pose(72, 72, 0);
         Follower follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose);
         follower.update();
