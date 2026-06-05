@@ -26,7 +26,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     Follower follower;
     private final Pose startPose = new Pose(108.1, 133.91, 0);
     private final Pose scorePose = new Pose(93.74, 85.37, 0);
-    private final Pose takePose_1 = new Pose(126.65, 84.76, 0);
+    private final Pose takePose_1 = new Pose(125.65, 84.76, 0);
     PathChain scorePreload, take1;
 
     @Override
@@ -93,16 +93,35 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.6));
         Command fecharTrava = instant(() -> s1.setPosition(0.82));
 
-        Command mirar = instant(() -> encoder(tower, -320, 0.5));
+        Command mirar = instant(() -> encoder(tower, -300, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(1450));
-        Command onShotL = instant(() -> l_left.setVelocity(1450));
+        Command onShotR_1400 = instant(() -> l_right.setVelocity(1400));
+        Command onShotL_1400 = instant(() -> l_left.setVelocity(1400));
+        Command onShotR_1450 = instant(() -> l_right.setVelocity(1450));
+        Command onShotL_1450 = instant(() -> l_left.setVelocity(1450));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
 
-        Command shot_on = parallel(
-                onShotR,
-                onShotL
+        Command shot_on_1400 = parallel(
+                onShotR_1400,
+                onShotL_1400
+        );
+
+        Command toShot_1400 = parallel(
+                goScore,
+                shot_on_1400,
+                abrirTrava
+        );
+
+        Command shot_on_1450 = parallel(
+                onShotR_1450,
+                onShotL_1450
+        );
+
+        Command toShot_1450 = parallel(
+                goScore,
+                shot_on_1450,
+                abrirTrava
         );
 
         Command shot_off = parallel(
@@ -110,24 +129,23 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 offShotL
         );
 
-        Command toShot = parallel(
-                goScore,
-                shot_on,
-                abrirTrava
+        Command firstShot =sequential(
+                waitMs(1100),
+                abrirTrava,
+                onIntake
         );
 
         Command sequence = sequential(
                 parallel(
-                        toShot,
-                        mirar
+                        toShot_1400,
+                        mirar,
+                        firstShot
                 ),
                 onIntake,
-                waitMs(2000),
-                shot_off,
-                fecharTrava,
                 toTake_1,
+                fecharTrava,
                 offIntake,
-                toShot,
+                toShot_1450,
                 onIntake,
                 waitMs(2000),
                 shot_off,
