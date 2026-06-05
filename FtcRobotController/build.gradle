@@ -16,7 +16,7 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    compileSdk 34
+    compileSdk 37
 
 
     compileOptions {
@@ -29,6 +29,11 @@ android {
     }
     testOptions {
         targetSdk 28
+    }
+    packaging {
+        jniLibs {
+            pickFirsts += ['**/*.so']
+        }
     }
 }
 

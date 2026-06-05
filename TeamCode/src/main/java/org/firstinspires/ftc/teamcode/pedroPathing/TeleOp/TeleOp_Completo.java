@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -106,7 +105,7 @@ public class TeleOp_Completo extends LinearOpMode {
         tower.setTargetPosition(0);
         tower.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
         tower.setPower(0);
-        tower.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
@@ -309,37 +308,46 @@ public class TeleOp_Completo extends LinearOpMode {
             }
             intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
 
-            if (telemetria) {
-                if (targetVisible) {
-                    telemetry.addLine("🟢 Telemetria  Ativada 🟢");
-                } else {
-                    telemetry.addLine("🔴 Telemetria  Ativada 🔴");
-                }
-                telemetry.addLine();
+            telemetria(l_right, l_left, tower, x, y, heading);
+        }
+    }
 
-                if (camera) {
-                    telemetry.addData("TX (Graus)", tx);
-                } else {
-                    telemetry.addLine("Câmera Desativada");
-                }
-                telemetry.addLine();
-
-                telemetry.addData("Troca de poder atual", changeM);
-                telemetry.addData("Chassi Power", velocityMultipleir);
-                telemetry.addData("Variável ShotP", shotP);
-                telemetry.addData("Ticks/s Dir", l_right.getVelocity());
-                telemetry.addData("Ticks/s Esq", l_left.getVelocity());
-                telemetry.addData("Posição Torre", tower.getCurrentPosition()).addData("Alvo Torre", target);
-                telemetry.addLine();
-                telemetry.addData("X", x).addData("Y", y).addData("Heading", heading);
-                telemetry.addLine();
-                telemetry.addData("Modo Automático da Torre", modo_TorreA);
-                telemetry.addData("Modo Automático de shotP", modo_ShotPA);
-                telemetry.update();
+    private void telemetria(DcMotorEx l_right, DcMotorEx l_left, DcMotorEx tower, double x, double y, double heading) {
+        if (telemetria) {
+            if (targetVisible) {
+                telemetry.addLine("🟢 Telemetria  Ativada 🟢");
             } else {
-                telemetry.addLine("Telemetria Desativada");
-                telemetry.update();
+                telemetry.addLine("🔴 Telemetria  Ativada 🔴");
             }
+            telemetry.addLine();
+
+            if (camera) {
+                telemetry.addData("TX (Graus)", tx);
+            } else {
+                telemetry.addLine("Câmera Desativada");
+            }
+            telemetry.addLine();
+
+            telemetry.addData("Troca de poder atual", changeM);
+            telemetry.addData("Chassi Power", velocityMultipleir);
+            telemetry.addData("Variável ShotP", shotP);
+            telemetry.addData("Ticks/s Dir", l_right.getVelocity());
+            telemetry.addData("Ticks/s Esq", l_left.getVelocity());
+            telemetry.addData("Posição Torre", tower.getCurrentPosition());
+            telemetry.addData("Alvo Torre", target);
+            telemetry.addData("Target Torre", tower.getTargetPosition());
+            telemetry.addData("Modo Torre", tower.getMode());
+            telemetry.addLine();
+            telemetry.addData("X", x).addData("Y", y);
+            telemetry.addData("Heading", heading);
+            telemetry.addLine();
+            telemetry.addData("Modo Automático da Torre", modo_TorreA);
+            telemetry.addData("Modo Automático de shotP", modo_ShotPA);
+            telemetry.addLine();
+            telemetry.update();
+        } else {
+            telemetry.addLine("Telemetria Desativada");
+            telemetry.update();
         }
     }
 
@@ -369,13 +377,15 @@ public class TeleOp_Completo extends LinearOpMode {
     }
 
     private void camera(LLResult result, double y, DcMotorEx tower) {
-        tx = result.getTx();
 
         if (result.getTimestamp() != lastStamp) {
             lastStamp = result.getTimestamp();
 
+            tx = result.getTx();
+            int atual = tower.getCurrentPosition();
+
             if (Math.abs(tx) > 1) {
-                int position = (y > 125) ? tower.getCurrentPosition() - 62 : tower.getCurrentPosition();
+                int position = (y > 125) ? atual - 62 : atual;
                 int alvo = position + (int) (tx * 7);
                 alvo = Range.clip(alvo, -limiteRotativo, limiteRotativo);
 
@@ -387,7 +397,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
                 encoder(tower, target, Math.abs(power));
             } else {
-                encoder(tower, tower.getCurrentPosition(), 0.5);
+                encoder(tower, atual, 0.3);
             }
         }
     }
@@ -456,8 +466,10 @@ public class TeleOp_Completo extends LinearOpMode {
         return target;
     }
 
-    private void encoder(DcMotor motor, int novoAlvo, double power) {
-        motor.setTargetPosition(novoAlvo);
-        motor.setPower(power);
+    private void encoder(DcMotorEx motor, int novoAlvo, double power) {
+        if (motor.getMode() == DcMotorEx.RunMode.RUN_TO_POSITION) {
+            motor.setTargetPosition(novoAlvo);
+            motor.setPower(power);
+        }
     }
 }
