@@ -45,7 +45,7 @@ public class TeleOp_Completo extends LinearOpMode {
     private double positionS = 0.82;
     private double velocityAtual = 0;
     private double lastStamp = 0;
-    final double kP = 0.02;
+    final double kP = 0.06;
     final double towerP = 0.5;
     private int shotP = 1450;
     private int change = 0;
