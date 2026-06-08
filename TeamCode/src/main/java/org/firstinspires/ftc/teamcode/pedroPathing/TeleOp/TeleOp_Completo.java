@@ -42,7 +42,7 @@ public class TeleOp_Completo extends LinearOpMode {
     private double velocityMultipleir = 0.8;
     private double velocityShot = 0;
     private double tx = 0;
-    private double positionS = 0.82;
+    private double positionS = 0.63;
     private double velocityAtual = 0;
     private double lastStamp = 0;
     final double kP = 0.06;
@@ -191,11 +191,11 @@ public class TeleOp_Completo extends LinearOpMode {
 
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (elapsedIntervaloServo.milliseconds() > 2500) {
-                    positionS = 0.6;
+                    positionS = 0.55;
                     s1.setPosition(positionS);
                 }
             } else {
-                positionS = 0.82;
+                positionS = 0.63;
                 s1.setPosition(positionS);
             }
 
