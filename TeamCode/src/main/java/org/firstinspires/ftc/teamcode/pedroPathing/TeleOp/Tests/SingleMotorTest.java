@@ -12,7 +12,7 @@ public class SingleMotorTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        DcMotorEx tower = hardwareMap.get(DcMotorEx.class, "tower");
+        //DcMotorEx tower = hardwareMap.get(DcMotorEx.class, "tower");
 
         double power = 0.8;
 
@@ -40,22 +40,22 @@ public class SingleMotorTest extends LinearOpMode {
 
             if (gamepad1.b) {
                 if(direcaoAtual >= 0 && intervalo.milliseconds() > 300) {
-                    tower.setPower(power);
+                    //tower.setPower(power);
                     direcaoAtual = 1;
                 } else {
-                    tower.setPower(0);
+                    //tower.setPower(0);
                     direcaoAtual = 0;
                 }
             } else if (gamepad1.x) {
                 if(direcaoAtual <= 0 && intervalo.milliseconds() > 300) {
-                    tower.setPower(-power);
+                    //tower.setPower(-power);
                     direcaoAtual = -1;
                 } else {
-                    tower.setPower(0);
+                    //tower.setPower(0);
                     direcaoAtual = 0;
                 }
             } else {
-                tower.setPower(0);
+                //tower.setPower(0);
                 direcaoAtual = 0;
                 intervalo.reset();
             }
