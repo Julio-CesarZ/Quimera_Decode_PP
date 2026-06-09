@@ -144,7 +144,7 @@ class LocalizationTest extends OpMode {
 
     @Override
     public void init() {
-        follower.setStartingPose(new Pose(72,72));
+        follower.setStartingPose(new Pose(0,0));
     }
 
     /** This initializes the PoseUpdater, the drive motors, and the Panels telemetry. */
@@ -569,7 +569,7 @@ class LateralVelocityTuner extends OpMode {
  */
 class ForwardZeroPowerAccelerationTuner extends OpMode {
     private final ArrayList<Double> accelerations = new ArrayList<>();
-    public static double VELOCITY = 61;
+    public static double VELOCITY = 30;
 
     private double previousVelocity;
     private long previousTimeNano;
@@ -675,7 +675,7 @@ class ForwardZeroPowerAccelerationTuner extends OpMode {
  */
 class LateralZeroPowerAccelerationTuner extends OpMode {
     private final ArrayList<Double> accelerations = new ArrayList<>();
-    public static double VELOCITY = 45;
+    public static double VELOCITY = 30;
     private double previousVelocity;
     private long previousTimeNano;
     private boolean stopping;

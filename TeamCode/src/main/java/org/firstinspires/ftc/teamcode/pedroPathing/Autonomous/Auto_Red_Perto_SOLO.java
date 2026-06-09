@@ -18,6 +18,7 @@ import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.*;
 import static com.pedropathing.ivy.groups.Groups.*;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
@@ -25,11 +26,12 @@ import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 public class Auto_Red_Perto_SOLO extends LinearOpMode {
 
     Follower follower;
-    private final Pose startPose = new Pose(108.1, 133.91,  0);
+    private final Pose startPose = new Pose(110.47, 132.68, 0);
     private final Pose scorePose = new Pose(93.74, 85.37, 0);
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
-    private final Pose takePose_2 = new Pose(130.95, 59.5, 0);
-    PathChain score1, take1, take2, score2;
+    private final Pose takePose_2 = new Pose(132, 59.5, 0);
+    private final Pose center = new Pose(72, 72, Math.toRadians(180));
+    PathChain score1, take1, take2, score2, center72;
 
     @Override
     public void runOpMode() {
@@ -75,7 +77,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         tower.setPower(0);
         tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        s1.setPosition(0.82);
+        s1.setPosition(0.63);
 
         score1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
@@ -105,17 +107,26 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 )
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+        center72 = follower.pathBuilder()
+                .addPath(
+                        new BezierLine(scorePose, center)
+                )
+                .setLinearHeadingInterpolation(scorePose.getHeading(), center.getHeading())
+                .build();
 
         Command goScore_1 = follow(follower, score1);
         Command toTake_1 = follow(follower, take1);
         Command toTake_2 = follow(follower, take2);
         Command goScore_2 = follow(follower, score2);
+        Command goCenter = follow(follower, center72);
+        Command turn180 = turnTo(follower, Math.toRadians(180));
+
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
 
-        Command abrirTrava = instant(() -> s1.setPosition(0.6));
-        Command fecharTrava = instant(() -> s1.setPosition(0.82));
+        Command abrirTrava = instant(() -> s1.setPosition(0.55));
+        Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
         Command mirar = instant(() -> encoder(tower, -300, 0.5));
 
@@ -165,7 +176,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                         mirar,
                         firstShot
                 ),
-                waitMs(400),
+                waitMs(100),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
@@ -174,6 +185,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 waitMs(200),
                 offIntake,
                 toShot_1450,
+                waitMs(500),
                 onIntake,
                 waitMs(1500),
                 parallel(
@@ -191,7 +203,8 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                         offIntake,
                         fecharTrava,
                         shot_off
-                )
+                ),
+                goCenter
         );
 
         waitForStart();
@@ -201,6 +214,10 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         while (opModeIsActive()) {
             follower.update();
             Scheduler.execute();
+            telemetry.addData("x", follower.getPose().getX());
+            telemetry.addData("y", follower.getPose().getY());
+            telemetry.addData("heading", follower.getPose().getHeading());
+            telemetry.update();
         }
     }
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {

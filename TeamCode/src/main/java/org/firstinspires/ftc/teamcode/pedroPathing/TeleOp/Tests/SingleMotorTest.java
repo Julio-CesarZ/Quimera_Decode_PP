@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-@TeleOp (name = "Teste Single Motor", group = "TeleOp")
+@TeleOp (name = "Teste Single Motor", group = "Tests")
 public class SingleMotorTest extends LinearOpMode {
 
     @Override
