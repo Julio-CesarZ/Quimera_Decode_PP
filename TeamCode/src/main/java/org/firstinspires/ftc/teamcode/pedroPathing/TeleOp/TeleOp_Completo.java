@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
 
+import static org.firstinspires.ftc.teamcode.pedroPathing.Autonomous.Auto_Red_Perto_SOLO.center;
+
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -26,7 +28,6 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean intervalo_bumper = false;
     boolean intervalo_dpad_up = false;
     boolean intervalo_stick = false;
-
     boolean intakeF = false;
     boolean intakeSS = false;
     boolean reverse = false;
@@ -38,8 +39,9 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
+    boolean suavizador = false;
 
-    private double velocityMultipleir = 0.8;
+    private double velocityMultipleir = 0.9;
     private double velocityShot = 0;
     private double tx = 0;
     private double positionS = 0.63;
@@ -61,15 +63,15 @@ public class TeleOp_Completo extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private final Pose startingPoseTeleop = new Pose(109.31, 133.91, 0);
-
-    public static Pose startPose;
+    private final Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    private final Pose centerGol = new Pose(144, 144);
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         Follower follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose == null ? startingPoseTeleop : startPose);
+        //follower.setStartingPose(center == null ? startingPoseTeleop : center);
+        follower.setStartingPose(startingPoseTeleop);
         follower.update();
         follower.startTeleopDrive();
 
@@ -175,6 +177,13 @@ public class TeleOp_Completo extends LinearOpMode {
             double x = follower.getPose().getX();
             double y = follower.getPose().getY();
 
+            double xGol = centerGol.getX();
+            double yGol = centerGol.getY();
+
+            double distanciaM = Math.hypot(x - xGol, y - yGol) / 39.37;
+
+            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.179, 0.075, 1.11) * 28) / 60;
+
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
 
@@ -192,7 +201,7 @@ public class TeleOp_Completo extends LinearOpMode {
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
             if (lF || gamepad1.left_trigger > 0.3) {
-                if (elapsedIntervaloServo.milliseconds() > 2500) {
+                if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 100 >= shotP && velocityAtual - 100 <= shotP) {
                     positionS = 0.55;
                     s1.setPosition(positionS);
                 }
@@ -216,6 +225,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 } else if (!gamepad1.y && reverseL) {
                     l_right.setVelocity(0);
                     l_left.setVelocity(0);
+                    velocityShot = 0;
                     reverseL = false;
                     elapsedintervaloL.reset();
                 }
@@ -284,7 +294,11 @@ public class TeleOp_Completo extends LinearOpMode {
             intervalo_stick = sticksPressionados;
 
             if (modo_ShotPA) {
-                shotPA(x, y);
+                //shotPA(x, y);
+                shotP = (int) ticks;
+                if (lF) {
+                    velocityAtual = shotP;
+                }
             }
 
             if (gamepad1.x && !intervalo_x) {
@@ -338,7 +352,6 @@ public class TeleOp_Completo extends LinearOpMode {
             telemetry.addData("Posição Torre", tower.getCurrentPosition());
             telemetry.addData("Alvo Torre", target);
             telemetry.addData("Target Torre", tower.getTargetPosition());
-            telemetry.addData("Modo Torre", tower.getMode());
             telemetry.addLine();
             telemetry.addData("X", x).addData("Y", y);
             telemetry.addData("Heading", heading);
@@ -362,7 +375,7 @@ public class TeleOp_Completo extends LinearOpMode {
             elapsedIntervaloServo.reset();
             lF = true;
         } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
-            velocityShot = 1000;
+            velocityShot = 0;
             lF = false;
         }
         intervalo_RT = gamepad1.right_trigger > 0.3;
@@ -371,7 +384,7 @@ public class TeleOp_Completo extends LinearOpMode {
         double maxAccelerationPerS = (y > 60) ? 800 : 1500;
         double maxChange = maxAccelerationPerS * deltaTime;
 
-        if (Math.abs(erroGeral) <= maxChange) {
+        if (Math.abs(erroGeral) <= maxChange || !suavizador) {
             velocityAtual = velocityShot;
         } else {
             velocityAtual += Math.signum(erroGeral) * maxChange;
@@ -473,5 +486,18 @@ public class TeleOp_Completo extends LinearOpMode {
             motor.setTargetPosition(novoAlvo);
             motor.setPower(power);
         }
+    }
+
+    private double veloV0_RPM(double x, double graus, double y0, double y, double wheel_D, double motor_E) {
+        double grausRadians = Math.toRadians(graus);
+        double numerador = 9.81 * Math.pow(x, 2);
+        double cosTheta = Math.cos(grausRadians);
+        double cosQuadrado = Math.pow(cosTheta, 2);
+        double termoParenteses = y0 + (x * Math.tan(grausRadians)) - y;
+        double denominador = 2 * cosQuadrado * termoParenteses;
+        double raiz = Math.sqrt(numerador / denominador) * 2;
+        double raiz_Motor = raiz * motor_E;
+        double RPM = (raiz_Motor * 60) / (Math.PI * wheel_D);
+        return RPM;
     }
 }

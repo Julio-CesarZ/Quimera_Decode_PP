@@ -23,7 +23,7 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Autonomous(name = "RED Auto - Perto", group = "Test")
-public class Auto_Red_Perto_SOLO extends LinearOpMode {
+public class AutoTurn extends LinearOpMode {
 
     Follower follower;
 
