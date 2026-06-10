@@ -39,10 +39,8 @@ public class TeleOp_Completo extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
-    boolean suavizador = false;
 
     private double velocityMultipleir = 0.9;
-    private double velocityShot = 0;
     private double tx = 0;
     private double positionS = 0.63;
     private double velocityAtual = 0;
@@ -212,6 +210,16 @@ public class TeleOp_Completo extends LinearOpMode {
                 s1.setPosition(positionS);
             }
 
+            if (gamepad1.right_trigger > 0.3 && !lF && !reverse && !reverseL && !intervalo_RT) {
+                velocityAtual = shotP;
+                elapsedIntervaloServo.reset();
+                lF = true;
+            } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
+                velocityAtual = 0;
+                lF = false;
+            }
+            intervalo_RT = gamepad1.right_trigger > 0.3;
+
             if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
                 l_right.setVelocity(velocityAtual);
                 l_left.setVelocity(velocityAtual);
@@ -225,7 +233,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 } else if (!gamepad1.y && reverseL) {
                     l_right.setVelocity(0);
                     l_left.setVelocity(0);
-                    velocityShot = 0;
+                    velocityAtual = 0;
                     reverseL = false;
                     elapsedintervaloL.reset();
                 }
@@ -319,7 +327,7 @@ public class TeleOp_Completo extends LinearOpMode {
                 } else if (change == 1) {
                     shotP += gamepad1.right_bumper ? 50 : -50;
                     shotP = Range.clip(shotP, 0, 2800);
-                    if (lF) velocityShot = shotP;
+                    if (lF) velocityAtual = shotP;
                 }
             }
             intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
@@ -366,31 +374,6 @@ public class TeleOp_Completo extends LinearOpMode {
         }
     }
 
-    private void suavizarAcelleration(double y) {
-        double deltaTime = elapsedSuavizador.seconds();
-        elapsedSuavizador.reset();
-
-        if (gamepad1.right_trigger > 0.3 && !lF && !reverse && !reverseL && !intervalo_RT) {
-            velocityShot = shotP;
-            elapsedIntervaloServo.reset();
-            lF = true;
-        } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
-            velocityShot = 0;
-            lF = false;
-        }
-        intervalo_RT = gamepad1.right_trigger > 0.3;
-
-        double erroGeral = velocityShot - velocityAtual;
-        double maxAccelerationPerS = (y > 60) ? 800 : 1500;
-        double maxChange = maxAccelerationPerS * deltaTime;
-
-        if (Math.abs(erroGeral) <= maxChange || !suavizador) {
-            velocityAtual = velocityShot;
-        } else {
-            velocityAtual += Math.signum(erroGeral) * maxChange;
-        }
-    }
-
     private void camera(LLResult result, double y, DcMotorEx tower) {
         double currentStamp = result.getTimestamp();
 
@@ -433,15 +416,6 @@ public class TeleOp_Completo extends LinearOpMode {
                 lastStamp = 0;
             }
         }
-    }
-
-    private void shotPA(double x, double y) {
-        if (82 <= x && x < 104 && 98 <= y && y <= 135) shotP = 1350;
-        else if (46 <= x && x < 82 && 66 <= y && y <= 135) shotP = 1600;
-        else if (32 <= x && x < 46 && 100 <= y && y <= 135) shotP = 1700;
-        else if (74 <= x && 7 <= y && y <= 30) shotP = 1850;
-        else if (64 <= x && x < 74 && 7 <= y && y <= 30) shotP = 1900;
-        else if (54 <= x && x < 64 && 7 <= y && y <= 20) shotP = 2000;
     }
 
     private void torreManual(DcMotorEx tower) {
