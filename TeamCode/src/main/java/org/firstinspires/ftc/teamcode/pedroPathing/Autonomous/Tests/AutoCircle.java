@@ -5,6 +5,7 @@ import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
+import com.pedropathing.paths.HeadingInterpolator;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -21,17 +22,20 @@ import static com.pedropathing.ivy.groups.Groups.*;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
 import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
+import static org.firstinspires.ftc.teamcode.pedroPathing.Tuning.follower;
+
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
 @Disabled
-@Autonomous(name = "Auto Turn", group = "Test")
-public class AutoTurn extends LinearOpMode {
+@Autonomous(name = "Auto Circle", group = "Test")
+public class AutoCircle extends LinearOpMode {
 
     Follower follower;
 
-    private final Pose startPose = new Pose(72, 94, 0);
-    private final Pose trava = new Pose(132, 57, 0);
-    PathChain line;
+    private final Pose startPose = new Pose(72, 72, Math.toRadians(270));
+    private final Pose center = new Pose(72, 72, Math.toRadians(0));
+
+    PathChain circle, center72;
 
     @Override
     public void runOpMode() {
@@ -43,46 +47,35 @@ public class AutoTurn extends LinearOpMode {
 
         Command turn180 = turnTo(follower, Math.toRadians(180));
         Command turn0 = turnTo(follower, 0);
-        Command turn270 = turnTo(follower, Math.toRadians(270));
-        Command turn90 = turnTo(follower, Math.toRadians(90));
 
-        line = follower.pathBuilder()
+        center72 = follower.pathBuilder()
                 .addPath(
-                        new BezierCurve(
-                                startPose,
-                                new Pose(61, 50),
-                                trava
-
-                        )
+                        new BezierLine(startPose, center)
                 )
-                .setLinearHeadingInterpolation(startPose.getHeading(), trava.getHeading())
+                .setLinearHeadingInterpolation(startPose.getHeading(), center.getHeading())
                 .build();
 
-        Command goLine = follow(follower, line);
+        Command goCenter = follow(follower, center72);
+
+        double RADIUS = 30;
+        circle = follower.pathBuilder()
+                .addPath(new BezierCurve(new Pose(72, 72), new Pose(RADIUS + 72, 72), new Pose(RADIUS + 72, RADIUS + 72)))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                .addPath(new BezierCurve(new Pose(RADIUS + 72, RADIUS + 72), new Pose(RADIUS + 72, (2 * RADIUS) + 72), new Pose(72, (2 * RADIUS) + 72)))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                .addPath(new BezierCurve(new Pose(72, (2 * RADIUS) + 72), new Pose(-RADIUS + 72, (2 * RADIUS) + 72), new Pose(-RADIUS + 72, RADIUS + 72)))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                .addPath(new BezierCurve(new Pose(-RADIUS + 72, RADIUS + 72), new Pose(-RADIUS + 72, 72), new Pose(72, 72)))
+                .setHeadingInterpolation(HeadingInterpolator.facingPoint(72, RADIUS + 72))
+                .build();
+
+        Command circleAuto = follow(follower, circle);
 
 
         Command sequence = sequential(
-                turn90,
-                waitMs(1500),
-                turn270,
-                waitMs(1500),
-                turn90,
-                waitMs(1500),
-                turn270,
-                waitMs(1500),
-                turn90,
-                waitMs(1500),
-                turn270,
-                waitMs(1500),
-                turn90,
-                waitMs(1500),
-                turn270,
-                waitMs(1500),
-                turn90,
-                waitMs(1500),
-                turn270,
-                waitMs(1500),
-                goLine
+                circleAuto,
+                goCenter
+
         );
 
         waitForStart();

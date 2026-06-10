@@ -47,7 +47,9 @@ public class TeleOp_Completo extends LinearOpMode {
     private double positionS = 0.63;
     private double velocityAtual = 0;
     private double lastStamp = 0;
-    final double kP = 0.05;
+    private double lastTx = 0;
+    final double kP = 0.1;
+    final double kD = 0.035;
     final double towerP = 0.5;
     private int shotP = 1450;
     private int change = 0;
@@ -97,11 +99,11 @@ public class TeleOp_Completo extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.2
         ));
 
         l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.2
         ));
 
         tower.setDirection(DcMotorEx.Direction.FORWARD);
@@ -182,7 +184,7 @@ public class TeleOp_Completo extends LinearOpMode {
 
             double distanciaM = Math.hypot(x - xGol, y - yGol) / 39.37;
 
-            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.179, 0.075, 1.11) * 28) / 60;
+            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.079, 0.075, 1.1) * 28) / 60;
 
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
@@ -392,15 +394,14 @@ public class TeleOp_Completo extends LinearOpMode {
     }
 
     private void camera(LLResult result, double y, DcMotorEx tower) {
+        double currentStamp = result.getTimestamp();
 
-        if (result.getTimestamp() != lastStamp) {
-            lastStamp = result.getTimestamp();
-
+        if (currentStamp != lastStamp) {
             tx = result.getTx();
             int atual = tower.getCurrentPosition();
 
             if (Math.abs(tx) > 1) {
-                int position = (y > 125) ? atual - 62 : atual;
+                int position = (y > 125) ? atual - 50 : atual;
                 int alvo = position + (int) (tx * 7);
                 alvo = Range.clip(alvo, -limiteRotativo, limiteRotativo);
 
@@ -408,11 +409,30 @@ public class TeleOp_Completo extends LinearOpMode {
                 target += delta;
                 target = Range.clip(target, -limiteRotativo, limiteRotativo);
 
-                double power = Range.clip(tx * kP, 0.1, 1.0);
+                double derivative = 0;
 
-                encoder(tower, target, Math.abs(power));
+                if (lastStamp != 0) {
+                    double dt = (currentStamp - lastStamp) / 1000.0;
+
+                    if (dt > 0) {
+                        double deltaError = tx - lastTx;
+                        derivative = deltaError / dt;
+                    }
+                }
+
+                double pidOutput = (tx * kP) + (derivative * kD);
+                double power = Range.clip(Math.abs(pidOutput), 0.1, 1.0);
+
+                encoder(tower, target, power);
+
+                lastTx = tx;
+                lastStamp = currentStamp;
+
             } else {
                 encoder(tower, atual, 0.3);
+
+                lastTx = 0;
+                lastStamp = 0;
             }
         }
     }
@@ -444,18 +464,17 @@ public class TeleOp_Completo extends LinearOpMode {
     }
 
     private int torreAuto(double x, double y, double heading) {
-        if (y > 115) {
-            if (heading > -10 && heading < 10) target = -20;
-            else if (heading > 35 && heading < 55) target = 230;
-            else if (heading > 80 && heading < 100) target = 500;
-            else if (heading > 125 && heading < 145) target = 690;
-            else if (heading > 160 || heading < -150) target = 750;
-            else if (heading > -55 && heading < -35) target = -290;
-            else if (heading > -100 && heading < -80) target = -560;
-            else if (heading > -145 && heading < -115) target = -750;
+        if (y > 120) {
+            if (heading > -20 && heading < 20) target = -50;
+            else if (heading > 25 && heading < 65) target = 200;
+            else if (heading > 70 && heading < 110) target = 470;
+            else if (heading > 125 && heading < 180) target = 750;
+            else if (heading > -170 && heading < -120) target = -750;
+            else if (heading > -110 && heading < -70) target = -525;
+            else if (heading > -65 && heading < -25) target = -300;
         } else if (y > 60 && x > 72) {
-            if (heading > -10 && heading < 10) target = -240;
-            else if (heading > 35 && heading < 55) target = 15;
+            if (heading > -20 && heading < 20) target = -225;
+            else if (heading > 25 && heading < 65) target = 30;
             else if (heading > 80 && heading < 100) target = 270;
             else if (heading > 125 && heading < 145) target = 490;
             else if (heading > 160 || heading < -140) target = 750;
