@@ -1,7 +1,5 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
 
-import static org.firstinspires.ftc.teamcode.pedroPathing.Autonomous.Auto_Red_Perto_SOLO.center;
-
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
@@ -17,8 +15,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp", group = "TeleOp")
-public class TeleOp_Completo extends LinearOpMode {
+@TeleOp(name = "TeleOp RED🔴", group = "TeleOp")
+public class TeleOp_RED extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;
@@ -114,7 +112,7 @@ public class TeleOp_Completo extends LinearOpMode {
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
         limelight.start();
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(0);
 
         s1.setPosition(positionS);
 
