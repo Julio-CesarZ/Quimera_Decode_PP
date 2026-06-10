@@ -45,7 +45,7 @@ public class TeleOp_Completo extends LinearOpMode {
     private double positionS = 0.63;
     private double velocityAtual = 0;
     private double lastStamp = 0;
-    final double kP = 0.05;
+    final double kP = 0.06;
     final double towerP = 0.5;
     private int shotP = 1450;
     private int change = 0;
@@ -61,15 +61,13 @@ public class TeleOp_Completo extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private final Pose startingPoseTeleop = new Pose(109.31, 133.91, 0);
-
-    public static Pose startPose;
+    private final Pose startingPose = new Pose(109.31, 133.91, 0);
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         Follower follower = Constants.createFollower(hardwareMap);
-        follower.setStartingPose(startPose == null ? startingPoseTeleop : startPose);
+        follower.setStartingPose(startingPose);
         follower.update();
         follower.startTeleopDrive();
 
@@ -362,13 +360,13 @@ public class TeleOp_Completo extends LinearOpMode {
             elapsedIntervaloServo.reset();
             lF = true;
         } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
-            velocityShot = 1000;
+            velocityShot = 750;
             lF = false;
         }
         intervalo_RT = gamepad1.right_trigger > 0.3;
 
         double erroGeral = velocityShot - velocityAtual;
-        double maxAccelerationPerS = (y > 60) ? 800 : 1500;
+        double maxAccelerationPerS = (y > 60) ? 700 : 1000;
         double maxChange = maxAccelerationPerS * deltaTime;
 
         if (Math.abs(erroGeral) <= maxChange) {
