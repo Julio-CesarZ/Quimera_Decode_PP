@@ -80,7 +80,7 @@ public class Auto_Red_Longe extends LinearOpMode {
 
         s1.setPosition(0.82);
 
-        scorePreload = follower.pathBuilder()
+        /*scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scoreS1))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
@@ -97,10 +97,10 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 new Pose(93.6201, 43.49, 0),
                                 new Pose(88.000, 8.000, 0)))
                 .setConstantHeadingInterpolation(startPose.getHeading())
-                .build();
+                .build(); */
 
 
-       /* Command goScore = follow(follower, scorePreload);
+        Command goScore = follow(follower, scorePreload);
         Command toTake_1 = follow(follower, take21);
 
         Command onIntake = instant(() -> intake.setPower(1));
@@ -114,7 +114,7 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command onShotR = instant(() -> l_right.setVelocity(1450));
         Command onShotL = instant(() -> l_left.setVelocity(1450));
         Command offShotR = instant(() -> l_right.setVelocity(0));
-        Command offShotL = instant(() -> l_left.setVelocity(0)); */
+        Command offShotL = instant(() -> l_left.setVelocity(0));
 
         Command shot_on = parallel(
                 //onShotR,
