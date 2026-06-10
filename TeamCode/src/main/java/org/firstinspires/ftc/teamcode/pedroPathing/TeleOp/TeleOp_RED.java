@@ -434,48 +434,99 @@ public class TeleOp_RED extends LinearOpMode {
         }
     }
 
+    public static class Waypoint {
+        double heading;
+        double target;
+
+        public Waypoint(double heading, double target) {
+            this.heading = heading;
+            this.target = target;
+        }
+    }
+
+    // y > 120
+    private final Waypoint[] pontosSituacao1 = {
+            new Waypoint(-145, -750), // Média de -170 a -120
+            new Waypoint(-90,  -525), // Média de -110 a -70
+            new Waypoint(-45,  -300), // Média de -65 a -25
+            new Waypoint(0,    -50),  // Média de -20 a 20
+            new Waypoint(45,   200),  // Média de 25 a 65
+            new Waypoint(90,   470),  // Média de 70 a 110
+            new Waypoint(147.5, 750)  // Média de 115 a 180
+    };
+
+    // y > 60 && x > 72
+    private final Waypoint[] pontosSituacao2 = {
+            new Waypoint(-75,  -750), // Média de -90 a -60
+            new Waypoint(-45,  -550), // Média de -65 a -25
+            new Waypoint(0,    -225), // Média de -20 a 20
+            new Waypoint(45,   30),   // Média de 25 a 65
+            new Waypoint(90,   255),  // Média de 70 a 110
+            new Waypoint(135,  515),  // Média de 115 a 155
+            new Waypoint(212.5, 750)  // Média do limite composto (160 a -95 passando por 180) -> 160 a 265
+    };
+
+    // y > 60 && x <= 72
+    private final Waypoint[] pontosSituacao3 = {
+            new Waypoint(-117.5, -750), // Média de -135 a -100
+            new Waypoint(-67.5,  -425), // Média de -90 a -45
+            new Waypoint(0,      -130), // Média de -20 a 20
+            new Waypoint(45,     130),  // Média de 25 a 65
+            new Waypoint(90,     385),  // Média de 70 a 110
+            new Waypoint(135,    660),  // Média de 115 a 155
+            new Waypoint(195,    750)   // Média do limite composto (160 a -130 passando por 180) -> 160 a 230
+    };
+
+    // y <= 50
+    private final Waypoint[] pontosSituacao4 = {
+            new Waypoint(-102.5, -750), // Média de -135 a -70
+            new Waypoint(-45,    -650), // Média de -65 a -25
+            new Waypoint(0,      -350), // Média de -20 a 20
+            new Waypoint(45,     -100), // Média de 25 a 65
+            new Waypoint(90,     190),  // Média de 70 a 110
+            new Waypoint(140,    435),  // Média de 115 a 165
+            new Waypoint(192.5,  750)   // Média do limite composto (170 a -145 passando por 180) -> 170 a 215
+    };
     private int torreAuto(double x, double y, double heading) {
+
         if (y > 120) {
-            if (heading > -20 && heading < 20) target = -50;
-            else if (heading > 25 && heading < 65) target = 200;
-            else if (heading > 70 && heading < 110) target = 470;
-            else if (heading > 115 && heading < 180) target = 750;
-            else if (heading > -170 && heading < -120) target = -750;
-            else if (heading > -110 && heading < -70) target = -525;
-            else if (heading > -65 && heading < -25) target = -300;
+            target = (int) interpola(pontosSituacao1, heading);
+
         } else if (y > 60 && x > 72) {
-            if (heading > -20 && heading < 20) target = -225;
-            else if (heading > 25 && heading < 65) target = 30;
-            else if (heading > 70 && heading < 110) target = 255;
-            else if (heading > 115 && heading < 155) target = 515;
-            else if (heading > 160 || heading < -95) target = 750;
-            else if (heading > -65 && heading < -25) target = -550;
-            else if (heading > -90 && heading < -60) target = -750;
+            target = (int) interpola(pontosSituacao2, heading);
+
         } else if (y > 60 && x <= 72) {
-            if (heading > -20 && heading < 20) target = -130;
-            else if (heading > 25 && heading < 65) target = 130;
-            else if (heading > 70 && heading < 110) target = 385;
-            else if (heading > 115 && heading < 155) target = 660;
-            else if (heading > 160 || heading < -130) target = 750;
-            else if (heading > -135 && heading < -100) target = -750;
-            else if (heading > -90 && heading < -45) target = -425;
+            target = (int) interpola(pontosSituacao3, heading);
+
         } else if (y <= 50) {
             double diff = Math.abs(heading - lastHeading);
             if (diff > 180) diff = 360 - diff;
 
             if (diff > Math.toRadians(45)) {
-                if (heading > -20 && heading < 20) target = -350;
-                else if (heading > 25 && heading < 65) target = -100;
-                else if (heading > 70 && heading < 110) target = 190;
-                else if (heading > 115 && heading < 165) target = 435;
-                else if (heading > 170 || heading < -145) target = 750;
-                else if (heading > -135 && heading < -70) target = -750;
-                else if (heading > -65 && heading < -25) target = -650;
-
+                target = (int) interpola(pontosSituacao4, heading);
                 lastHeading = heading;
             }
         }
-        return target;
+
+        return Range.clip(target, -750, 750);
+    }
+
+    private double interpola(Waypoint[] pontos, double heading) {
+        // Se o heading estiver abaixo do primeiro ponto, segura no menor target
+        if (heading <= pontos[0].heading) return pontos[0].target;
+        // Se estiver acima do último ponto, segura no maior target
+        if (heading >= pontos[pontos.length - 1].heading) return pontos[pontos.length - 1].target;
+
+        // Varre a lista procurando em qual intervalo o heading se encontra
+        for (int i = 0; i < pontos.length - 1; i++) {
+            if (heading >= pontos[i].heading && heading <= pontos[i+1].heading) {
+                // Calcula a porcentagem do caminho percorrido entre o ponto A e B (fator t de 0.0 a 1.0)
+                double t = (heading - pontos[i].heading) / (pontos[i+1].heading - pontos[i].heading);
+                // Retorna o valor proporcional entre os dois alvos
+                return pontos[i].target + t * (pontos[i+1].target - pontos[i].target);
+            }
+        }
+        return pontos[pontos.length - 1].target;
     }
 
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {
