@@ -30,7 +30,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     private final Pose startPose = new Pose(110.47, 132.68, 0);
     private final Pose scorePose = new Pose(93.74, 85.37, 0);
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
-    private final Pose takePose_2 = new Pose(132, 59.5, 0);
+    private final Pose takePose_2 = new Pose(134, 59.5, 0);
     private final Pose takePose_Gate = new Pose(131, 59.8, Math.toRadians(30));
     private final Pose outPose = new Pose(94, 71, 0);
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
@@ -205,7 +205,6 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 waitMs(200),
                 offIntake,
                 toShot_1450,
-                waitMs(500),
                 onIntake,
                 waitMs(1250),
                 parallel(
@@ -213,7 +212,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                                 fecharTrava),
                         toGate_1
                 ),
-                waitMs(2000),
+                waitMs(1500),
                 offIntake,
                 abrirTrava,
                 goScoreG_1,
@@ -224,7 +223,20 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                                 fecharTrava),
                         toGate_1
                 ),
-                waitMs(2000),
+                waitMs(1500),
+                parallel(
+                        offIntake,
+                        goScoreG_1
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1250),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        toGate_1
+                ),
+                waitMs(1500),
                 parallel(
                         offIntake,
                         goScoreG_1
