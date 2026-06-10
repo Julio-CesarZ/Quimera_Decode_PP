@@ -212,8 +212,6 @@ public class TeleOp_Completo extends LinearOpMode {
                 s1.setPosition(positionS);
             }
 
-            suavizarAcelleration(y);
-
             if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
                 l_right.setVelocity(velocityAtual);
                 l_left.setVelocity(velocityAtual);
@@ -468,34 +466,34 @@ public class TeleOp_Completo extends LinearOpMode {
             if (heading > -20 && heading < 20) target = -50;
             else if (heading > 25 && heading < 65) target = 200;
             else if (heading > 70 && heading < 110) target = 470;
-            else if (heading > 125 && heading < 180) target = 750;
-            else if (heading > -170 && heading < -120) target = -750;
+            else if (heading > 115 && heading < 180) target = 750;
+            else if (heading > -170 && heading < -120) target = 750;
             else if (heading > -110 && heading < -70) target = -525;
             else if (heading > -65 && heading < -25) target = -300;
         } else if (y > 60 && x > 72) {
             if (heading > -20 && heading < 20) target = -225;
             else if (heading > 25 && heading < 65) target = 30;
-            else if (heading > 80 && heading < 100) target = 270;
-            else if (heading > 125 && heading < 145) target = 490;
-            else if (heading > 160 || heading < -140) target = 750;
-            else if (heading > -55 && heading < -35) target = -560;
-            else if (heading > -100 && heading < -80) target = -750;
+            else if (heading > 70 && heading < 110) target = 255;
+            else if (heading > 115 && heading < 155) target = 515;
+            else if (heading > 160 || heading < -95) target = 750;
+            else if (heading > -65 && heading < -25) target = -550;
+            else if (heading > -90 && heading < -60) target = -750;
         } else if (y > 60 && x <= 72) {
-            if (heading > -10 && heading < 10) target = -110;
-            else if (heading > 35 && heading < 55) target = 120;
-            else if (heading > 80 && heading < 100) target = 370;
-            else if (heading > 125 && heading < 145) target = 670;
-            else if (heading > 160 || heading < -160) target = 750;
-            else if (heading > -55 && heading < -35) target = -360;
-            else if (heading > -150 && heading < -80) target = -720;
+            if (heading > -20 && heading < 20) target = -130;
+            else if (heading > 25 && heading < 65) target = 130;
+            else if (heading > 70 && heading < 110) target = 385;
+            else if (heading > 115 && heading < 155) target = 660;
+            else if (heading > 160 || heading < -130) target = 750;
+            else if (heading > -135 && heading < -100) target = -750;
+            else if (heading > -90 && heading < -45) target = -425;
         } else if (y <= 60) {
-            if (heading > -10 && heading < 10) target = -330;
-            else if (heading > 35 && heading < 55) target = -70;
-            else if (heading > 80 && heading < 100) target = 150;
-            else if (heading > 125 && heading < 145) target = 450;
-            else if (heading > 170 || heading < -140) target = 715;
-            else if (heading > -55 && heading < -35) target = -630;
-            else if (heading > -135 && heading < -60) target = -750;
+            if (heading > -20 && heading < 20) target = -350;
+            else if (heading > 25 && heading < 65) target = -100;
+            else if (heading > 70 && heading < 110) target = 190;
+            else if (heading > 115 && heading < 165) target = 435;
+            else if (heading > 170 || heading < -145) target = 750;
+            else if (heading > -135 && heading < -70) target = -750;
+            else if (heading > -65 && heading < -25) target = -650;
         }
         return target;
     }
