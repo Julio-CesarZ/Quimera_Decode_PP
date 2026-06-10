@@ -28,9 +28,9 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     Follower follower;
 
     private final Pose startPose = new Pose(110.47, 132.68, 0);
-    private final Pose scorePose = new Pose(93.74, 85.37, 0);
+    private final Pose scorePose = new Pose(97.12, 83.03, 0);
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
-    private final Pose takePose_2 = new Pose(134, 59.5, 0);
+    private final Pose takePose_2 = new Pose(133, 58, 0);
     private final Pose takePose_Gate = new Pose(131, 59.8, Math.toRadians(30));
     private final Pose outPose = new Pose(94, 71, 0);
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
@@ -113,7 +113,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(86.44, 49.43),
+                                new Pose(99.6, 68.86),
                                 takePose_Gate
                         )
                 )
@@ -123,7 +123,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 takePose_Gate,
-                                new Pose(86.44, 49.43),
+                                new Pose(99.6, 68.86),
                                 scorePose
                         )
                 )
@@ -148,14 +148,25 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.55));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, -300, 0.5));
+        Command mirar = instant(() -> encoder(tower, -315, 0.5));
 
+        Command onShotR_F = instant(() -> l_right.setVelocity(1350));
+        Command onShotL_F = instant(() -> l_left.setVelocity(1350));
         Command onShotR_1400 = instant(() -> l_right.setVelocity(1400));
         Command onShotL_1400 = instant(() -> l_left.setVelocity(1400));
-        Command onShotR_1450 = instant(() -> l_right.setVelocity(1450));
-        Command onShotL_1450 = instant(() -> l_left.setVelocity(1450));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
+
+        Command shot_on_F = parallel(
+                onShotR_F,
+                onShotL_F
+        );
+
+        Command toShot_F = parallel(
+                goScore_1,
+                shot_on_F,
+                abrirTrava
+        );
 
         Command shot_on_1400 = parallel(
                 onShotR_1400,
@@ -163,19 +174,8 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         );
 
         Command toShot_1400 = parallel(
-                goScore_1,
-                shot_on_1400,
-                abrirTrava
-        );
-
-        Command shot_on_1450 = parallel(
-                onShotR_1450,
-                onShotL_1450
-        );
-
-        Command toShot_1450 = parallel(
                 goScore_2,
-                shot_on_1450,
+                shot_on_1400,
                 abrirTrava
         );
 
@@ -185,28 +185,26 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         );
 
         Command firstShot =sequential(
-                waitMs(1000),
+                waitMs(800),
                 abrirTrava,
                 onIntake
         );
 
         Command sequence = sequential(
                 parallel(
-                        toShot_1400,
+                        toShot_F,
                         mirar,
                         firstShot
                 ),
-                waitMs(100),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
                         toTake_2
                 ),
-                waitMs(200),
                 offIntake,
-                toShot_1450,
+                toShot_1400,
                 onIntake,
-                waitMs(1250),
+                waitMs(1000),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
@@ -217,7 +215,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 abrirTrava,
                 goScoreG_1,
                 onIntake,
-                waitMs(1250),
+                waitMs(1100),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
