@@ -204,7 +204,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 offIntake,
                 toShot_S,
                 onIntake,
-                waitMs(900),
+                waitMs(1050),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
@@ -221,7 +221,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                                 fecharTrava),
                         toGate_1
                 ),
-                waitMs(1100),
+                waitMs(1450),
                 parallel(
                         offIntake,
                         goScoreG_1
@@ -253,7 +253,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 ),
                 abrirTrava,
                 onIntake,
-                waitMs(1250),
+                waitMs(1300),
                 outLine,
                 parallel(
                         offIntake,
