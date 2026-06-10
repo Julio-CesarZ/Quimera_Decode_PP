@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp Azul\uD83D\uDD35", group = "TeleOp")
-public class TeleOp_Azul extends LinearOpMode {
+@TeleOp(name = "TeleOp BLUE\uD83D\uDD35", group = "TeleOp")
+public class TeleOp_BLUE extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;

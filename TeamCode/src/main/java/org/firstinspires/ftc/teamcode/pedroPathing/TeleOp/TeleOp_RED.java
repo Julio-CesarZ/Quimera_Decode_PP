@@ -44,6 +44,7 @@ public class TeleOp_RED extends LinearOpMode {
     private double velocityAtual = 0;
     private double lastStamp = 0;
     private double lastTx = 0;
+    private double lastHeading = 0;
     final double kP = 0.1;
     final double kD = 0.035;
     final double towerP = 0.5;
@@ -95,11 +96,11 @@ public class TeleOp_RED extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.2
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
         ));
 
         l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.2
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
         ));
 
         tower.setDirection(DcMotorEx.Direction.FORWARD);
@@ -439,7 +440,7 @@ public class TeleOp_RED extends LinearOpMode {
             else if (heading > 25 && heading < 65) target = 200;
             else if (heading > 70 && heading < 110) target = 470;
             else if (heading > 115 && heading < 180) target = 750;
-            else if (heading > -170 && heading < -120) target = 750;
+            else if (heading > -170 && heading < -120) target = -750;
             else if (heading > -110 && heading < -70) target = -525;
             else if (heading > -65 && heading < -25) target = -300;
         } else if (y > 60 && x > 72) {
@@ -458,14 +459,21 @@ public class TeleOp_RED extends LinearOpMode {
             else if (heading > 160 || heading < -130) target = 750;
             else if (heading > -135 && heading < -100) target = -750;
             else if (heading > -90 && heading < -45) target = -425;
-        } else if (y <= 60) {
-            if (heading > -20 && heading < 20) target = -350;
-            else if (heading > 25 && heading < 65) target = -100;
-            else if (heading > 70 && heading < 110) target = 190;
-            else if (heading > 115 && heading < 165) target = 435;
-            else if (heading > 170 || heading < -145) target = 750;
-            else if (heading > -135 && heading < -70) target = -750;
-            else if (heading > -65 && heading < -25) target = -650;
+        } else if (y <= 50) {
+            double diff = Math.abs(heading - lastHeading);
+            if (diff > 180) diff = 360 - diff;
+
+            if (diff > Math.toRadians(45)) {
+                if (heading > -20 && heading < 20) target = -350;
+                else if (heading > 25 && heading < 65) target = -100;
+                else if (heading > 70 && heading < 110) target = 190;
+                else if (heading > 115 && heading < 165) target = 435;
+                else if (heading > 170 || heading < -145) target = 750;
+                else if (heading > -135 && heading < -70) target = -750;
+                else if (heading > -65 && heading < -25) target = -650;
+
+                lastHeading = heading;
+            }
         }
         return target;
     }
