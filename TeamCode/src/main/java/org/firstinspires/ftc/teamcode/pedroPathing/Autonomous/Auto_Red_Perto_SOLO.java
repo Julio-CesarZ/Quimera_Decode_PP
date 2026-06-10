@@ -31,8 +31,9 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     private final Pose scorePose = new Pose(93.74, 85.37, 0);
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
     private final Pose takePose_2 = new Pose(132, 59.5, 0);
-    public static Pose center = new Pose(72, 72, Math.toRadians(180));
-    PathChain score1, take1, take2, score2, center72;
+    private final Pose takePose_Gate = new Pose(131, 59.8, Math.toRadians(30));
+    private final Pose outPose = new Pose(94, 71, 0);
+    PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
 
     @Override
     public void runOpMode() {
@@ -108,20 +109,38 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 )
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
-        center72 = follower.pathBuilder()
+        takeG1 = follower.pathBuilder()
                 .addPath(
-                        new BezierLine(scorePose, center)
+                        new BezierCurve(
+                                scorePose,
+                                new Pose(86.44, 49.43),
+                                takePose_Gate
+                        )
                 )
-                .setLinearHeadingInterpolation(scorePose.getHeading(), center.getHeading())
+                .setLinearHeadingInterpolation(scorePose.getHeading(), takePose_Gate.getHeading())
+                .build();
+        scoreG1 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                takePose_Gate,
+                                new Pose(86.44, 49.43),
+                                scorePose
+                        )
+                )
+                .setLinearHeadingInterpolation(takePose_Gate.getHeading(), scorePose.getHeading())
+                .build();
+        out = follower.pathBuilder()
+                .addPath(new BezierLine(scorePose, outPose))
+                .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
 
         Command goScore_1 = follow(follower, score1);
         Command toTake_1 = follow(follower, take1);
         Command toTake_2 = follow(follower, take2);
         Command goScore_2 = follow(follower, score2);
-        Command goCenter = follow(follower, center72);
-        Command turn180 = turnTo(follower, Math.toRadians(180));
-
+        Command toGate_1 = follow(follower, takeG1);
+        Command goScoreG_1 = follow(follower, scoreG1);
+        Command outLine = follow(follower, out);
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
@@ -155,7 +174,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         );
 
         Command toShot_1450 = parallel(
-                goScore_1,
+                goScore_2,
                 shot_on_1450,
                 abrirTrava
         );
@@ -166,7 +185,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         );
 
         Command firstShot =sequential(
-                waitMs(1100),
+                waitMs(1000),
                 abrirTrava,
                 onIntake
         );
@@ -181,31 +200,55 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
-                        toTake_1
+                        toTake_2
                 ),
                 waitMs(200),
                 offIntake,
                 toShot_1450,
                 waitMs(500),
                 onIntake,
-                waitMs(1500),
+                waitMs(1250),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
-                        toTake_2
+                        toGate_1
                 ),
-                waitMs(200),
+                waitMs(2000),
                 offIntake,
                 abrirTrava,
-                goScore_2,
+                goScoreG_1,
                 onIntake,
+                waitMs(1250),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        toGate_1
+                ),
                 waitMs(2000),
                 parallel(
                         offIntake,
-                        fecharTrava,
-                        shot_off
+                        goScoreG_1
                 ),
-                goCenter
+                abrirTrava,
+                onIntake,
+                waitMs(1250),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        toTake_1
+                ),
+                parallel(
+                        offIntake,
+                        goScore_1
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1250),
+                offIntake,
+                shot_off,
+                fecharTrava,
+                outLine
+
         );
 
         waitForStart();
