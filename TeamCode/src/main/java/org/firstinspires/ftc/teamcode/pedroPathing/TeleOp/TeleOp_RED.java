@@ -63,6 +63,7 @@ public class TeleOp_RED extends LinearOpMode {
 
     private String changeM = "Movimentação";
     private final Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    //private final Pose startingPoseTeleop = new Pose(94, 71, 0);
     private final Pose centerGol = new Pose(144, 144);
 
     @Override
@@ -201,7 +202,7 @@ public class TeleOp_RED extends LinearOpMode {
 
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (y < 48) {
-                    if (elapsedIntervaloServo.seconds() > 0.2) {
+                    if (elapsedIntervaloServo.seconds() > 0.8) {
                         positionS = 0.55;
                         s1.setPosition(positionS);
                     }
@@ -312,7 +313,7 @@ public class TeleOp_RED extends LinearOpMode {
                 shotP = (int) ticks;
                 if (lF) {
                     if (y < 48) {
-                        velocityAtual = 2000;
+                        velocityAtual = 2100;
                     } else {
                         velocityAtual = shotP;
                     }
