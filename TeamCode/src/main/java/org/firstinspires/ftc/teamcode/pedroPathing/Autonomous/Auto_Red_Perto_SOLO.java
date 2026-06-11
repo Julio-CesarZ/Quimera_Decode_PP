@@ -30,8 +30,8 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     private final Pose startPose = new Pose(110.47, 132.68, 0);
     private final Pose scorePose = new Pose(97.12, 83.03, 0);
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
-    private final Pose takePose_2 = new Pose(133, 58, 0);
-    private final Pose takePose_Gate = new Pose(131, 59.8, Math.toRadians(30));
+    private final Pose takePose_2 = new Pose(133.5, 58, 0);
+    private final Pose takePose_Gate = new Pose(132.25, 60.8, Math.toRadians(30));
     private final Pose outPose = new Pose(94, 71, 0);
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
 
@@ -113,7 +113,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(99.6, 68.86),
+                                new Pose(96.62, 66.82),
                                 takePose_Gate
                         )
                 )
@@ -210,7 +210,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                                 fecharTrava),
                         toGate_1
                 ),
-                waitMs(950),
+                waitMs(1250),
                 offIntake,
                 abrirTrava,
                 goScoreG_1,
@@ -228,7 +228,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 ),
                 abrirTrava,
                 onIntake,
-                waitMs(1200),
+                waitMs(1250),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
@@ -253,10 +253,12 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
                 ),
                 abrirTrava,
                 onIntake,
-                waitMs(1300),
-                outLine,
+                waitMs(1250),
                 parallel(
-                        offIntake,
+                        outLine,
+                        offIntake
+                ),
+                parallel(
                         shot_off,
                         fecharTrava
                 )
