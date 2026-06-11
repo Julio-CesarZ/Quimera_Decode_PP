@@ -23,7 +23,7 @@ import com.pedropathing.geometry.BezierCurve;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RED Auto - Longe 2.3", group = "Test")
+@Autonomous(name = "RED Auto - Longe 2.4", group = "Autonomous")
 public class Auto_Red_Longe extends LinearOpMode {
 
     Follower follower;
@@ -80,7 +80,7 @@ public class Auto_Red_Longe extends LinearOpMode {
 
         s1.setPosition(0.82);
 
-        /*scorePreload = follower.pathBuilder()
+        scorePreload = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scoreS1))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
@@ -97,7 +97,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 new Pose(93.6201, 43.49, 0),
                                 new Pose(88.000, 8.000, 0)))
                 .setConstantHeadingInterpolation(startPose.getHeading())
-                .build(); */
+                .build();
 
 
         Command goScore = follow(follower, scorePreload);
