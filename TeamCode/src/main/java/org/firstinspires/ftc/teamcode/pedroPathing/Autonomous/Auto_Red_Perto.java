@@ -32,7 +32,6 @@ public class Auto_Red_Perto extends LinearOpMode {
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
     private final Pose takePose_2 = new Pose(133.5, 58, 0);
     private final Pose takePose_Gate = new Pose(131, 59, Math.toRadians(30.8));
-    //private final Pose outPose = new Pose(94, 71, 0);
     private final Pose outPose = new Pose(83.83, 106.49, 0);
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
 
