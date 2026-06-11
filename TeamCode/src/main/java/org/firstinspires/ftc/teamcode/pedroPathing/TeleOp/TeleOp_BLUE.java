@@ -62,7 +62,7 @@ public class TeleOp_BLUE extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private final Pose startingPoseTeleop = new Pose(33.53, 11.32, Math.toRadians(180));
+    private final Pose startingPoseTeleop = new Pose(33.53, 132.68, Math.toRadians(180));
     private final Pose centerGol = new Pose(0, 144);
 
     @Override
@@ -113,7 +113,7 @@ public class TeleOp_BLUE extends LinearOpMode {
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
         limelight.start();
-        limelight.pipelineSwitch(0);
+        limelight.pipelineSwitch(1);
 
         s1.setPosition(positionS);
 

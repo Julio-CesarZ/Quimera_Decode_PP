@@ -181,7 +181,7 @@ public class TeleOp_RED extends LinearOpMode {
 
             double distanciaM = Math.hypot(x - xGol, y - yGol) / 39.37;
 
-            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.079, 0.075, 1.1) * 28) / 60;
+            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.179, 0.075, 1.1) * 28) / 60;
 
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
