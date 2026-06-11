@@ -313,7 +313,7 @@ public class TeleOp_RED extends LinearOpMode {
                 shotP = (int) ticks;
                 if (lF) {
                     if (y < 48) {
-                        velocityAtual = 2100;
+                        velocityAtual = shotP + 100;
                     } else {
                         velocityAtual = shotP;
                     }
