@@ -32,6 +32,8 @@ public class ID_Move_Encoder extends LinearOpMode {
         int x = 0;
         int y = 0;
 
+
+
         double ticksPorPixel = 0.25;
 
         double pw = 0;
