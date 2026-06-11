@@ -31,7 +31,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
     private final Pose scorePose = new Pose(97.12, 83.03, 0);
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
     private final Pose takePose_2 = new Pose(133.5, 58, 0);
-    private final Pose takePose_Gate = new Pose(132.25, 60.8, Math.toRadians(30));
+    private final Pose takePose_Gate = new Pose(131.6, 59.45, Math.toRadians(30.8));
     private final Pose outPose = new Pose(94, 71, 0);
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
 
@@ -148,7 +148,7 @@ public class Auto_Red_Perto_SOLO extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.55));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, -315, 0.5));
+        Command mirar = instant(() -> encoder(tower, -300, 0.5));
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1350));
         Command onShotL_F = instant(() -> l_left.setVelocity(1350));
