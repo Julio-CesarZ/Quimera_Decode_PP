@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp RED🔴", group = "TeleOp")
+@TeleOp(name = "TeleOp RED 🔴", group = "TeleOp")
 public class TeleOp_RED extends LinearOpMode {
 
     boolean intervalo_a = false;
@@ -512,17 +512,13 @@ public class TeleOp_RED extends LinearOpMode {
     }
 
     private double interpola(Waypoint[] pontos, double heading) {
-        // Se o heading estiver abaixo do primeiro ponto, segura no menor target
         if (heading <= pontos[0].heading) return pontos[0].target;
-        // Se estiver acima do último ponto, segura no maior target
         if (heading >= pontos[pontos.length - 1].heading) return pontos[pontos.length - 1].target;
 
-        // Varre a lista procurando em qual intervalo o heading se encontra
         for (int i = 0; i < pontos.length - 1; i++) {
             if (heading >= pontos[i].heading && heading <= pontos[i+1].heading) {
-                // Calcula a porcentagem do caminho percorrido entre o ponto A e B (fator t de 0.0 a 1.0)
                 double t = (heading - pontos[i].heading) / (pontos[i+1].heading - pontos[i].heading);
-                // Retorna o valor proporcional entre os dois alvos
+
                 return pontos[i].target + t * (pontos[i+1].target - pontos[i].target);
             }
         }
