@@ -31,8 +31,8 @@ public class Auto_Blue_Perto extends LinearOpMode {
     private final Pose scorePose = new Pose(46.88, 83.03, Math.toRadians(180));
     private final Pose takePose_1 = new Pose(18, 84.76, Math.toRadians(180));
     private final Pose takePose_2 = new Pose(10.5, 58, Math.toRadians(180));
-    private final Pose takePose_Gate = new Pose(12.4, 59.45, Math.toRadians(149.12));
-    private final Pose outPose = new Pose(50, 71, Math.toRadians(180));
+    private final Pose takePose_Gate = new Pose(13, 59, Math.toRadians(149.2));
+    private final Pose outPose = new Pose(60.17, 106.49, 0);
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
 
     @Override
@@ -130,8 +130,8 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .setLinearHeadingInterpolation(takePose_Gate.getHeading(), scorePose.getHeading())
                 .build();
         out = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, outPose))
-                .setConstantHeadingInterpolation(startPose.getHeading())
+                .addPath(new BezierLine(takePose_1, outPose))
+                .setConstantHeadingInterpolation(outPose.getHeading())
                 .build();
 
         Command goScore_1 = follow(follower, score1);
@@ -148,7 +148,9 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.55));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, 300, 0.5));
+        Command mirar = instant(() -> encoder(tower, 320, 0.5));
+        Command mirarF = instant(() -> encoder(tower, 150, 0.5));
+        Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1350));
         Command onShotL_F = instant(() -> l_left.setVelocity(1350));
@@ -190,16 +192,26 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 onIntake
         );
 
+        Command lastShot = sequential(
+                waitMs(600),
+                abrirTrava,
+                onIntake
+        );
+
         Command sequence = sequential(
                 parallel(
                         toShot_F,
                         mirar,
                         firstShot
                 ),
+                waitMs(100),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
-                        toTake_2
+                        race(
+                                toTake_2,
+                                waitMs(1500)
+                        )
                 ),
                 offIntake,
                 toShot_S,
@@ -208,9 +220,12 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
-                        toGate_1
+                        race(
+                                toGate_1,
+                                waitMs(1500)
+                        )
                 ),
-                waitMs(1350),
+                waitMs(1450),
                 offIntake,
                 abrirTrava,
                 goScoreG_1,
@@ -219,7 +234,10 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
-                        toGate_1
+                        race(
+                                toGate_1,
+                                waitMs(1500)
+                        )
                 ),
                 waitMs(1450),
                 parallel(
@@ -232,9 +250,12 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
-                        toGate_1
+                        race(
+                                toGate_1,
+                                waitMs(1500)
+                        )
                 ),
-                waitMs(1600),
+                waitMs(1475),
                 parallel(
                         offIntake,
                         goScoreG_1
@@ -245,20 +266,21 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
-                        toTake_1
+                        race(
+                                toTake_1,
+                                waitMs(1500)
+                        )
                 ),
                 parallel(
                         offIntake,
-                        goScore_1
+                        mirarF,
+                        lastShot,
+                        outLine
                 ),
-                abrirTrava,
-                onIntake,
-                waitMs(1250),
+                waitMs(100),
                 parallel(
-                        outLine,
-                        offIntake
-                ),
-                parallel(
+                        offIntake,
+                        zerar,
                         shot_off,
                         fecharTrava
                 )
