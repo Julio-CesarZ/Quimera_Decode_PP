@@ -28,12 +28,12 @@ public class Auto_Red_Perto extends LinearOpMode {
     Follower follower;
 
     private final Pose startPose = new Pose(110.47, 132.68, 0);
-    private final Pose scorePose = new Pose(97.12, 83.03, 0);
+    private final Pose scorePose = new Pose(96.12, 84.03, 0);
     private final Pose takePose_1 = new Pose(126, 84.76, 0);
-    private final Pose takePose_2 = new Pose(133.5, 58, 0);
-    private final Pose takePose_Gate = new Pose(131, 59, Math.toRadians(30.8));
+    private final Pose takePose_2 = new Pose(135.5, 58, 0);
+    private final Pose takePose_Gate = new Pose(133.16, 59.84, Math.toRadians(39.43));
     private final Pose outPose = new Pose(83.83, 106.49, 0);
-    PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
+    PathChain score1, take1, take2, score2, fTakeG1, takeG1, scoreG1, out;
 
     @Override
     public void runOpMode() {
@@ -109,6 +109,16 @@ public class Auto_Red_Perto extends LinearOpMode {
                 )
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+        fTakeG1 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                scorePose,
+                                new Pose(112.25, 36.67),
+                                takePose_Gate
+                        )
+                )
+                .setLinearHeadingInterpolation(scorePose.getHeading(), takePose_Gate.getHeading())
+                .build();
         takeG1 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
@@ -138,6 +148,7 @@ public class Auto_Red_Perto extends LinearOpMode {
         Command toTake_1 = follow(follower, take1);
         Command toTake_2 = follow(follower, take2);
         Command goScore_2 = follow(follower, score2);
+        Command fToGate_1 = follow(follower, fTakeG1);
         Command toGate_1 = follow(follower, takeG1);
         Command goScoreG_1 = follow(follower, scoreG1);
         Command outLine = follow(follower, out);
@@ -193,7 +204,7 @@ public class Auto_Red_Perto extends LinearOpMode {
         );
 
         Command lastShot = sequential(
-                waitMs(600),
+                waitMs(400),
                 abrirTrava,
                 onIntake
         );
@@ -213,10 +224,18 @@ public class Auto_Red_Perto extends LinearOpMode {
                                 waitMs(1500)
                         )
                 ),
-                offIntake,
-                toShot_S,
+                parallel(
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
+                        sequential(
+                                waitMs(600),
+                                toShot_S
+                        )
+                ),
                 onIntake,
-                waitMs(1050),
+                waitMs(1150),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
@@ -226,9 +245,14 @@ public class Auto_Red_Perto extends LinearOpMode {
                         )
                 ),
                 waitMs(1450),
-                offIntake,
+                parallel(
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
+                        goScoreG_1
+                ),
                 abrirTrava,
-                goScoreG_1,
                 onIntake,
                 waitMs(1100),
                 parallel(
@@ -239,9 +263,12 @@ public class Auto_Red_Perto extends LinearOpMode {
                                 waitMs(1500)
                         )
                 ),
-                waitMs(1450),
+                waitMs(1550),
                 parallel(
-                        offIntake,
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
                         goScoreG_1
                 ),
                 abrirTrava,
@@ -255,9 +282,12 @@ public class Auto_Red_Perto extends LinearOpMode {
                                 waitMs(1500)
                         )
                 ),
-                waitMs(1475),
+                waitMs(1500),
                 parallel(
-                        offIntake,
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
                         goScoreG_1
                 ),
                 abrirTrava,

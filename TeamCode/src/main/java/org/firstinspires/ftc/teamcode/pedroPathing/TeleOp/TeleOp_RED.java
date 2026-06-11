@@ -97,11 +97,11 @@ public class TeleOp_RED extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d * 1.3, coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.8
         ));
 
         l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d * 1.3, coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.8
         ));
 
         tower.setDirection(DcMotorEx.Direction.FORWARD);
@@ -202,7 +202,7 @@ public class TeleOp_RED extends LinearOpMode {
 
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (y < 48) {
-                    if (elapsedIntervaloServo.seconds() > 0.8) {
+                    if (elapsedIntervaloServo.seconds() > 1) {
                         positionS = 0.55;
                         s1.setPosition(positionS);
                     }
@@ -310,13 +310,15 @@ public class TeleOp_RED extends LinearOpMode {
 
             if (modo_ShotPA) {
                 //shotPA(x, y);
-                shotP = (int) ticks;
+                if (y < 48 && y >= 10) {
+                    shotP = (int) ticks + 150;
+                } else if (y < 10) {
+                    shotP = (int) ticks + 200;
+                } else {
+                    shotP = (int) ticks;
+                }
                 if (lF) {
-                    if (y < 48) {
-                        velocityAtual = shotP + 100;
-                    } else {
-                        velocityAtual = shotP;
-                    }
+                    velocityAtual = shotP;
                 }
             }
 
@@ -459,46 +461,47 @@ public class TeleOp_RED extends LinearOpMode {
     // y > 120
     private final Waypoint[] pontosSituacao1 = {
             new Waypoint(-145, -750), // Média de -170 a -120
-            new Waypoint(-90,  -525), // Média de -110 a -70
-            new Waypoint(-45,  -300), // Média de -65 a -25
-            new Waypoint(0,    -50),  // Média de -20 a 20
-            new Waypoint(45,   200),  // Média de 25 a 65
-            new Waypoint(90,   470),  // Média de 70 a 110
+            new Waypoint(-90, -525), // Média de -110 a -70
+            new Waypoint(-45, -300), // Média de -65 a -25
+            new Waypoint(0, -50),  // Média de -20 a 20
+            new Waypoint(45, 200),  // Média de 25 a 65
+            new Waypoint(90, 470),  // Média de 70 a 110
             new Waypoint(147.5, 750)  // Média de 115 a 180
     };
 
     // y > 60 && x > 72
     private final Waypoint[] pontosSituacao2 = {
-            new Waypoint(-75,  -750), // Média de -90 a -60
-            new Waypoint(-45,  -550), // Média de -65 a -25
-            new Waypoint(0,    -225), // Média de -20 a 20
-            new Waypoint(45,   30),   // Média de 25 a 65
-            new Waypoint(90,   255),  // Média de 70 a 110
-            new Waypoint(135,  515),  // Média de 115 a 155
+            new Waypoint(-75, -750), // Média de -90 a -60
+            new Waypoint(-45, -550), // Média de -65 a -25
+            new Waypoint(0, -225), // Média de -20 a 20
+            new Waypoint(45, 30),   // Média de 25 a 65
+            new Waypoint(90, 255),  // Média de 70 a 110
+            new Waypoint(135, 515),  // Média de 115 a 155
             new Waypoint(212.5, 750)  // Média do limite composto (160 a -95 passando por 180) -> 160 a 265
     };
 
     // y > 60 && x <= 72
     private final Waypoint[] pontosSituacao3 = {
             new Waypoint(-117.5, -750), // Média de -135 a -100
-            new Waypoint(-67.5,  -425), // Média de -90 a -45
-            new Waypoint(0,      -130), // Média de -20 a 20
-            new Waypoint(45,     130),  // Média de 25 a 65
-            new Waypoint(90,     385),  // Média de 70 a 110
-            new Waypoint(135,    660),  // Média de 115 a 155
-            new Waypoint(195,    750)   // Média do limite composto (160 a -130 passando por 180) -> 160 a 230
+            new Waypoint(-67.5, -425), // Média de -90 a -45
+            new Waypoint(0, -130), // Média de -20 a 20
+            new Waypoint(45, 130),  // Média de 25 a 65
+            new Waypoint(90, 385),  // Média de 70 a 110
+            new Waypoint(135, 660),  // Média de 115 a 155
+            new Waypoint(195, 750)   // Média do limite composto (160 a -130 passando por 180) -> 160 a 230
     };
 
     // y <= 50
     private final Waypoint[] pontosSituacao4 = {
             new Waypoint(-102.5, -750), // Média de -135 a -70
-            new Waypoint(-45,    -650), // Média de -65 a -25
-            new Waypoint(0,      -350), // Média de -20 a 20
-            new Waypoint(45,     -100), // Média de 25 a 65
-            new Waypoint(90,     190),  // Média de 70 a 110
-            new Waypoint(140,    435),  // Média de 115 a 165
-            new Waypoint(192.5,  750)   // Média do limite composto (170 a -145 passando por 180) -> 170 a 215
+            new Waypoint(-45, -650), // Média de -65 a -25
+            new Waypoint(0, -350), // Média de -20 a 20
+            new Waypoint(45, -100), // Média de 25 a 65
+            new Waypoint(90, 190),  // Média de 70 a 110
+            new Waypoint(140, 435),  // Média de 115 a 165
+            new Waypoint(192.5, 750)   // Média do limite composto (170 a -145 passando por 180) -> 170 a 215
     };
+
     private int torreAuto(double x, double y, double heading) {
 
         if (y > 120) {
@@ -528,10 +531,10 @@ public class TeleOp_RED extends LinearOpMode {
         if (heading >= pontos[pontos.length - 1].heading) return pontos[pontos.length - 1].target;
 
         for (int i = 0; i < pontos.length - 1; i++) {
-            if (heading >= pontos[i].heading && heading <= pontos[i+1].heading) {
-                double t = (heading - pontos[i].heading) / (pontos[i+1].heading - pontos[i].heading);
+            if (heading >= pontos[i].heading && heading <= pontos[i + 1].heading) {
+                double t = (heading - pontos[i].heading) / (pontos[i + 1].heading - pontos[i].heading);
 
-                return pontos[i].target + t * (pontos[i+1].target - pontos[i].target);
+                return pontos[i].target + t * (pontos[i + 1].target - pontos[i].target);
             }
         }
         return pontos[pontos.length - 1].target;
