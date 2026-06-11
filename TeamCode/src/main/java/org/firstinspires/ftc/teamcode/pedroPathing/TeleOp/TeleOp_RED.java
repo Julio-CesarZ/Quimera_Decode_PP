@@ -96,11 +96,11 @@ public class TeleOp_RED extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d * 1.3, coefficientsRightMotor.f * 1.5
         ));
 
         l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d * 1.3, coefficientsLeftMotor.f * 1.5
         ));
 
         tower.setDirection(DcMotorEx.Direction.FORWARD);
@@ -200,9 +200,16 @@ public class TeleOp_RED extends LinearOpMode {
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
             if (lF || gamepad1.left_trigger > 0.3) {
-                if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 100 >= shotP && velocityAtual - 100 <= shotP) {
-                    positionS = 0.55;
-                    s1.setPosition(positionS);
+                if (y < 48) {
+                    if (elapsedIntervaloServo.seconds() > 0.2) {
+                        positionS = 0.55;
+                        s1.setPosition(positionS);
+                    }
+                } else {
+                    if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 200 >= shotP && velocityAtual - 200 <= shotP) {
+                        positionS = 0.55;
+                        s1.setPosition(positionS);
+                    }
                 }
             } else {
                 positionS = 0.63;
@@ -304,7 +311,11 @@ public class TeleOp_RED extends LinearOpMode {
                 //shotPA(x, y);
                 shotP = (int) ticks;
                 if (lF) {
-                    velocityAtual = shotP;
+                    if (y < 48) {
+                        velocityAtual = 2000;
+                    } else {
+                        velocityAtual = shotP;
+                    }
                 }
             }
 

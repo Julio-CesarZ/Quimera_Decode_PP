@@ -196,6 +196,7 @@ public class Auto_Red_Perto extends LinearOpMode {
                         mirar,
                         firstShot
                 ),
+                waitMs(100),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
@@ -234,7 +235,7 @@ public class Auto_Red_Perto extends LinearOpMode {
                                 fecharTrava),
                         toGate_1
                 ),
-                waitMs(1600),
+                waitMs(1475),
                 parallel(
                         offIntake,
                         goScoreG_1
