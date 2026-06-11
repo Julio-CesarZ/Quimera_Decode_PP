@@ -7,6 +7,7 @@ import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.pedropathing.ivy.Scheduler;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -18,22 +19,18 @@ import static com.pedropathing.ivy.Scheduler.schedule;
 import static com.pedropathing.ivy.commands.Commands.*;
 import static com.pedropathing.ivy.groups.Groups.*;
 import static com.pedropathing.ivy.pedro.PedroCommands.follow;
-import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
-
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "BLUE Auto - Perto", group = "Test")
-public class Auto_Blue_Perto extends LinearOpMode {
+@Disabled
+@Autonomous(name = "Blue Auto - Perto / Gu", group = "Test")
+public class Auto_Blue_Perto_Gu extends LinearOpMode {
 
     Follower follower;
-
-    private final Pose startPose = new Pose(33.53, 132.68, Math.toRadians(180));
-    private final Pose scorePose = new Pose(46.88, 83.03, Math.toRadians(180));
-    private final Pose takePose_1 = new Pose(18, 84.76, Math.toRadians(180));
-    private final Pose takePose_2 = new Pose(10.5, 58, Math.toRadians(180));
-    private final Pose takePose_Gate = new Pose(12.4, 59.45, Math.toRadians(149.12));
-    private final Pose outPose = new Pose(50, 71, Math.toRadians(180));
-    PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
+    private final Pose startPose = new Pose(36.17, 134.91,  Math.toRadians(180));
+    private final Pose scorePose = new Pose(57.11, 86.37, Math.toRadians(180));
+    private final Pose takePose_1 = new Pose(11.33, 84.76, Math.toRadians(180));
+    private final Pose takePose_2 = new Pose(11.67, 59.5, Math.toRadians(180));
+    PathChain score1, take1, take2, score2;
 
     @Override
     public void runOpMode() {
@@ -79,7 +76,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
         tower.setPower(0);
         tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        s1.setPosition(0.63);
+        s1.setPosition(0.82);
 
         score1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
@@ -93,7 +90,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(49.795, 54.922),
+                                new Pose(49.35, 54.922),
                                 takePose_2
                         )
                 )
@@ -103,34 +100,10 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 takePose_2,
-                                new Pose(49.795, 54.922),
+                                new Pose(49.35, 54.922),
                                 scorePose
                         )
                 )
-                .setConstantHeadingInterpolation(startPose.getHeading())
-                .build();
-        takeG1 = follower.pathBuilder()
-                .addPath(
-                        new BezierCurve(
-                                scorePose,
-                                new Pose(47.38, 66.82),
-                                takePose_Gate
-                        )
-                )
-                .setLinearHeadingInterpolation(scorePose.getHeading(), takePose_Gate.getHeading())
-                .build();
-        scoreG1 = follower.pathBuilder()
-                .addPath(
-                        new BezierCurve(
-                                takePose_Gate,
-                                new Pose(44.4, 68.86),
-                                scorePose
-                        )
-                )
-                .setLinearHeadingInterpolation(takePose_Gate.getHeading(), scorePose.getHeading())
-                .build();
-        out = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, outPose))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
 
@@ -138,44 +111,41 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command toTake_1 = follow(follower, take1);
         Command toTake_2 = follow(follower, take2);
         Command goScore_2 = follow(follower, score2);
-        Command toGate_1 = follow(follower, takeG1);
-        Command goScoreG_1 = follow(follower, scoreG1);
-        Command outLine = follow(follower, out);
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
 
-        Command abrirTrava = instant(() -> s1.setPosition(0.55));
-        Command fecharTrava = instant(() -> s1.setPosition(0.63));
+        Command abrirTrava = instant(() -> s1.setPosition(0.6));
+        Command fecharTrava = instant(() -> s1.setPosition(0.82));
 
         Command mirar = instant(() -> encoder(tower, 300, 0.5));
 
-        Command onShotR_F = instant(() -> l_right.setVelocity(1350));
-        Command onShotL_F = instant(() -> l_left.setVelocity(1350));
-        Command onShotR_S = instant(() -> l_right.setVelocity(1450));
-        Command onShotL_S = instant(() -> l_left.setVelocity(1450));
+        Command onShotR_1400 = instant(() -> l_right.setVelocity(1400));
+        Command onShotL_1400 = instant(() -> l_left.setVelocity(1400));
+        Command onShotR_1450 = instant(() -> l_right.setVelocity(1450));
+        Command onShotL_1450 = instant(() -> l_left.setVelocity(1450));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
 
-        Command shot_on_F = parallel(
-                onShotR_F,
-                onShotL_F
+        Command shot_on_1400 = parallel(
+                onShotR_1400,
+                onShotL_1400
         );
 
-        Command toShot_F = parallel(
+        Command toShot_1400 = parallel(
                 goScore_1,
-                shot_on_F,
+                shot_on_1400,
                 abrirTrava
         );
 
-        Command shot_on_S = parallel(
-                onShotR_S,
-                onShotL_S
+        Command shot_on_1450 = parallel(
+                onShotR_1450,
+                onShotL_1450
         );
 
-        Command toShot_S = parallel(
-                goScore_2,
-                shot_on_S,
+        Command toShot_1450 = parallel(
+                goScore_1,
+                shot_on_1450,
                 abrirTrava
         );
 
@@ -184,85 +154,45 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 offShotL
         );
 
-        Command firstShot = sequential(
-                waitMs(900),
+        Command firstShot =sequential(
+                waitMs(1100),
                 abrirTrava,
                 onIntake
         );
 
         Command sequence = sequential(
                 parallel(
-                        toShot_F,
+                        toShot_1400,
                         mirar,
                         firstShot
                 ),
-                parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
-                        toTake_2
-                ),
-                offIntake,
-                toShot_S,
-                onIntake,
-                waitMs(1050),
-                parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
-                        toGate_1
-                ),
-                waitMs(1350),
-                offIntake,
-                abrirTrava,
-                goScoreG_1,
-                onIntake,
-                waitMs(1100),
-                parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
-                        toGate_1
-                ),
-                waitMs(1450),
-                parallel(
-                        offIntake,
-                        goScoreG_1
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1250),
-                parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
-                        toGate_1
-                ),
-                waitMs(1600),
-                parallel(
-                        offIntake,
-                        goScoreG_1
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1200),
+                waitMs(400),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
                         toTake_1
                 ),
+                waitMs(200),
+                offIntake,
+                toShot_1450,
+                onIntake,
+                waitMs(1500),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        toTake_2
+                ),
+                waitMs(200),
+                offIntake,
+                abrirTrava,
+                goScore_2,
+                onIntake,
+                waitMs(2000),
                 parallel(
                         offIntake,
-                        goScore_1
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1250),
-                parallel(
-                        outLine,
-                        offIntake
-                ),
-                parallel(
-                        shot_off,
-                        fecharTrava
+                        fecharTrava,
+                        shot_off
                 )
-
         );
 
         waitForStart();
@@ -272,13 +202,8 @@ public class Auto_Blue_Perto extends LinearOpMode {
         while (opModeIsActive()) {
             follower.update();
             Scheduler.execute();
-            telemetry.addData("x", follower.getPose().getX());
-            telemetry.addData("y", follower.getPose().getY());
-            telemetry.addData("heading", follower.getPose().getHeading());
-            telemetry.update();
         }
     }
-
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {
         if (motor.getMode() == DcMotorEx.RunMode.RUN_TO_POSITION) {
             motor.setTargetPosition(novoAlvo);
