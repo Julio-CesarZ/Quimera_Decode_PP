@@ -7,17 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-
-
-import com.pedropathing.follower.Follower;
-import com.pedropathing.geometry.Pose;
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-
-import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
 @Autonomous(name = "Coordenadas Fundo", group = "Test")
-public class coodenadas_Fundo extends LinearOpMode {
+public class Coordenadas_Fundo extends LinearOpMode {
     private Pose startingPose;
     private boolean intervalo_y = false;
     private boolean startPose = true;
@@ -37,7 +28,7 @@ public class coodenadas_Fundo extends LinearOpMode {
             telemetry.update();
         }
 
-        startingPose = startPose ? new Pose(80.1, 8.19, 0) : new Pose(72, 72, 0);
+        startingPose = startPose ? new Pose(89.17, 8.27, 0) : new Pose(72, 72, 0);
         Follower follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startingPose);
         follower.update();
@@ -66,4 +57,3 @@ public class coodenadas_Fundo extends LinearOpMode {
         telemetry.update();
     }
 }
-

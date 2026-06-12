@@ -22,7 +22,7 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RED Auto - Perto", group = "Test")
+@Autonomous(name = "RED Auto - Perto", group = "Auto")
 public class Auto_Red_Perto extends LinearOpMode {
 
     Follower follower;
@@ -33,7 +33,7 @@ public class Auto_Red_Perto extends LinearOpMode {
     private final Pose takePose_2 = new Pose(133.5, 58, 0);
     private final Pose takePose_Gate = new Pose(131.6, 59.45, Math.toRadians(30.8));
     private final Pose outPose = new Pose(83.83, 106.49, 0);
-    PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
+    PathChain scoreF, take1, take2, score2, takeG1, scoreG1, out;
 
     @Override
     public void runOpMode() {
@@ -81,7 +81,7 @@ public class Auto_Red_Perto extends LinearOpMode {
 
         s1.setPosition(0.63);
 
-        score1 = follower.pathBuilder()
+        scoreF = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
@@ -134,7 +134,7 @@ public class Auto_Red_Perto extends LinearOpMode {
                 .setConstantHeadingInterpolation(outPose.getHeading())
                 .build();
 
-        Command goScore_1 = follow(follower, score1);
+        Command goScore_1 = follow(follower, scoreF);
         Command toTake_1 = follow(follower, take1);
         Command toTake_2 = follow(follower, take2);
         Command goScore_2 = follow(follower, score2);

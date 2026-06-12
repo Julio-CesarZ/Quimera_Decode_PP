@@ -22,18 +22,18 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "BLUE Auto - Perto", group = "Auto")
-public class Auto_Blue_Perto extends LinearOpMode {
+@Autonomous(name = "RED Auto - Longe", group = "Auto")
+public class Auto_Red_Longe_Gu extends LinearOpMode {
 
     Follower follower;
 
-    private final Pose startPose = new Pose(33.53, 132.68, Math.toRadians(180));
-    private final Pose scorePose = new Pose(46.88, 83.03, Math.toRadians(180));
-    private final Pose takePose_1 = new Pose(18, 84.76, Math.toRadians(180));
-    private final Pose takePose_2 = new Pose(10.5, 58, Math.toRadians(180));
-    private final Pose takePose_Gate = new Pose(12.4, 59.45, Math.toRadians(149.2));
-    private final Pose outPose = new Pose(60.17, 106.49, Math.toRadians(180));
-    PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
+    private final Pose startPose = new Pose(89.17, 8.27, 0);
+    private final Pose scoreShot = new Pose(80.20, 20.19, 0);
+    private final Pose takePose_1 = new Pose(128.83, 35.51, 0);
+    private final Pose takePose_2 = new Pose(130.2, 5.51, Math.toRadians(-39.5));
+    //private final Pose takePose_Gate = new Pose(131, 59, Math.toRadians(30.8));
+    //private final Pose outPose = new Pose(83.83, 106.49, 0);
+    PathChain shot11, take1, shot12, take2, score2, takeG1, scoreG1, out;
 
     @Override
     public void runOpMode() {
@@ -81,30 +81,38 @@ public class Auto_Blue_Perto extends LinearOpMode {
 
         s1.setPosition(0.63);
 
-        score1 = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, scorePose))
+        shot11 = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, scoreShot))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
         take1 = follower.pathBuilder()
-                .addPath(new BezierLine(scorePose, takePose_1))
+                .addPath(new BezierCurve(
+                        new Pose(88.000, 8.000, 0),
+                        new Pose(93.6201, 34.49, 0),
+                        new Pose(130.833, 60.514, 0)))
                 .setConstantHeadingInterpolation(startPose.getHeading())
+                .build();
+
+        shot12 = follower.pathBuilder()
+                .addPath(new BezierLine(takePose_1, scoreShot))
+                .setConstantHeadingInterpolation(takePose_1.getHeading())
                 .build();
         take2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                scorePose,
-                                new Pose(49.795, 54.922),
+                                scoreShot,
+                                new Pose(125.5587300, 21.2, Math.toRadians(-39.5)),
                                 takePose_2
                         )
                 )
-                .setConstantHeadingInterpolation(startPose.getHeading())
+                .setConstantHeadingInterpolation(scoreShot.getHeading())
                 .build();
-        score2 = follower.pathBuilder()
+        /*score2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 takePose_2,
-                                new Pose(49.795, 54.922),
-                                scorePose
+                                new Pose(94.205, 54.922),
+                                scoreShot
                         )
                 )
                 .setConstantHeadingInterpolation(startPose.getHeading())
@@ -112,32 +120,33 @@ public class Auto_Blue_Perto extends LinearOpMode {
         takeG1 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
-                                scorePose,
-                                new Pose(47.38, 66.82),
+                                scoreShot,
+                                new Pose(96.62, 66.82),
                                 takePose_Gate
                         )
                 )
-                .setLinearHeadingInterpolation(scorePose.getHeading(), takePose_Gate.getHeading())
+                .setLinearHeadingInterpolation(scoreShot.getHeading(), takePose_Gate.getHeading())
                 .build();
         scoreG1 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 takePose_Gate,
-                                new Pose(44.4, 68.86),
-                                scorePose
+                                new Pose(99.6, 68.86),
+                                scoreShot
                         )
                 )
-                .setLinearHeadingInterpolation(takePose_Gate.getHeading(), scorePose.getHeading())
+                .setLinearHeadingInterpolation(takePose_Gate.getHeading(), scoreShot.getHeading())
                 .build();
         out = follower.pathBuilder()
                 .addPath(new BezierLine(takePose_1, outPose))
                 .setConstantHeadingInterpolation(outPose.getHeading())
-                .build();
+                .build(); */
 
-        Command goScore_1 = follow(follower, score1);
+        Command goScore_1 = follow(follower, shot11);
         Command toTake_1 = follow(follower, take1);
+        Command goScore_2 = follow(follower, shot12);
         Command toTake_2 = follow(follower, take2);
-        Command goScore_2 = follow(follower, score2);
+        Command goScore_3 = follow(follower, score2);
         Command toGate_1 = follow(follower, takeG1);
         Command goScoreG_1 = follow(follower, scoreG1);
         Command outLine = follow(follower, out);
@@ -148,14 +157,14 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.55));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, 300, 0.5));
-        Command mirarF = instant(() -> encoder(tower, 180, 0.5));
+        Command mirar = instant(() -> encoder(tower, -410, 0.5));
+        Command mirarF = instant(() -> encoder(tower, -410, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1350));
         Command onShotL_F = instant(() -> l_left.setVelocity(1350));
-        Command onShotR_S = instant(() -> l_right.setVelocity(1450));
-        Command onShotL_S = instant(() -> l_left.setVelocity(1450));
+        Command onShotR_S = instant(() -> l_right.setVelocity(1780));
+        Command onShotL_S = instant(() -> l_left.setVelocity(1780));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
 
@@ -164,11 +173,11 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 onShotL_F
         );
 
-        Command toShot_F = parallel(
+        /*Command toShot_F = parallel(
                 goScore_1,
                 shot_on_F,
                 abrirTrava
-        );
+        ); */
 
         Command shot_on_S = parallel(
                 onShotR_S,
@@ -176,13 +185,17 @@ public class Auto_Blue_Perto extends LinearOpMode {
         );
 
         Command toShot_S = parallel(
-                goScore_2,
-                shot_on_S
+                //goScore_1,
+                shot_on_S,
+                abrirTrava
         );
 
         Command shot_off = parallel(
                 offShotR,
                 offShotL
+        );
+
+        Command disableR = parallel(
         );
 
         Command firstShot = sequential(
@@ -192,118 +205,61 @@ public class Auto_Blue_Perto extends LinearOpMode {
         );
 
         Command lastShot = sequential(
-                waitMs(800),
-                abrirTrava
+                waitMs(600),
+                abrirTrava,
+                onIntake
         );
 
         Command sequence = sequential(
                 parallel(
-                        toShot_F,
+                        toShot_S,
+                        mirar,
+                        firstShot,
+                        goScore_1
+                ),
+                waitMs(1500),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava
+                        )
+                ),
+                shot_off,
+                waitMs(1000),
+                offIntake,
+                waitMs(300),
+                parallel(
+                        toTake_1,
+                        onIntake
+                ),
+                waitMs(1000),
+                offIntake,
+                goScore_1,
+                waitMs(1000),
+                parallel(
+                        toShot_S,
                         mirar,
                         firstShot
                 ),
+                waitMs(1000),
                 parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
-                        race(
-                                toTake_2,
-                                waitMs(1750)
-                        )
-                ),
-                parallel(
-                        sequential(
-                                waitMs(800),
-                                offIntake
-                        ),
-                        toShot_S
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1100),
-                parallel(
-                        sequential(
-                                waitMs(300),
-                                fecharTrava
-                        ),
-                        race(
-                                toGate_1,
-                                waitMs(1750)
-                        )
-                ),
-                waitMs(1350),
-                parallel(
-                        sequential(
-                                waitMs(800),
-                                offIntake
-                        ),
-                        goScoreG_1
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1100),
-                parallel(
-                        sequential(
-                                waitMs(300),
-                                fecharTrava
-                        ),
-                        race(
-                                toGate_1,
-                                waitMs(1750)
-                        )
-                ),
-                waitMs(1450),
-                parallel(
-                        sequential(
-                                waitMs(800),
-                                offIntake
-                        ),
-                        goScoreG_1
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1250),
-                parallel(
-                        sequential(
-                                waitMs(300),
-                                fecharTrava
-                        ),
-                        race(
-                                toGate_1,
-                                waitMs(1750)
-                        )
-                ),
-                waitMs(1600),
-                parallel(
-                        sequential(
-                                waitMs(800),
-                                offIntake
-                        ),
-                        goScoreG_1
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1200),
-                parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
-                        race(
-                                toTake_1,
-                                waitMs(1500)
-                        ),
-                        mirarF
-                ),
-                parallel(
-                        lastShot,
-                        outLine
-                ),
-                waitMs(200),
-                parallel(
-                        shot_off,
-                        fecharTrava,
                         offIntake,
-                        zerar
-                )
-
+                        shot_off,
+                        fecharTrava
+                ),
+                parallel(
+                        onIntake,
+                        fecharTrava
+                ),
+                toTake_2,
+                goScore_1,
+                parallel(
+                        offIntake,
+                        shot_off,
+                        fecharTrava
+                ),
+                waitMs(1000),
+                zerar
+                
         );
 
         waitForStart();
@@ -327,3 +283,74 @@ public class Auto_Blue_Perto extends LinearOpMode {
         }
     }
 }
+
+                /*offIntake,
+                toShot_S,
+                onIntake,
+                waitMs(1050),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                //toGate_1,
+                                waitMs(1500)
+                        )
+                ),
+                waitMs(1450),
+                offIntake,
+                abrirTrava,
+               // goScoreG_1,
+                onIntake,
+                waitMs(1100),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                //toGate_1,
+                                waitMs(1500)
+                        )
+                ),
+                waitMs(1450),
+                parallel(
+                        offIntake//,
+                        //goScoreG_1
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1250),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                //toGate_1,
+                                waitMs(1500)
+                        )
+                ),
+                waitMs(1475),
+                parallel(
+                        offIntake//,
+                        //goScoreG_1
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1200),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                toTake_1,
+                                waitMs(1500)
+                        )
+                ),
+                parallel(
+                        offIntake,
+                        mirarF,
+                        lastShot//,
+                        //outLine
+                ),
+                waitMs(100),
+                parallel(
+                        offIntake,
+                        zerar,
+                        shot_off,
+                        fecharTrava */
