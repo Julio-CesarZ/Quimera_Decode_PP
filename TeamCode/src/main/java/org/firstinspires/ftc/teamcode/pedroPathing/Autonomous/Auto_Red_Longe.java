@@ -168,8 +168,8 @@ public class Auto_Red_Longe extends LinearOpMode {
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1350));
         Command onShotL_F = instant(() -> l_left.setVelocity(1350));
-        Command onShotR_S = instant(() -> l_right.setVelocity(1750));
-        Command onShotL_S = instant(() -> l_left.setVelocity(1750));
+        Command onShotR_S = instant(() -> l_right.setVelocity(1800));
+        Command onShotL_S = instant(() -> l_left.setVelocity(1800));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
 
@@ -228,12 +228,16 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 fecharTrava
                         )
                 ),
-                race(
-                        toTake_1,
-                        waitMs(5000)
+
+                toTake_1,
+                waitMs(1500),
+                parallel(
+                        toShot_S,
+                        mirar,
+                        firstShot,
+                        goScore_1
                 ),
-                //goScore_2,
-                waitMs(100),
+                waitMs(1000),
                 offIntake,
                 shot_off,
                 zerar
