@@ -31,8 +31,8 @@ public class Auto_Blue_Perto extends LinearOpMode {
     private final Pose scorePose = new Pose(46.88, 83.03, Math.toRadians(180));
     private final Pose takePose_1 = new Pose(18, 84.76, Math.toRadians(180));
     private final Pose takePose_2 = new Pose(10.5, 58, Math.toRadians(180));
-    private final Pose takePose_Gate = new Pose(13, 59, Math.toRadians(149.2));
-    private final Pose outPose = new Pose(60.17, 106.49, 0);
+    private final Pose takePose_Gate = new Pose(12.4, 59.45, Math.toRadians(149.2));
+    private final Pose outPose = new Pose(60.17, 106.49, Math.toRadians(180));
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
 
     @Override
@@ -148,7 +148,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.55));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, 320, 0.5));
+        Command mirar = instant(() -> encoder(tower, 300, 0.5));
         Command mirarF = instant(() -> encoder(tower, 150, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
@@ -177,8 +177,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
 
         Command toShot_S = parallel(
                 goScore_2,
-                shot_on_S,
-                abrirTrava
+                shot_on_S
         );
 
         Command shot_off = parallel(
@@ -193,9 +192,8 @@ public class Auto_Blue_Perto extends LinearOpMode {
         );
 
         Command lastShot = sequential(
-                waitMs(600),
-                abrirTrava,
-                onIntake
+                waitMs(400),
+                abrirTrava
         );
 
         Command sequence = sequential(
@@ -204,60 +202,82 @@ public class Auto_Blue_Perto extends LinearOpMode {
                         mirar,
                         firstShot
                 ),
-                waitMs(100),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava),
                         race(
                                 toTake_2,
-                                waitMs(1500)
+                                waitMs(1750)
                         )
                 ),
-                offIntake,
-                toShot_S,
-                onIntake,
-                waitMs(1050),
                 parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
-                        race(
-                                toGate_1,
-                                waitMs(1500)
-                        )
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
+                        toShot_S
                 ),
-                waitMs(1450),
-                offIntake,
                 abrirTrava,
-                goScoreG_1,
                 onIntake,
                 waitMs(1100),
                 parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
+                        sequential(
+                                waitMs(300),
+                                fecharTrava
+                        ),
                         race(
                                 toGate_1,
-                                waitMs(1500)
+                                waitMs(1750)
+                        )
+                ),
+                waitMs(1350),
+                parallel(
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
+                        goScoreG_1
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1100),
+                parallel(
+                        sequential(
+                                waitMs(300),
+                                fecharTrava
+                        ),
+                        race(
+                                toGate_1,
+                                waitMs(1750)
                         )
                 ),
                 waitMs(1450),
                 parallel(
-                        offIntake,
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
                         goScoreG_1
                 ),
                 abrirTrava,
                 onIntake,
                 waitMs(1250),
                 parallel(
-                        sequential(waitMs(300),
-                                fecharTrava),
+                        sequential(
+                                waitMs(300),
+                                fecharTrava
+                        ),
                         race(
                                 toGate_1,
-                                waitMs(1500)
+                                waitMs(1750)
                         )
                 ),
-                waitMs(1475),
+                waitMs(1600),
                 parallel(
-                        offIntake,
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
                         goScoreG_1
                 ),
                 abrirTrava,
@@ -272,17 +292,15 @@ public class Auto_Blue_Perto extends LinearOpMode {
                         )
                 ),
                 parallel(
-                        offIntake,
-                        mirarF,
                         lastShot,
+                        mirarF,
                         outLine
                 ),
-                waitMs(100),
                 parallel(
-                        offIntake,
-                        zerar,
                         shot_off,
-                        fecharTrava
+                        fecharTrava,
+                        offIntake,
+                        zerar
                 )
 
         );
