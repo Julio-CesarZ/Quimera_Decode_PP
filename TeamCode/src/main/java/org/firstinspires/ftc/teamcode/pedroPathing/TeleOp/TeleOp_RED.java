@@ -38,7 +38,6 @@ public class TeleOp_RED extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
-    boolean azul = false;
 
     private double velocityMultipleir = 0.9;
     private double tx = 0;
@@ -69,12 +68,6 @@ public class TeleOp_RED extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
-        if (azul) {
-            startingPoseTeleop = new Pose(33.53, 132.68, Math.toRadians(180));
-            centerGol = new Pose(0, 144);
-        }
-
         Follower follower = Constants.createFollower(hardwareMap);
         //follower.setStartingPose(center == null ? startingPoseTeleop : center);
         follower.setStartingPose(startingPoseTeleop);
@@ -110,7 +103,7 @@ public class TeleOp_RED extends LinearOpMode {
                 coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
         ));
 
-        tower.setDirection(DcMotorEx.Direction.REVERSE);
+        tower.setDirection(DcMotorEx.Direction.FORWARD);
         tower.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         tower.setTargetPosition(0);
         tower.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
@@ -119,13 +112,9 @@ public class TeleOp_RED extends LinearOpMode {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
-        limelight.start();
+        limelight.pipelineSwitch(0);
 
-        if (azul) {
-            limelight.pipelineSwitch(1);
-        } else {
-            limelight.pipelineSwitch(0);
-        }
+        limelight.start();
 
         s1.setPosition(positionS);
 
@@ -294,6 +283,7 @@ public class TeleOp_RED extends LinearOpMode {
                 if (!lF) {
                     if (modo_TorreA) {
                         target = Range.clip(torreAuto(x, y, heading), -limiteRotativo, limiteRotativo);
+
                         encoder(tower, target, towerP);
                     } else {
                         torreManual(tower);
@@ -420,7 +410,7 @@ public class TeleOp_RED extends LinearOpMode {
                 double pidOutput = (tx * kP) + (derivative * kD);
                 double power = Range.clip(Math.abs(pidOutput), 0.1, 1.0);
 
-                encoder(tower, -target, power);
+                encoder(tower, target, power);
 
                 lastTx = tx;
                 lastStamp = currentStamp;
@@ -463,111 +453,83 @@ public class TeleOp_RED extends LinearOpMode {
 
     // y > 120
     private final Waypoint[] pontosSituacao1 = {
-            new Waypoint(-145, -750), // Média de -170 a -120
-            new Waypoint(-90,  -525), // Média de -110 a -70
-            new Waypoint(-45,  -300), // Média de -65 a -25
-            new Waypoint(0,    -50),  // Média de -20 a 20
-            new Waypoint(45,   200),  // Média de 25 a 65
-            new Waypoint(90,   470),  // Média de 70 a 110
-            new Waypoint(147.5, 750)  // Média de 115 a 180
+            new Waypoint(-145, -750),
+            new Waypoint(-90, -525),
+            new Waypoint(-45, -300),
+            new Waypoint(0, -50),
+            new Waypoint(45, 200),
+            new Waypoint(90, 470),
+            new Waypoint(147.5, 750)
     };
 
     // y > 60 && x > 72
     private final Waypoint[] pontosSituacao2 = {
-            new Waypoint(-75,  -750), // Média de -90 a -60
-            new Waypoint(-45,  -550), // Média de -65 a -25
-            new Waypoint(0,    -225), // Média de -20 a 20
-            new Waypoint(45,   30),   // Média de 25 a 65
-            new Waypoint(90,   255),  // Média de 70 a 110
-            new Waypoint(135,  515),  // Média de 115 a 155
-            new Waypoint(212.5, 750)  // Média do limite composto (160 a -95 passando por 180) -> 160 a 265
+            new Waypoint(-75, -750),
+            new Waypoint(-45, -550),
+            new Waypoint(0, -225),
+            new Waypoint(45, 30),
+            new Waypoint(90, 255),
+            new Waypoint(135, 515),
+            new Waypoint(212.5, 750)
     };
 
     // y > 60 && x <= 72
     private final Waypoint[] pontosSituacao3 = {
-            new Waypoint(-117.5, -750), // Média de -135 a -100
-            new Waypoint(-67.5,  -425), // Média de -90 a -45
-            new Waypoint(0,      -130), // Média de -20 a 20
-            new Waypoint(45,     130),  // Média de 25 a 65
-            new Waypoint(90,     385),  // Média de 70 a 110
-            new Waypoint(135,    660),  // Média de 115 a 155
-            new Waypoint(195,    750)   // Média do limite composto (160 a -130 passando por 180) -> 160 a 230
+            new Waypoint(-117.5, -750),
+            new Waypoint(-67.5, -425),
+            new Waypoint(0, -130),
+            new Waypoint(45, 130),
+            new Waypoint(90, 385),
+            new Waypoint(135, 660),
+            new Waypoint(195, 750)
     };
 
     // y <= 50
     private final Waypoint[] pontosSituacao4 = {
-            new Waypoint(-102.5, -750), // Média de -135 a -70
-            new Waypoint(-45,    -650), // Média de -65 a -25
-            new Waypoint(0,      -350), // Média de -20 a 20
-            new Waypoint(45,     -100), // Média de 25 a 65
-            new Waypoint(90,     190),  // Média de 70 a 110
-            new Waypoint(140,    435),  // Média de 115 a 165
-            new Waypoint(192.5,  750)   // Média do limite composto (170 a -145 passando por 180) -> 170 a 215
+            new Waypoint(-102.5, -750),
+            new Waypoint(-45, -650),
+            new Waypoint(0, -350),
+            new Waypoint(45, -100),
+            new Waypoint(90, 190),
+            new Waypoint(140, 435),
+            new Waypoint(192.5, 750)
     };
-
-    private double normalizaAngulo(double angulo) {
-        while (angulo > 180) angulo -= 360;
-        while (angulo < -180) angulo += 360;
-        return angulo;
-    }
-
-    private int torreAuto(double x, double y, double heading) {
-        if (azul) {
-            heading = normalizaAngulo(heading + 180);
-
-            if (y > 120) {
-                target = -(int) interpola(pontosSituacao1, heading);
-
-            } else if (y > 60 && x <= 72) {
-                target = -(int) interpola(pontosSituacao2, heading);
-
-            } else if (y > 60 && x > 72) {
-                target = -(int) interpola(pontosSituacao3, heading);
-
-            } else if (y <= 50) {
-                double diff = Math.abs(heading - lastHeading);
-                if (diff > 180) diff = 360 - diff;
-
-                if (diff > Math.toRadians(45)) {
-                    target = -(int) interpola(pontosSituacao4, heading);
-                    lastHeading = heading;
-                }
-            }
-        } else {
-            if (y > 120) {
-                target = (int) interpola(pontosSituacao1, heading);
-
-            } else if (y > 60 && x <= 72) {
-                target = (int) interpola(pontosSituacao2, heading);
-
-            } else if (y > 60 && x > 72) {
-                target = (int) interpola(pontosSituacao3, heading);
-
-            } else if (y <= 50) {
-                double diff = Math.abs(heading - lastHeading);
-                if (diff > 180) diff = 360 - diff;
-
-                if (diff > Math.toRadians(45)) {
-                    target = (int) interpola(pontosSituacao4, heading);
-                    lastHeading = heading;
-                }
-            }
-        }
-
-        return Range.clip(target, -750, 750);
-    }
 
     private double interpola(Waypoint[] pontos, double heading) {
         if (heading <= pontos[0].heading) return pontos[0].target;
         if (heading >= pontos[pontos.length - 1].heading) return pontos[pontos.length - 1].target;
 
         for (int i = 0; i < pontos.length - 1; i++) {
-            if (heading >= pontos[i].heading && heading <= pontos[i+1].heading) {
-                double t = (heading - pontos[i].heading) / (pontos[i+1].heading - pontos[i].heading);
-                return pontos[i].target + t * (pontos[i+1].target - pontos[i].target);
+            if (heading >= pontos[i].heading && heading <= pontos[i + 1].heading) {
+                double t = (heading - pontos[i].heading) / (pontos[i + 1].heading - pontos[i].heading);
+                return pontos[i].target + t * (pontos[i + 1].target - pontos[i].target);
             }
         }
         return pontos[pontos.length - 1].target;
+    }
+
+    private int torreAuto(double x, double y, double heading) {
+
+        if (y > 120) {
+            target = (int) interpola(pontosSituacao1, heading);
+
+        } else if (y > 60 && x >= 72) {
+            target = (int) interpola(pontosSituacao2, heading);
+
+        } else if (y > 60 && x < 72) {
+            target = (int) interpola(pontosSituacao3, heading);
+
+        } else if (y <= 50) {
+            double diff = Math.abs(heading - lastHeading);
+            if (diff > 180) diff = 360 - diff;
+
+            if (diff > 45) {
+                target = (int) interpola(pontosSituacao4, heading);
+                lastHeading = heading;
+            }
+        }
+
+        return Range.clip(target, -750, 750);
     }
 
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {
