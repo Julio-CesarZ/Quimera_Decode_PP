@@ -1,38 +1,39 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous;
 
-import static com.pedropathing.ivy.Scheduler.schedule;
-import static com.pedropathing.ivy.commands.Commands.instant;
-import static com.pedropathing.ivy.commands.Commands.waitMs;
-import static com.pedropathing.ivy.groups.Groups.parallel;
-import static com.pedropathing.ivy.groups.Groups.sequential;
-import static com.pedropathing.ivy.pedro.PedroCommands.follow;
-
 import com.pedropathing.follower.Follower;
+import com.pedropathing.geometry.BezierCurve;
 import com.pedropathing.geometry.BezierLine;
 import com.pedropathing.geometry.Pose;
 import com.pedropathing.ivy.Command;
-import com.pedropathing.ivy.Scheduler;
 import com.pedropathing.paths.PathChain;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.pedropathing.ivy.Scheduler;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.pedropathing.geometry.BezierCurve;
+
+import static com.pedropathing.ivy.Scheduler.schedule;
+import static com.pedropathing.ivy.commands.Commands.*;
+import static com.pedropathing.ivy.groups.Groups.*;
+import static com.pedropathing.ivy.pedro.PedroCommands.follow;
+import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RED Auto - Longe 2.4", group = "Autonomous")
+@Autonomous(name = "RED Auto - Longe 3.12", group = "Test")
 public class Auto_Red_Longe extends LinearOpMode {
 
     Follower follower;
+
     private final Pose startPose = new Pose(80.1, 8.19, 0);
-    private final Pose scoreS1 = new Pose(80.1, 8.19, 0);
-    private final Pose takeB = new Pose(126.83, 34.51, 0);
-    private final Pose scoreS2 = new Pose(126.83, 34.51, 0);
-    //private final Pose Shot1Pose = new Pose(80.1, 8.19, 0);
-    PathChain scorePreload, shot20 , take21;
+    private final Pose scoreShot = new Pose(80.20, 20.19, 0);
+    private final Pose takePose_1 = new Pose(126.83, 36.51, 0);
+    //private final Pose takePose_2 = new Pose(126.5, 36.51, 0);
+    //private final Pose takePose_Gate = new Pose(131, 59, Math.toRadians(30.8));
+    //private final Pose outPose = new Pose(83.83, 106.49, 0);
+    PathChain shot11, take1, shot12, take2, score2, takeG1, scoreG1, out;
 
     @Override
     public void runOpMode() {
@@ -78,47 +79,120 @@ public class Auto_Red_Longe extends LinearOpMode {
         tower.setPower(0);
         tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        s1.setPosition(0.82);
+        s1.setPosition(0.63);
 
-        scorePreload = follower.pathBuilder()
-                .addPath(new BezierLine(startPose, scoreS1))
+        shot11 = follower.pathBuilder()
+                .addPath(new BezierLine(startPose, scoreShot))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
-        shot20 = follower.pathBuilder()
+        take1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                                new Pose(88.000, 8.000, 0),
-                                new Pose(93.6201, 43.49, 0),
-                                new Pose(126.833, 34.514, 0)))
+                        new Pose(88.000, 8.000, 0),
+                        new Pose(93.6201, 45.49, 0),
+                        new Pose(95.6201, 46.56, 0),
+                        new Pose(125.833, 36.514, 0)))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
-        take21 = follower.pathBuilder()
+
+        shot12 = follower.pathBuilder()
                 .addPath(new BezierCurve(
-                                new Pose(126.833, 34.514, 0),
-                                new Pose(93.6201, 43.49, 0),
-                                new Pose(88.000, 8.000, 0)))
+                        new Pose(125.833, 36.514, 0),
+                        new Pose(95.6201, 46.56, 0),
+                        new Pose(93.6201, 45.49, 0),
+                        new Pose(88.000, 8.000, 0)))
+                .setConstantHeadingInterpolation(takePose_1.getHeading())
+                .build();
+        /*take2 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                scoreShot,
+                                new Pose(94.205, 54.922),
+                                takePose_2
+                        )
+                )
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+        score2 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                takePose_2,
+                                new Pose(94.205, 54.922),
+                                scoreShot
+                        )
+                )
+                .setConstantHeadingInterpolation(startPose.getHeading())
+                .build();
+        takeG1 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                scoreShot,
+                                new Pose(96.62, 66.82),
+                                takePose_Gate
+                        )
+                )
+                .setLinearHeadingInterpolation(scoreShot.getHeading(), takePose_Gate.getHeading())
+                .build();
+        scoreG1 = follower.pathBuilder()
+                .addPath(
+                        new BezierCurve(
+                                takePose_Gate,
+                                new Pose(99.6, 68.86),
+                                scoreShot
+                        )
+                )
+                .setLinearHeadingInterpolation(takePose_Gate.getHeading(), scoreShot.getHeading())
+                .build();
+        out = follower.pathBuilder()
+                .addPath(new BezierLine(takePose_1, outPose))
+                .setConstantHeadingInterpolation(outPose.getHeading())
+                .build(); */
 
-
-        Command goScore = follow(follower, scorePreload);
-        Command toTake_1 = follow(follower, take21);
+        Command goScore_1 = follow(follower, shot11);
+        Command toTake_1 = follow(follower, take1);
+        Command goScore_2 = follow(follower, shot12);
+        Command toTake_2 = follow(follower, take2);
+        Command goScore_3 = follow(follower, score2);
+        Command toGate_1 = follow(follower, takeG1);
+        Command goScoreG_1 = follow(follower, scoreG1);
+        Command outLine = follow(follower, out);
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
 
-        Command abrirTrava = instant(() -> s1.setPosition(0.6));
-        Command fecharTrava = instant(() -> s1.setPosition(0.82));
+        Command abrirTrava = instant(() -> s1.setPosition(0.55));
+        Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, -420, 0.5));
+        Command mirar = instant(() -> encoder(tower, -410, 0.5));
+        Command mirarF = instant(() -> encoder(tower, -410, 0.5));
+        Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(1450));
-        Command onShotL = instant(() -> l_left.setVelocity(1450));
+        Command onShotR_F = instant(() -> l_right.setVelocity(1350));
+        Command onShotL_F = instant(() -> l_left.setVelocity(1350));
+        Command onShotR_S = instant(() -> l_right.setVelocity(1800));
+        Command onShotL_S = instant(() -> l_left.setVelocity(1800));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
 
-        Command shot_on = parallel(
-                onShotR,
-                onShotL
+        Command shot_on_F = parallel(
+                onShotR_F,
+                onShotL_F
+        );
+
+        /*Command toShot_F = parallel(
+                goScore_1,
+                shot_on_F,
+                abrirTrava
+        ); */
+
+        Command shot_on_S = parallel(
+                onShotR_S,
+                onShotL_S
+        );
+
+        Command toShot_S = parallel(
+                //goScore_1,
+                shot_on_S,
+                abrirTrava
         );
 
         Command shot_off = parallel(
@@ -126,29 +200,48 @@ public class Auto_Red_Longe extends LinearOpMode {
                 offShotL
         );
 
-        Command toShot = parallel(
-               goScore,
-                shot_on,
-                abrirTrava
+        Command disableR = parallel(
+        );
+
+        Command firstShot = sequential(
+                waitMs(900),
+                abrirTrava,
+                onIntake
+        );
+
+        Command lastShot = sequential(
+                waitMs(600),
+                abrirTrava,
+                onIntake
         );
 
         Command sequence = sequential(
                 parallel(
-                        toShot,
-                        mirar
+                        toShot_S,
+                        mirar,
+                        firstShot,
+                        goScore_1
                 ),
-                onIntake,
-                waitMs(2000),
-                shot_off,
-                fecharTrava,
+                waitMs(2500),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava
+                        )
+                ),
+
                 toTake_1,
+                waitMs(1500),
+                parallel(
+                        toShot_S,
+                        mirar,
+                        firstShot,
+                        goScore_1
+                ),
+                waitMs(1000),
                 offIntake,
-                toShot,
-                onIntake,
-                waitMs(2000),
                 shot_off,
-                fecharTrava,
-                offIntake
+                zerar
+                
         );
 
         waitForStart();
@@ -156,11 +249,15 @@ public class Auto_Red_Longe extends LinearOpMode {
         schedule(sequence);
 
         while (opModeIsActive()) {
-            // Run the scheduler each loop
             follower.update();
             Scheduler.execute();
+            telemetry.addData("x", follower.getPose().getX());
+            telemetry.addData("y", follower.getPose().getY());
+            telemetry.addData("heading", follower.getPose().getHeading());
+            telemetry.update();
         }
     }
+
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {
         if (motor.getMode() == DcMotorEx.RunMode.RUN_TO_POSITION) {
             motor.setTargetPosition(novoAlvo);
@@ -169,3 +266,73 @@ public class Auto_Red_Longe extends LinearOpMode {
     }
 }
 
+                /*offIntake,
+                toShot_S,
+                onIntake,
+                waitMs(1050),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                //toGate_1,
+                                waitMs(1500)
+                        )
+                ),
+                waitMs(1450),
+                offIntake,
+                abrirTrava,
+               // goScoreG_1,
+                onIntake,
+                waitMs(1100),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                //toGate_1,
+                                waitMs(1500)
+                        )
+                ),
+                waitMs(1450),
+                parallel(
+                        offIntake//,
+                        //goScoreG_1
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1250),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                //toGate_1,
+                                waitMs(1500)
+                        )
+                ),
+                waitMs(1475),
+                parallel(
+                        offIntake//,
+                        //goScoreG_1
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1200),
+                parallel(
+                        sequential(waitMs(300),
+                                fecharTrava),
+                        race(
+                                toTake_1,
+                                waitMs(1500)
+                        )
+                ),
+                parallel(
+                        offIntake,
+                        mirarF,
+                        lastShot//,
+                        //outLine
+                ),
+                waitMs(100),
+                parallel(
+                        offIntake,
+                        zerar,
+                        shot_off,
+                        fecharTrava */
