@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -109,7 +110,7 @@ public class TeleOp_RED extends LinearOpMode {
                 coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
         ));
 
-        tower.setDirection(DcMotorEx.Direction.FORWARD);
+        tower.setDirection(DcMotorEx.Direction.REVERSE);
         tower.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         tower.setTargetPosition(0);
         tower.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
@@ -313,9 +314,9 @@ public class TeleOp_RED extends LinearOpMode {
 
             if (modo_ShotPA) {
                 if (y < 15) {
-                    shotP = (int) ticks + 70;
-                } else if (y > 80) {
-                    shotP = (int) ticks - 120;
+                    shotP = (int) ticks + 200;
+                } else if (y >= 15 && y < 40) {
+                    shotP = (int) ticks + 100;
                 } else {
                     shotP = (int) ticks;
                 }
@@ -419,7 +420,7 @@ public class TeleOp_RED extends LinearOpMode {
                 double pidOutput = (tx * kP) + (derivative * kD);
                 double power = Range.clip(Math.abs(pidOutput), 0.1, 1.0);
 
-                encoder(tower, target, power);
+                encoder(tower, -target, power);
 
                 lastTx = tx;
                 lastStamp = currentStamp;
@@ -513,24 +514,43 @@ public class TeleOp_RED extends LinearOpMode {
     private int torreAuto(double x, double y, double heading) {
         if (azul) {
             heading = normalizaAngulo(heading + 180);
-        }
 
-        if (y > 120) {
-            target = (int) interpola(pontosSituacao1, heading);
+            if (y > 120) {
+                target = -(int) interpola(pontosSituacao1, heading);
 
-        } else if (y > 60 && x <= 72) {
-            target = (int) interpola(pontosSituacao2, heading);
+            } else if (y > 60 && x <= 72) {
+                target = -(int) interpola(pontosSituacao2, heading);
 
-        } else if (y > 60 && x > 72) {
-            target = (int) interpola(pontosSituacao3, heading);
+            } else if (y > 60 && x > 72) {
+                target = -(int) interpola(pontosSituacao3, heading);
 
-        } else if (y <= 50) {
-            double diff = Math.abs(heading - lastHeading);
-            if (diff > 180) diff = 360 - diff;
+            } else if (y <= 50) {
+                double diff = Math.abs(heading - lastHeading);
+                if (diff > 180) diff = 360 - diff;
 
-            if (diff > Math.toRadians(45)) {
-                target = (int) interpola(pontosSituacao4, heading);
-                lastHeading = heading;
+                if (diff > Math.toRadians(45)) {
+                    target = -(int) interpola(pontosSituacao4, heading);
+                    lastHeading = heading;
+                }
+            }
+        } else {
+            if (y > 120) {
+                target = (int) interpola(pontosSituacao1, heading);
+
+            } else if (y > 60 && x <= 72) {
+                target = (int) interpola(pontosSituacao2, heading);
+
+            } else if (y > 60 && x > 72) {
+                target = (int) interpola(pontosSituacao3, heading);
+
+            } else if (y <= 50) {
+                double diff = Math.abs(heading - lastHeading);
+                if (diff > 180) diff = 360 - diff;
+
+                if (diff > Math.toRadians(45)) {
+                    target = (int) interpola(pontosSituacao4, heading);
+                    lastHeading = heading;
+                }
             }
         }
 
