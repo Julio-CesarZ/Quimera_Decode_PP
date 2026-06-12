@@ -149,7 +149,7 @@ public class Auto_Red_Perto extends LinearOpMode {
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
         Command mirar = instant(() -> encoder(tower, -300, 0.5));
-        Command mirarF = instant(() -> encoder(tower, -150, 0.5));
+        Command mirarF = instant(() -> encoder(tower, -180, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1350));
@@ -192,7 +192,7 @@ public class Auto_Red_Perto extends LinearOpMode {
         );
 
         Command lastShot = sequential(
-                waitMs(400),
+                waitMs(600),
                 abrirTrava
         );
 
@@ -289,11 +289,11 @@ public class Auto_Red_Perto extends LinearOpMode {
                         race(
                                 toTake_1,
                                 waitMs(1500)
-                        )
+                        ),
+                        mirarF
                 ),
                 parallel(
                         lastShot,
-                        mirarF,
                         outLine
                 ),
                 parallel(
