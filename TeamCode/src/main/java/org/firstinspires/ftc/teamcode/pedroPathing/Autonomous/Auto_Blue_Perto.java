@@ -192,7 +192,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
         );
 
         Command lastShot = sequential(
-                waitMs(600),
+                waitMs(800),
                 abrirTrava
         );
 
