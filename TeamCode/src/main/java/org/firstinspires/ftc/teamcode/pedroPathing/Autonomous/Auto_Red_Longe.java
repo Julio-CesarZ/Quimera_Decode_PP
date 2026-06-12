@@ -29,8 +29,8 @@ public class Auto_Red_Longe extends LinearOpMode {
 
     private final Pose startPose = new Pose(80.1, 8.19, 0);
     private final Pose scoreShot = new Pose(80.20, 20.19, 0);
-    private final Pose takePose_1 = new Pose(126.83, 36.51, 0);
-    //private final Pose takePose_2 = new Pose(126.5, 36.51, 0);
+    private final Pose takePose_1 = new Pose(128.83, 35.51, 0);
+    private final Pose takePose_2 = new Pose(130.2, 5.51, Math.toRadians(-39.5));
     //private final Pose takePose_Gate = new Pose(131, 59, Math.toRadians(30.8));
     //private final Pose outPose = new Pose(83.83, 106.49, 0);
     PathChain shot11, take1, shot12, take2, score2, takeG1, scoreG1, out;
@@ -88,31 +88,26 @@ public class Auto_Red_Longe extends LinearOpMode {
         take1 = follower.pathBuilder()
                 .addPath(new BezierCurve(
                         new Pose(88.000, 8.000, 0),
-                        new Pose(93.6201, 45.49, 0),
-                        new Pose(95.6201, 46.56, 0),
-                        new Pose(125.833, 36.514, 0)))
+                        new Pose(93.6201, 34.49, 0),
+                        new Pose(130.833, 60.514, 0)))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
 
         shot12 = follower.pathBuilder()
-                .addPath(new BezierCurve(
-                        new Pose(125.833, 36.514, 0),
-                        new Pose(95.6201, 46.56, 0),
-                        new Pose(93.6201, 45.49, 0),
-                        new Pose(88.000, 8.000, 0)))
+                .addPath(new BezierLine(takePose_1, scoreShot))
                 .setConstantHeadingInterpolation(takePose_1.getHeading())
                 .build();
-        /*take2 = follower.pathBuilder()
+        take2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 scoreShot,
-                                new Pose(94.205, 54.922),
+                                new Pose(125.5587300, 21.2, Math.toRadians(-39.5)),
                                 takePose_2
                         )
                 )
-                .setConstantHeadingInterpolation(startPose.getHeading())
+                .setConstantHeadingInterpolation(scoreShot.getHeading())
                 .build();
-        score2 = follower.pathBuilder()
+        /*score2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 takePose_2,
@@ -168,8 +163,8 @@ public class Auto_Red_Longe extends LinearOpMode {
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1350));
         Command onShotL_F = instant(() -> l_left.setVelocity(1350));
-        Command onShotR_S = instant(() -> l_right.setVelocity(1800));
-        Command onShotL_S = instant(() -> l_left.setVelocity(1800));
+        Command onShotR_S = instant(() -> l_right.setVelocity(1780));
+        Command onShotL_S = instant(() -> l_left.setVelocity(1780));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
 
@@ -222,24 +217,47 @@ public class Auto_Red_Longe extends LinearOpMode {
                         firstShot,
                         goScore_1
                 ),
-                waitMs(2500),
+                waitMs(1500),
                 parallel(
                         sequential(waitMs(300),
                                 fecharTrava
                         )
                 ),
-
-                toTake_1,
-                waitMs(1500),
+                shot_off,
+                waitMs(1000),
+                offIntake,
+                waitMs(300),
                 parallel(
-                        toShot_S,
-                        mirar,
-                        firstShot,
-                        goScore_1
+                        toTake_1,
+                        onIntake
                 ),
                 waitMs(1000),
                 offIntake,
-                shot_off,
+                goScore_1,
+                waitMs(1000),
+                parallel(
+                        toShot_S,
+                        mirar,
+                        firstShot
+                ),
+                waitMs(1000),
+                parallel(
+                        offIntake,
+                        shot_off,
+                        fecharTrava
+                ),
+                parallel(
+                        onIntake,
+                        fecharTrava
+                ),
+                toTake_2,
+                goScore_1,
+                parallel(
+                        offIntake,
+                        shot_off,
+                        fecharTrava
+                ),
+                waitMs(1000),
                 zerar
                 
         );
