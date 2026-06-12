@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -15,7 +16,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp RED 🔴", group = "TeleOp")
+@TeleOp(name = "TeleOp RED", group = "TeleOp")
 public class TeleOp_RED extends LinearOpMode {
 
     boolean intervalo_a = false;
@@ -37,6 +38,7 @@ public class TeleOp_RED extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
+    boolean azul = false;
 
     private double velocityMultipleir = 0.9;
     private double tx = 0;
@@ -48,7 +50,7 @@ public class TeleOp_RED extends LinearOpMode {
     final double kP = 0.1;
     final double kD = 0.035;
     final double towerP = 0.5;
-    private int shotP = 1450;
+    private int shotP = 0;
     private int change = 0;
     private int target = 0;
     final int maxChangeTick = 10;
@@ -62,12 +64,16 @@ public class TeleOp_RED extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private final Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
-    //private final Pose startingPoseTeleop = new Pose(94, 71, 0);
-    private final Pose centerGol = new Pose(144, 144);
+    private Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    private Pose centerGol = new Pose(144, 144);
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        if (azul) {
+            startingPoseTeleop = new Pose(33.53, 132.68, Math.toRadians(180));
+            centerGol = new Pose(0, 144);
+        }
 
         Follower follower = Constants.createFollower(hardwareMap);
         //follower.setStartingPose(center == null ? startingPoseTeleop : center);
@@ -97,14 +103,14 @@ public class TeleOp_RED extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d * 1.3, coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
         ));
 
         l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d * 1.3, coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
         ));
 
-        tower.setDirection(DcMotorEx.Direction.FORWARD);
+        tower.setDirection(DcMotorEx.Direction.REVERSE);
         tower.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         tower.setTargetPosition(0);
         tower.setMode(DcMotorEx.RunMode.RUN_TO_POSITION);
@@ -114,7 +120,12 @@ public class TeleOp_RED extends LinearOpMode {
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
         limelight.start();
-        limelight.pipelineSwitch(0);
+
+        if (azul) {
+            limelight.pipelineSwitch(1);
+        } else {
+            limelight.pipelineSwitch(0);
+        }
 
         s1.setPosition(positionS);
 
@@ -182,7 +193,7 @@ public class TeleOp_RED extends LinearOpMode {
 
             double distanciaM = Math.hypot(x - xGol, y - yGol) / 39.37;
 
-            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.179, 0.075, 1.1) * 28) / 60;
+            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.079, 0.075, 1.1) * 28) / 60;
 
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
@@ -201,16 +212,9 @@ public class TeleOp_RED extends LinearOpMode {
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
             if (lF || gamepad1.left_trigger > 0.3) {
-                if (y < 48) {
-                    if (elapsedIntervaloServo.seconds() > 0.8) {
-                        positionS = 0.55;
-                        s1.setPosition(positionS);
-                    }
-                } else {
-                    if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 200 >= shotP && velocityAtual - 200 <= shotP) {
-                        positionS = 0.55;
-                        s1.setPosition(positionS);
-                    }
+                if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 100 >= shotP && velocityAtual - 100 <= shotP) {
+                    positionS = 0.55;
+                    s1.setPosition(positionS);
                 }
             } else {
                 positionS = 0.63;
@@ -309,14 +313,15 @@ public class TeleOp_RED extends LinearOpMode {
             intervalo_stick = sticksPressionados;
 
             if (modo_ShotPA) {
-                //shotPA(x, y);
-                shotP = (int) ticks;
+                if (y < 15) {
+                    shotP = (int) ticks + 200;
+                } else if (y >= 15 && y < 40) {
+                    shotP = (int) ticks + 100;
+                } else {
+                    shotP = (int) ticks;
+                }
                 if (lF) {
-                    if (y < 48) {
-                        velocityAtual = shotP + 100;
-                    } else {
-                        velocityAtual = shotP;
-                    }
+                    velocityAtual = shotP;
                 }
             }
 
@@ -415,7 +420,7 @@ public class TeleOp_RED extends LinearOpMode {
                 double pidOutput = (tx * kP) + (derivative * kD);
                 double power = Range.clip(Math.abs(pidOutput), 0.1, 1.0);
 
-                encoder(tower, target, power);
+                encoder(tower, -target, power);
 
                 lastTx = tx;
                 lastStamp = currentStamp;
@@ -499,24 +504,53 @@ public class TeleOp_RED extends LinearOpMode {
             new Waypoint(140,    435),  // Média de 115 a 165
             new Waypoint(192.5,  750)   // Média do limite composto (170 a -145 passando por 180) -> 170 a 215
     };
+
+    private double normalizaAngulo(double angulo) {
+        while (angulo > 180) angulo -= 360;
+        while (angulo < -180) angulo += 360;
+        return angulo;
+    }
+
     private int torreAuto(double x, double y, double heading) {
+        if (azul) {
+            heading = normalizaAngulo(heading + 180);
 
-        if (y > 120) {
-            target = (int) interpola(pontosSituacao1, heading);
+            if (y > 120) {
+                target = -(int) interpola(pontosSituacao1, heading);
 
-        } else if (y > 60 && x > 72) {
-            target = (int) interpola(pontosSituacao2, heading);
+            } else if (y > 60 && x <= 72) {
+                target = -(int) interpola(pontosSituacao2, heading);
 
-        } else if (y > 60 && x <= 72) {
-            target = (int) interpola(pontosSituacao3, heading);
+            } else if (y > 60 && x > 72) {
+                target = -(int) interpola(pontosSituacao3, heading);
 
-        } else if (y <= 50) {
-            double diff = Math.abs(heading - lastHeading);
-            if (diff > 180) diff = 360 - diff;
+            } else if (y <= 50) {
+                double diff = Math.abs(heading - lastHeading);
+                if (diff > 180) diff = 360 - diff;
 
-            if (diff > Math.toRadians(45)) {
-                target = (int) interpola(pontosSituacao4, heading);
-                lastHeading = heading;
+                if (diff > Math.toRadians(45)) {
+                    target = -(int) interpola(pontosSituacao4, heading);
+                    lastHeading = heading;
+                }
+            }
+        } else {
+            if (y > 120) {
+                target = (int) interpola(pontosSituacao1, heading);
+
+            } else if (y > 60 && x <= 72) {
+                target = (int) interpola(pontosSituacao2, heading);
+
+            } else if (y > 60 && x > 72) {
+                target = (int) interpola(pontosSituacao3, heading);
+
+            } else if (y <= 50) {
+                double diff = Math.abs(heading - lastHeading);
+                if (diff > 180) diff = 360 - diff;
+
+                if (diff > Math.toRadians(45)) {
+                    target = (int) interpola(pontosSituacao4, heading);
+                    lastHeading = heading;
+                }
             }
         }
 
@@ -530,7 +564,6 @@ public class TeleOp_RED extends LinearOpMode {
         for (int i = 0; i < pontos.length - 1; i++) {
             if (heading >= pontos[i].heading && heading <= pontos[i+1].heading) {
                 double t = (heading - pontos[i].heading) / (pontos[i+1].heading - pontos[i].heading);
-
                 return pontos[i].target + t * (pontos[i+1].target - pontos[i].target);
             }
         }
