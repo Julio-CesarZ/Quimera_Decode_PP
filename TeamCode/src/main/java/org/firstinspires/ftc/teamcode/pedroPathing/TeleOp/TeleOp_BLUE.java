@@ -204,7 +204,7 @@ public class TeleOp_BLUE extends LinearOpMode {
 
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 100 >= shotP && velocityAtual - 100 <= shotP) {
-                    positionS = 0.55;
+                    positionS = 0.52;
                     s1.setPosition(positionS);
                 }
             } else {
@@ -305,9 +305,9 @@ public class TeleOp_BLUE extends LinearOpMode {
             intervalo_stick = sticksPressionados;
 
             if (modo_ShotPA) {
-                if (y < 15) {
-                    shotP = (int) ticks + 200;
-                } else if (y >= 15 && y < 40) {
+                if (y < 20) {
+                    shotP = (int) ticks + 250;
+                } else if (y >= 20 && y < 40) {
                     shotP = (int) ticks + 100;
                 } else {
                     shotP = (int) ticks;

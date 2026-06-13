@@ -63,8 +63,8 @@ public class TeleOp_RED extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
-    private Pose centerGol = new Pose(144, 144);
+    private final Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    private final Pose centerGol = new Pose(144, 144);
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -112,9 +112,8 @@ public class TeleOp_RED extends LinearOpMode {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
-        limelight.pipelineSwitch(0);
-
         limelight.start();
+        limelight.pipelineSwitch(0);
 
         s1.setPosition(positionS);
 
@@ -202,7 +201,7 @@ public class TeleOp_RED extends LinearOpMode {
 
             if (lF || gamepad1.left_trigger > 0.3) {
                 if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 100 >= shotP && velocityAtual - 100 <= shotP) {
-                    positionS = 0.55;
+                    positionS = 0.52;
                     s1.setPosition(positionS);
                 }
             } else {
@@ -303,9 +302,9 @@ public class TeleOp_RED extends LinearOpMode {
             intervalo_stick = sticksPressionados;
 
             if (modo_ShotPA) {
-                if (y < 15) {
-                    shotP = (int) ticks + 200;
-                } else if (y >= 15 && y < 40) {
+                if (y < 20) {
+                    shotP = (int) ticks + 250;
+                } else if (y >= 20 && y < 40) {
                     shotP = (int) ticks + 100;
                 } else {
                     shotP = (int) ticks;

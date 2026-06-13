@@ -22,7 +22,7 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RED Auto - Longe", group = "Auto")
+@Autonomous(name = "RED Auto - Longe (Gu)", group = "Auto")
 public class Auto_Red_Longe_Gu extends LinearOpMode {
 
     Follower follower;

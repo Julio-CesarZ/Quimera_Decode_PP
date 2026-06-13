@@ -145,7 +145,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
 
-        Command abrirTrava = instant(() -> s1.setPosition(0.55));
+        Command abrirTrava = instant(() -> s1.setPosition(0.52));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
         Command mirar = instant(() -> encoder(tower, 300, 0.5));
