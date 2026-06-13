@@ -22,20 +22,20 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "RED Auto - Longe", group = "Auto")
-public class Auto_Red_Longe extends LinearOpMode {
+@Autonomous(name = "BLUE Auto - Longe", group = "Auto")
+public class Auto_Blue_Longe extends LinearOpMode {
 
     Follower follower;
 
-    private final Pose startPose = new Pose(89.17, 8.27, 0);
-    private final Pose scorePose = new Pose(89.62, 17.31, 0);
-    private final Pose takePose_3 = new Pose(135.5, 35.86, 0);
-    private final Pose takePose_Canto = new Pose(132.06, 16.41, Math.toRadians(-17.47));
-    private final Pose takePose_CantoX = new Pose(132.41, 10.03, Math.toRadians(-9.04));
-    private final Pose takePose_CantoX_R = new Pose(101.12, 11.08, Math.toRadians(0));
-    private final Pose takePose_CantoX_R_2 = new Pose(121.12, 11.08, Math.toRadians(0));
-    private final Pose cycleTakePose = new Pose(134, 24, Math.toRadians(-20));
-    private final Pose outPose = new Pose(87, 36.05, 0);
+    private final Pose startPose = new Pose(54.83, 8.27, 0);
+    private final Pose scorePose = new Pose(54.38, 17.31, 0);
+    private final Pose takePose_3 = new Pose(8.5, 35.86, 0);
+    private final Pose takePose_Canto = new Pose(11.59, 16.41, Math.toRadians(-162.53));
+    private final Pose takePose_CantoX = new Pose(11.59, 10.03, Math.toRadians(-170.96));
+    private final Pose takePose_CantoX_R = new Pose(42.88, 11.08, Math.toRadians(0));
+    private final Pose takePose_CantoX_R_2 = new Pose(22.88, 11.08, Math.toRadians(0));
+    private final Pose cycleTakePose = new Pose(10, 24, Math.toRadians(-160));
+    private final Pose outPose = new Pose(57, 36.05, 0);
     PathChain scoreF, take3, takeCanto, takeX, score3, scoreX, takeX_R, takeX_R_2, cycleTake, cycleScore, outLine;
 
     @Override
@@ -92,7 +92,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(86.51, 39.35),
+                                new Pose(57.49, 39.35),
                                 takePose_3
                         )
                 )
@@ -126,7 +126,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(114.89, 31.49),
+                                new Pose(29.11, 31.49),
                                 cycleTakePose
                         )
                 )
@@ -159,7 +159,7 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.52));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, -405, 0.5));
+        Command mirar = instant(() -> encoder(tower, 405, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
         Command onShotR = instant(() -> l_right.setVelocity(1850));

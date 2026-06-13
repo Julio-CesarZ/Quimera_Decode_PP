@@ -38,6 +38,7 @@ public class TeleOp_BLUE extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
+    boolean azul = true;
 
     private double velocityMultipleir = 0.9;
     private double tx = 0;
@@ -63,11 +64,17 @@ public class TeleOp_BLUE extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private final Pose startingPoseTeleop = new Pose(33.53, 132.68, Math.toRadians(180));
-    private final Pose centerGol = new Pose(0, 144);
+    private Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    private Pose centerGol = new Pose(144, 144);
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        if (azul) {
+            startingPoseTeleop = new Pose(33.53, 132.68, Math.toRadians(180));
+            centerGol = new Pose(0, 144);
+        }
+
         Follower follower = Constants.createFollower(hardwareMap);
         //follower.setStartingPose(center == null ? startingPoseTeleop : center);
         follower.setStartingPose(startingPoseTeleop);
@@ -96,11 +103,11 @@ public class TeleOp_BLUE extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.7
         ));
 
         l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.7
         ));
 
         tower.setDirection(DcMotorEx.Direction.FORWARD);
@@ -112,7 +119,12 @@ public class TeleOp_BLUE extends LinearOpMode {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
-        limelight.pipelineSwitch(1);
+
+        if (azul) {
+            limelight.pipelineSwitch(1);
+        } else {
+            limelight.pipelineSwitch(0);
+        }
 
         limelight.start();
 

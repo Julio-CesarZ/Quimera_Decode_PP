@@ -38,6 +38,7 @@ public class TeleOp_RED extends LinearOpMode {
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
+    boolean azul = false;
 
     private double velocityMultipleir = 0.9;
     private double tx = 0;
@@ -63,11 +64,17 @@ public class TeleOp_RED extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private final Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
-    private final Pose centerGol = new Pose(144, 144);
+    private Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    private Pose centerGol = new Pose(144, 144);
 
     @Override
     public void runOpMode() throws InterruptedException {
+
+        if (azul) {
+            startingPoseTeleop = new Pose(33.53, 132.68, Math.toRadians(180));
+            centerGol = new Pose(0, 144);
+        }
+
         Follower follower = Constants.createFollower(hardwareMap);
         //follower.setStartingPose(center == null ? startingPoseTeleop : center);
         follower.setStartingPose(startingPoseTeleop);
@@ -96,11 +103,11 @@ public class TeleOp_RED extends LinearOpMode {
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
+                coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.7
         ));
 
         l_left.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
-                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.5
+                coefficientsLeftMotor.p, coefficientsLeftMotor.i, coefficientsLeftMotor.d, coefficientsLeftMotor.f * 1.7
         ));
 
         tower.setDirection(DcMotorEx.Direction.FORWARD);
@@ -112,8 +119,14 @@ public class TeleOp_RED extends LinearOpMode {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
         limelight.setPollRateHz(50);
+
+        if (azul) {
+            limelight.pipelineSwitch(1);
+        } else {
+            limelight.pipelineSwitch(0);
+        }
+
         limelight.start();
-        limelight.pipelineSwitch(0);
 
         s1.setPosition(positionS);
 
@@ -172,7 +185,9 @@ public class TeleOp_RED extends LinearOpMode {
         while (opModeIsActive()) {
             follower.update();
 
-            double heading = Math.toDegrees(follower.getPose().getHeading());
+            double rawHeading = Math.toDegrees(follower.getPose().getHeading());
+            double heading = (rawHeading % 360 + 360) % 360;
+
             double x = follower.getPose().getX();
             double y = follower.getPose().getY();
 
@@ -200,7 +215,7 @@ public class TeleOp_RED extends LinearOpMode {
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
             if (lF || gamepad1.left_trigger > 0.3) {
-                if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 100 >= shotP && velocityAtual - 100 <= shotP) {
+                if (elapsedIntervaloServo.seconds() > 1 && velocityAtual + 200 >= shotP && velocityAtual - 200 <= shotP) {
                     positionS = 0.52;
                     s1.setPosition(positionS);
                 }
@@ -216,8 +231,15 @@ public class TeleOp_RED extends LinearOpMode {
             } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
                 velocityAtual = 0;
                 lF = false;
+                intake.setPower(0);
+                intakeF = false;
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
+
+            if (elapsedIntervaloServo.seconds() > 1.2 && lF) {
+                intake.setPower(intakeP);
+                intakeF = true;
+            }
 
             if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
                 l_right.setVelocity(velocityAtual);
@@ -259,7 +281,7 @@ public class TeleOp_RED extends LinearOpMode {
             }
             intervalo_a = gamepad1.a;
 
-            double intervaloSS = 300;
+            double intervaloSS = 200;
             if (gamepad1.dpad_up && !intakeSS && !intervalo_dpad_up) {
                 intakeSS = true;
                 elapsedintervaloIntakeSS.reset();
@@ -302,10 +324,10 @@ public class TeleOp_RED extends LinearOpMode {
             intervalo_stick = sticksPressionados;
 
             if (modo_ShotPA) {
-                if (y < 20) {
-                    shotP = (int) ticks + 250;
-                } else if (y >= 20 && y < 40) {
+                if (y < 18) {
                     shotP = (int) ticks + 100;
+                } else if (y >= 18 && y < 40) {
+                    shotP = (int) ticks + 50;
                 } else {
                     shotP = (int) ticks;
                 }
@@ -387,7 +409,12 @@ public class TeleOp_RED extends LinearOpMode {
             int atual = tower.getCurrentPosition();
 
             if (Math.abs(tx) > 1) {
-                int position = (y > 125) ? atual - 50 : atual;
+                int position = 0;
+                if (azul) {
+                    position = (y > 125) ? atual + 50 : atual;
+                } else {
+                    position = (y > 125) ? atual - 50 : atual;
+                }
                 int alvo = position + (int) (tx * 7);
                 alvo = Range.clip(alvo, -limiteRotativo, limiteRotativo);
 
@@ -450,48 +477,48 @@ public class TeleOp_RED extends LinearOpMode {
         }
     }
 
-    // y > 120
     private final Waypoint[] pontosSituacao1 = {
-            new Waypoint(-145, -750),
-            new Waypoint(-90, -525),
-            new Waypoint(-45, -300),
-            new Waypoint(0, -50),
-            new Waypoint(45, 200),
-            new Waypoint(90, 470),
-            new Waypoint(147.5, 750)
+            new Waypoint(0,     -50),
+            new Waypoint(45,    200),
+            new Waypoint(90,    470),
+            new Waypoint(147.5, 750),
+            new Waypoint(215,  -750),
+            new Waypoint(270,  -525),
+            new Waypoint(315,  -300),
+            new Waypoint(360,   -50)
     };
 
-    // y > 60 && x > 72
     private final Waypoint[] pontosSituacao2 = {
-            new Waypoint(-75, -750),
-            new Waypoint(-45, -550),
-            new Waypoint(0, -225),
-            new Waypoint(45, 30),
-            new Waypoint(90, 255),
-            new Waypoint(135, 515),
-            new Waypoint(212.5, 750)
+            new Waypoint(0,     -225),
+            new Waypoint(45,    30),
+            new Waypoint(90,    255),
+            new Waypoint(135,   515),
+            new Waypoint(212.5, 750),
+            new Waypoint(285,  -750),
+            new Waypoint(315,  -550),
+            new Waypoint(360,  -225)
     };
 
-    // y > 60 && x <= 72
     private final Waypoint[] pontosSituacao3 = {
-            new Waypoint(-117.5, -750),
-            new Waypoint(-67.5, -425),
-            new Waypoint(0, -130),
-            new Waypoint(45, 130),
-            new Waypoint(90, 385),
-            new Waypoint(135, 660),
-            new Waypoint(195, 750)
+            new Waypoint(0,     -130),
+            new Waypoint(45,    130),
+            new Waypoint(90,    385),
+            new Waypoint(135,   660),
+            new Waypoint(195,   750),
+            new Waypoint(242.5, -750),
+            new Waypoint(292.5, -425),
+            new Waypoint(360,  -130)
     };
 
-    // y <= 50
     private final Waypoint[] pontosSituacao4 = {
-            new Waypoint(-102.5, -750),
-            new Waypoint(-45, -650),
             new Waypoint(0, -350),
             new Waypoint(45, -100),
             new Waypoint(90, 190),
             new Waypoint(140, 435),
-            new Waypoint(192.5, 750)
+            new Waypoint(192.5, 750),
+            new Waypoint(257.5, -750),
+            new Waypoint(315, -650),
+            new Waypoint(360, -350)
     };
 
     private double interpola(Waypoint[] pontos, double heading) {
@@ -513,10 +540,18 @@ public class TeleOp_RED extends LinearOpMode {
             target = (int) interpola(pontosSituacao1, heading);
 
         } else if (y > 60 && x >= 72) {
-            target = (int) interpola(pontosSituacao2, heading);
+            if (azul) {
+                target = (int) interpola(pontosSituacao3, heading);
+            } else {
+                target = (int) interpola(pontosSituacao2, heading);
+            }
 
         } else if (y > 60 && x < 72) {
-            target = (int) interpola(pontosSituacao3, heading);
+            if (azul) {
+                target = (int) interpola(pontosSituacao2, heading);
+            } else {
+                target = (int) interpola(pontosSituacao3, heading);
+            }
 
         } else if (y <= 50) {
             double diff = Math.abs(heading - lastHeading);
