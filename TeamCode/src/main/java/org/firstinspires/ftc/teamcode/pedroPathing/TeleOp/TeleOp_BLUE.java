@@ -46,10 +46,9 @@ public class TeleOp_BLUE extends LinearOpMode {
     private double velocityAtual = 0;
     private double lastStamp = 0;
     private double lastTx = 0;
-    private double lastHeading = 0;
-    final double kP = 0.1;
+    final double kP = 0.25;
     final double kD = 0.035;
-    final double towerP = 0.5;
+    final double towerP = 1;
     private int shotP = 0;
     private int change = 0;
     private int target = 0;
@@ -187,6 +186,11 @@ public class TeleOp_BLUE extends LinearOpMode {
 
             double rawHeading = Math.toDegrees(follower.getPose().getHeading());
             double heading = (rawHeading % 360 + 360) % 360;
+            double normalHeading = heading + 180;
+
+            if (normalHeading > 360) {
+                normalHeading -= 360;
+            }
 
             double x = follower.getPose().getX();
             double y = follower.getPose().getY();
@@ -215,7 +219,7 @@ public class TeleOp_BLUE extends LinearOpMode {
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
             if (lF || gamepad1.left_trigger > 0.3) {
-                if (elapsedIntervaloServo.seconds() > 0.1 && velocityAtual + 100 >= shotP && velocityAtual - 100 <= shotP) {
+                if (elapsedIntervaloServo.seconds() > 1 && velocityAtual + 200 >= shotP && velocityAtual - 200 <= shotP) {
                     positionS = 0.52;
                     s1.setPosition(positionS);
                 }
@@ -231,8 +235,15 @@ public class TeleOp_BLUE extends LinearOpMode {
             } else if (gamepad1.right_trigger > 0.3 && lF && !reverse && !reverseL && !intervalo_RT) {
                 velocityAtual = 0;
                 lF = false;
+                intake.setPower(0);
+                intakeF = false;
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
+
+            if (elapsedIntervaloServo.seconds() > 1.2 && lF) {
+                intake.setPower(intakeP);
+                intakeF = true;
+            }
 
             if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
                 l_right.setVelocity(velocityAtual);
@@ -274,7 +285,7 @@ public class TeleOp_BLUE extends LinearOpMode {
             }
             intervalo_a = gamepad1.a;
 
-            double intervaloSS = 300;
+            double intervaloSS = 200;
             if (gamepad1.dpad_up && !intakeSS && !intervalo_dpad_up) {
                 intakeSS = true;
                 elapsedintervaloIntakeSS.reset();
@@ -296,7 +307,7 @@ public class TeleOp_BLUE extends LinearOpMode {
             if (!targetVisible) {
                 if (!lF) {
                     if (modo_TorreA) {
-                        target = Range.clip(torreAuto(x, y, heading), -limiteRotativo, limiteRotativo);
+                        target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);
 
                         encoder(tower, target, towerP);
                     } else {
@@ -317,10 +328,10 @@ public class TeleOp_BLUE extends LinearOpMode {
             intervalo_stick = sticksPressionados;
 
             if (modo_ShotPA) {
-                if (y < 20) {
-                    shotP = (int) ticks + 250;
-                } else if (y >= 20 && y < 40) {
+                if (y < 18) {
                     shotP = (int) ticks + 100;
+                } else if (y >= 18 && y < 40) {
+                    shotP = (int) ticks + 50;
                 } else {
                     shotP = (int) ticks;
                 }
@@ -402,7 +413,12 @@ public class TeleOp_BLUE extends LinearOpMode {
             int atual = tower.getCurrentPosition();
 
             if (Math.abs(tx) > 1) {
-                int position = (y > 125) ? atual + 50 : atual;
+                int position = 0;
+                if (azul) {
+                    position = (y > 125) ? atual + 50 : atual;
+                } else {
+                    position = (y > 125) ? atual - 50 : atual;
+                }
                 int alvo = position + (int) (tx * 7);
                 alvo = Range.clip(alvo, -limiteRotativo, limiteRotativo);
 
@@ -465,56 +481,47 @@ public class TeleOp_BLUE extends LinearOpMode {
         }
     }
 
-    // y > 120
     private final Waypoint[] pontosSituacao1 = {
-            new Waypoint(0,     30),
-            new Waypoint(37.5, -750),
-            new Waypoint(90,   -475),
-            new Waypoint(135,  -200),
-            new Waypoint(180,   30),
-            new Waypoint(225,   300),
-            new Waypoint(270,   545),
-            new Waypoint(330,   750),
-            new Waypoint(360,   30)
+            new Waypoint(0, 40),
+            new Waypoint(30, 190),
+            new Waypoint(60, 370),
+            new Waypoint(90, 550),
+            new Waypoint(120, 750),
+            new Waypoint(115, -750),
+            new Waypoint(240, -650),
+            new Waypoint(270, -490),
+            new Waypoint(300, -280),
+            new Waypoint(330, -130),
+            new Waypoint(360, 40),
     };
 
-    // y > 60 && x < 72
     private final Waypoint[] pontosSituacao2 = {
-            new Waypoint(0,     290),
-            new Waypoint(17.5, -750),
-            new Waypoint(47.5, -500),
-            new Waypoint(90,   -230),
-            new Waypoint(135,   30),
-            new Waypoint(180,   290),
-            new Waypoint(225,   555),
-            new Waypoint(307.5, 750),
-            new Waypoint(360,   290)
+            new Waypoint(0, 305),
+            new Waypoint(30, 440),
+            new Waypoint(60, 660),
+            new Waypoint(75, 750),
+            new Waypoint(131.5, -750),
+            new Waypoint(190, -700),
+            new Waypoint(220, -530),
+            new Waypoint(250, -346),
+            new Waypoint(280, -165),
+            new Waypoint(310, -20),
+            new Waypoint(340, 190),
+            new Waypoint(360, 305),
     };
 
-    // y > 60 && x >= 72
     private final Waypoint[] pontosSituacao3 = {
-            new Waypoint(0,     145),
-            new Waypoint(37.5, -750),
-            new Waypoint(90,   -360),
-            new Waypoint(135,  -80),
-            new Waypoint(180,   145),
-            new Waypoint(225,  -135),
-            new Waypoint(270,   690),
-            new Waypoint(330,   750),
-            new Waypoint(360,   145)
-    };
-
-    // y <= 50
-    private final Waypoint[] pontosSituacao4 = {
-            new Waypoint(0,     350),
-            new Waypoint(45,   -400),
-            new Waypoint(90,   -125),
-            new Waypoint(135,   110),
-            new Waypoint(180,   350),
-            new Waypoint(225,   670),
-            new Waypoint(292.5, 750),
-            new Waypoint(315,  -750),
-            new Waypoint(360,   350)
+            new Waypoint(0, 375),
+            new Waypoint(30, 570),
+            new Waypoint(60, 750),
+            new Waypoint(115, -750),
+            new Waypoint(175, -700),
+            new Waypoint(205, -545),
+            new Waypoint(245, -335),
+            new Waypoint(275, -185),
+            new Waypoint(305, 85),
+            new Waypoint(335, 260),
+            new Waypoint(360, 375),
     };
 
     private double interpola(Waypoint[] pontos, double heading) {
@@ -530,25 +537,16 @@ public class TeleOp_BLUE extends LinearOpMode {
         return pontos[pontos.length - 1].target;
     }
 
-    private int torreAuto(double x, double y, double heading) {
+    private int torreAuto(double y, double heading) {
 
-        if (y > 120) {
+        if (y >= 115) {
             target = (int) interpola(pontosSituacao1, heading);
 
-        } else if (y > 60 && x <= 72) {
+        } else if (y < 115 && y > 45) {
             target = (int) interpola(pontosSituacao2, heading);
 
-        } else if (y > 60 && x > 72) {
+        } else if (y <= 45) {
             target = (int) interpola(pontosSituacao3, heading);
-
-        } else if (y <= 50) {
-            double diff = Math.abs(heading - lastHeading);
-            if (diff > 180) diff = 360 - diff;
-
-            if (diff > 45) {
-                target = (int) interpola(pontosSituacao4, heading);
-                lastHeading = heading;
-            }
         }
 
         return Range.clip(target, -750, 750);

@@ -46,8 +46,7 @@ public class TeleOp_RED extends LinearOpMode {
     private double velocityAtual = 0;
     private double lastStamp = 0;
     private double lastTx = 0;
-    private double lastHeading = 0;
-    final double kP = 0.1;
+    final double kP = 0.25;
     final double kD = 0.035;
     final double towerP = 0.5;
     private int shotP = 0;
@@ -478,47 +477,48 @@ public class TeleOp_RED extends LinearOpMode {
     }
 
     private final Waypoint[] pontosSituacao1 = {
-            new Waypoint(0,     -50),
-            new Waypoint(45,    200),
-            new Waypoint(90,    470),
-            new Waypoint(147.5, 750),
-            new Waypoint(215,  -750),
-            new Waypoint(270,  -525),
-            new Waypoint(315,  -300),
-            new Waypoint(360,   -50)
+            new Waypoint(0, -15),
+            new Waypoint(30, 170),
+            new Waypoint(60, 300),
+            new Waypoint(90, 490),
+            new Waypoint(120, 675),
+            new Waypoint(130, 750),
+            new Waypoint(187.5, -750),
+            new Waypoint(245, -730),
+            new Waypoint(295, -750),
+            new Waypoint(300, -385),
+            new Waypoint(330, -200),
+            new Waypoint(360, -15),
     };
 
     private final Waypoint[] pontosSituacao2 = {
-            new Waypoint(0,     -225),
-            new Waypoint(45,    30),
-            new Waypoint(90,    255),
-            new Waypoint(135,   515),
-            new Waypoint(212.5, 750),
-            new Waypoint(285,  -750),
-            new Waypoint(315,  -550),
-            new Waypoint(360,  -225)
+            new Waypoint(0, -230),
+            new Waypoint(30, -90),
+            new Waypoint(60, 120),
+            new Waypoint(90, 300),
+            new Waypoint(120, 460),
+            new Waypoint(150, 645),
+            new Waypoint(165, 730),
+            new Waypoint(222.5, -750),
+            new Waypoint(280, -740),
+            new Waypoint(300, -616),
+            new Waypoint(330, -425),
+            new Waypoint(360, -230),
     };
 
     private final Waypoint[] pontosSituacao3 = {
-            new Waypoint(0,     -130),
-            new Waypoint(45,    130),
-            new Waypoint(90,    385),
-            new Waypoint(135,   660),
-            new Waypoint(195,   750),
-            new Waypoint(242.5, -750),
-            new Waypoint(292.5, -425),
-            new Waypoint(360,  -130)
-    };
-
-    private final Waypoint[] pontosSituacao4 = {
-            new Waypoint(0, -350),
-            new Waypoint(45, -100),
-            new Waypoint(90, 190),
-            new Waypoint(140, 435),
-            new Waypoint(192.5, 750),
-            new Waypoint(257.5, -750),
-            new Waypoint(315, -650),
-            new Waypoint(360, -350)
+            new Waypoint(0, -355),
+            new Waypoint(30, -150),
+            new Waypoint(60, 20),
+            new Waypoint(90, 195),
+            new Waypoint(120, 370),
+            new Waypoint(150, 550),
+            new Waypoint(180, 735),
+            new Waypoint(240, 750),
+            new Waypoint(295, -750),
+            new Waypoint(300, -616),
+            new Waypoint(330, -505),
+            new Waypoint(360, -335),
     };
 
     private double interpola(Waypoint[] pontos, double heading) {
@@ -536,31 +536,14 @@ public class TeleOp_RED extends LinearOpMode {
 
     private int torreAuto(double x, double y, double heading) {
 
-        if (y > 120) {
+        if (y >= 115) {
             target = (int) interpola(pontosSituacao1, heading);
 
-        } else if (y > 60 && x >= 72) {
-            if (azul) {
-                target = (int) interpola(pontosSituacao3, heading);
-            } else {
-                target = (int) interpola(pontosSituacao2, heading);
-            }
+        } else if (y < 115 && y > 45) {
+            target = (int) interpola(pontosSituacao2, heading);
 
-        } else if (y > 60 && x < 72) {
-            if (azul) {
-                target = (int) interpola(pontosSituacao2, heading);
-            } else {
-                target = (int) interpola(pontosSituacao3, heading);
-            }
-
-        } else if (y <= 50) {
-            double diff = Math.abs(heading - lastHeading);
-            if (diff > 180) diff = 360 - diff;
-
-            if (diff > 45) {
-                target = (int) interpola(pontosSituacao4, heading);
-                lastHeading = heading;
-            }
+        } else if (y <= 45) {
+            target = (int) interpola(pontosSituacao3, heading);
         }
 
         return Range.clip(target, -750, 750);
