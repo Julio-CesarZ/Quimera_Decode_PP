@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous;
+package org.firstinspires.ftc.teamcode.pedroPathing.Autonomous.Tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.BezierCurve;

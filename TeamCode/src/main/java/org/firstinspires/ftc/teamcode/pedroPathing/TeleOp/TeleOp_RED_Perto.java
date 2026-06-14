@@ -8,7 +8,6 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -16,8 +15,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp RED", group = "TeleOp")
-public class TeleOp_RED extends LinearOpMode {
+@TeleOp(name = "TeleOp RED - Perto", group = "TeleOp")
+public class TeleOp_RED_Perto extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;
@@ -63,7 +62,7 @@ public class TeleOp_RED extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    private Pose startingPoseTeleop = new Pose(83.83, 106.49, 0);
     private Pose centerGol = new Pose(144, 144);
 
     @Override
@@ -324,7 +323,7 @@ public class TeleOp_RED extends LinearOpMode {
 
             if (modo_ShotPA) {
                 if (y < 18) {
-                    shotP = (int) ticks + 100;
+                    shotP = (int) ticks + 150;
                 } else if (y >= 18 && y < 40) {
                     shotP = (int) ticks + 50;
                 } else {

@@ -1,10 +1,11 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.Cam;
 
 import com.qualcomm.hardware.dfrobot.HuskyLens;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-
+@Disabled
 @TeleOp (name = "HuskylensTEst", group = "Test")
 public class HuskylensTest extends LinearOpMode {
     private HuskyLens huskylens;

@@ -1,11 +1,12 @@
 package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp.Tests;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
-
+@Disabled
 @TeleOp (name = "Teste Single Motor", group = "Tests")
 public class SingleMotorTest extends LinearOpMode {
 

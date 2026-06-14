@@ -29,14 +29,14 @@ public class Auto_Red_Longe extends LinearOpMode {
 
     private final Pose startPose = new Pose(89.17, 8.27, 0);
     private final Pose scorePose = new Pose(89.62, 17.31, 0);
-    private final Pose takePose_3 = new Pose(135.5, 35.86, 0);
-    private final Pose takePose_Canto = new Pose(132.06, 16.41, Math.toRadians(-17.47));
-    private final Pose takePose_CantoX = new Pose(132.41, 10.03, Math.toRadians(-9.04));
-    private final Pose takePose_CantoX_R = new Pose(101.12, 11.08, Math.toRadians(0));
-    private final Pose takePose_CantoX_R_2 = new Pose(121.12, 11.08, Math.toRadians(0));
-    private final Pose cycleTakePose = new Pose(134, 24, Math.toRadians(-20));
+    private final Pose takePose_3 = new Pose(137, 35.86, 0);
+    private final Pose takePose_Canto = new Pose(134.41, 16.41, Math.toRadians(-17.47));
+    private final Pose takePose_CantoX = new Pose(134.41, 10.03, Math.toRadians(-9.04));
+    private final Pose cyclePose_R = new Pose(108.8, 16.09, 0);
+    private final Pose cyclePose_R_2 = new Pose(135.5, 16, 0);
+    private final Pose cycleTakePose = new Pose(135.5, 16, Math.toRadians(-20));
     private final Pose outPose = new Pose(87, 36.05, 0);
-    PathChain scoreF, take3, takeCanto, takeX, score3, scoreX, takeX_R, takeX_R_2, cycleTake, cycleScore, outLine;
+    PathChain scoreF, take3, takeCanto, takeX, score3, scoreX, cycle_R, cycle_R2, cycle_RR, cycleTake, cycleScore, outLine;
 
     @Override
     public void runOpMode() {
@@ -111,29 +111,39 @@ public class Auto_Red_Longe extends LinearOpMode {
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
         scoreX = follower.pathBuilder()
-                .addPath(new BezierLine(takePose_CantoX_R_2, scorePose))
+                .addPath(new BezierLine(cyclePose_R_2, scorePose))
                 .setConstantHeadingInterpolation(scorePose.getHeading())
                 .build();
-        takeX_R = follower.pathBuilder()
-                .addPath(new BezierLine(takePose_CantoX, takePose_CantoX_R))
-                .setLinearHeadingInterpolation(takePose_CantoX.getHeading(), takePose_CantoX_R.getHeading())
+        cycle_R = follower.pathBuilder()
+                .addPath(new BezierLine(cycleTakePose, cyclePose_R))
+                .setLinearHeadingInterpolation(takePose_CantoX.getHeading(), cyclePose_R.getHeading())
                 .build();
-        takeX_R_2 = follower.pathBuilder()
-                .addPath(new BezierLine(takePose_CantoX_R, takePose_CantoX_R_2))
-                .setConstantHeadingInterpolation(takePose_CantoX_R_2.getHeading())
+        cycle_R2 = follower.pathBuilder()
+                .addPath(new BezierLine(cyclePose_R, cyclePose_R_2))
+                .setLinearHeadingInterpolation(cyclePose_R.getHeading(), cyclePose_R_2.getHeading())
+                .build();
+        cycle_RR = follower.pathBuilder()
+                .addPath(new BezierLine(cyclePose_R_2, scorePose))
+                .setConstantHeadingInterpolation(cyclePose_R_2.getHeading())
                 .build();
         cycleTake = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(114.89, 31.49),
+                                new Pose(107.04, 30.17),
                                 cycleTakePose
                         )
                 )
                 .setLinearHeadingInterpolation(scorePose.getHeading(), cycleTakePose.getHeading())
                 .build();
         cycleScore = follower.pathBuilder()
-                .addPath(new BezierLine(cycleTakePose, scorePose))
+                .addPath(
+                        new BezierCurve(
+                                cycleTakePose,
+                                new Pose(107.04, 30.17),
+                                scorePose
+                        )
+                )
                 .setLinearHeadingInterpolation(cycleTakePose.getHeading(), scorePose.getHeading())
                 .build();
         outLine = follower.pathBuilder()
@@ -145,8 +155,8 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command toTake_3 = follow(follower, take3);
         Command toTake_Canto = follow(follower, takeCanto);
         Command toTakeX = follow(follower, takeX);
-        Command toTakeXR = follow(follower, takeX_R);
-        Command toTakeXR_2 = follow(follower, takeX_R_2);
+        Command toTakeXR = follow(follower, cycle_R);
+        Command toTakeXR_2 = follow(follower, cycle_RR);
         Command goScore_3 = follow(follower, score3);
         Command goScoreX = follow(follower, scoreX);
         Command toTake_Cycle = follow(follower, cycleTake);
@@ -162,8 +172,8 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command mirar = instant(() -> encoder(tower, -400, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(1850));
-        Command onShotL = instant(() -> l_left.setVelocity(1850));
+        Command onShotR = instant(() -> l_right.setVelocity(1825));
+        Command onShotL = instant(() -> l_left.setVelocity(1825));
         Command offShotR = instant(() -> l_right.setVelocity(1000));
         Command offShotL = instant(() -> l_left.setVelocity(1000));
         Command zeroShotR = instant(() -> l_right.setVelocity(0));
@@ -203,6 +213,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 waitMs(1750)
                         )
                 ),
+                waitMs(500),
                 parallel(
                         sequential(
                                 waitMs(1000),
@@ -232,6 +243,55 @@ public class Auto_Red_Longe extends LinearOpMode {
                         waitMs(1000)
                 ),
                 waitMs(100),
+                parallel(
+                        sequential(
+                                waitMs(1000),
+                                offIntake
+                        ),
+                        parallel(
+                                shot_on,
+                                goScoreX
+                        )
+                ),
+                abrirTrava,
+                onIntake,
+                waitMs(1500),
+                shot_off,
+                parallel(
+                        sequential(
+                                waitMs(500),
+                                fecharTrava
+                        ),
+                        race(
+                                toTake_Cycle,
+                                waitMs(2000)
+                        )
+                ),
+                parallel(
+                        sequential(
+                                waitMs(800),
+                                offIntake
+                        ),
+                        parallel(
+                                shot_on,
+                                goScore_Cycle
+                        )
+                ),
+                waitMs(100),
+                abrirTrava,
+                onIntake,
+                waitMs(1450),
+                shot_off,
+                parallel(
+                        sequential(
+                                waitMs(500),
+                                fecharTrava
+                        ),
+                        race(
+                                toTake_Cycle,
+                                waitMs(2000)
+                        )
+                ),
                 race(
                         toTakeXR,
                         waitMs(2000)
@@ -247,61 +307,12 @@ public class Auto_Red_Longe extends LinearOpMode {
                         ),
                         parallel(
                                 shot_on,
-                                goScoreX
-                        )
-                ),
-                abrirTrava,
-                onIntake,
-                waitMs(1700),
-                shot_off,
-                parallel(
-                        sequential(
-                                waitMs(500),
-                                fecharTrava
-                        ),
-                        race(
-                                toTake_Cycle,
-                                waitMs(2000)
-                        )
-                ),
-                parallel(
-                        sequential(
-                                waitMs(500),
-                                offIntake
-                        ),
-                        parallel(
-                                shot_on,
-                                goScore_Cycle
-                        )
-                ),
-                waitMs(100),
-                abrirTrava,
-                onIntake,
-                waitMs(1700),
-                shot_off,
-                parallel(
-                        sequential(
-                                waitMs(500),
-                                fecharTrava
-                        ),
-                        race(
-                                toTake_Cycle,
-                                waitMs(2000)
-                        )
-                ),
-                parallel(
-                        sequential(
-                                waitMs(1000),
-                                offIntake
-                        ),
-                        parallel(
-                                shot_on,
                                 goScore_Cycle
                         )
                 ),
                 abrirTrava,
                 onIntake,
-                waitMs(1800),
+                waitMs(1500),
                 parallel(
                         goOut,
                         shot_zero,
