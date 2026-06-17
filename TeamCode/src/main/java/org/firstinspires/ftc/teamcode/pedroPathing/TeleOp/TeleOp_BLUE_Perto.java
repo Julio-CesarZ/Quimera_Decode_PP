@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -93,7 +94,7 @@ public class TeleOp_BLUE_Perto extends LinearOpMode {
         l_right.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         l_left.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        intake.setDirection(DcMotorEx.Direction.REVERSE);
+        intake.setDirection(DcMotorEx.Direction.FORWARD);
         l_right.setDirection(DcMotorEx.Direction.REVERSE);
         l_left.setDirection(DcMotorEx.Direction.REVERSE);
 
