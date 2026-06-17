@@ -52,7 +52,7 @@ public class TeleOp_RED_Longe extends LinearOpMode {
     private int change = 0;
     private int target = 0;
     final int maxChangeTick = 10;
-    final int limiteRotativo = 750;
+    final int limiteRotativo = 650;
     final int intakeP = 1;
 
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();

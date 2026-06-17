@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp;
+package org.firstinspires.ftc.teamcode.pedroPathing.TeleOp.Tests;
 
 import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp BLUE - Longe", group = "TeleOp")
-public class TeleOp_BLUE_Longe extends LinearOpMode {
+@TeleOp(name = "TeleOp Apresentação", group = "TeleOp")
+public class Teste_Cam_Apresentation extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;
@@ -33,11 +33,10 @@ public class TeleOp_BLUE_Longe extends LinearOpMode {
     boolean lF = false;
     boolean targetVisible;
     boolean telemetria = true;
-    boolean mode_2 = false;
-    boolean modo_TorreA = true;
+    boolean modo_TorreA = false;
     boolean modo_ShotPA = true;
     boolean camera = true;
-    boolean azul = true;
+    boolean azul = false;
 
     private double velocityMultipleir = 0.9;
     private double tx = 0;
@@ -62,14 +61,14 @@ public class TeleOp_BLUE_Longe extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private Pose startingPoseTeleop = new Pose(110.47, 132.68, 0);
+    private Pose startingPoseTeleop = new Pose(72, 72, 0);
     private Pose centerGol = new Pose(144, 144);
 
     @Override
     public void runOpMode() throws InterruptedException {
 
         if (azul) {
-            startingPoseTeleop = new Pose(57, 36.05, Math.toRadians(180));
+            startingPoseTeleop = new Pose(72, 72, Math.toRadians(180));
             centerGol = new Pose(0, 144);
         }
 
@@ -121,7 +120,7 @@ public class TeleOp_BLUE_Longe extends LinearOpMode {
         if (azul) {
             limelight.pipelineSwitch(1);
         } else {
-            limelight.pipelineSwitch(0);
+            limelight.pipelineSwitch(2);
         }
 
         limelight.start();
@@ -136,15 +135,8 @@ public class TeleOp_BLUE_Longe extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
 
-            mode_2 = gamepad1.getUser() != null && gamepad2.getUser() != null;
-
-            if (mode_2) {
-                telemetry.addLine("Modo para dois jogadores");
-                telemetry.addLine("Gamepad 1 - Funções | Gamepad 2 - Chassi");
-            } else {
-                telemetry.addLine("Modo para um jogador");
-                telemetry.addLine("Gamepad 1 - Controle Geral");
-            }
+            telemetry.addLine("Modo para um jogador");
+            telemetry.addLine("Gamepad 1 - Controle Geral");
             telemetry.addLine();
 
             if (gamepad1.y && !intervalo_y) {
@@ -205,15 +197,10 @@ public class TeleOp_BLUE_Longe extends LinearOpMode {
             targetVisible = (result != null && result.isValid());
 
             double forward, strafe, turn;
-            if (mode_2) {
-                forward = Math.pow(-gamepad2.left_stick_y * velocityMultipleir, 3);
-                strafe = Math.pow(-gamepad2.left_stick_x * velocityMultipleir, 3);
-                turn = Math.pow(-gamepad2.right_stick_x * velocityMultipleir, 3);
-            } else {
-                forward = Math.pow(-gamepad1.left_stick_y * velocityMultipleir, 3);
-                strafe = Math.pow(-gamepad1.left_stick_x * velocityMultipleir, 3);
-                turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
-            }
+
+            forward = Math.pow(-gamepad1.left_stick_y * velocityMultipleir, 3);
+            strafe = Math.pow(-gamepad1.left_stick_x * velocityMultipleir, 3);
+            turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
 
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
@@ -363,6 +350,14 @@ public class TeleOp_BLUE_Longe extends LinearOpMode {
             intervalo_bumper = gamepad1.right_bumper || gamepad1.left_bumper;
 
             telemetria(l_right, l_left, tower, x, y, heading);
+
+            if(gamepad2.dpad_down) {
+                follower.setPose(new Pose(x, y, heading));
+                tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                target = 0;
+                modo_TorreA = true;
+            }
         }
     }
 
@@ -456,10 +451,10 @@ public class TeleOp_BLUE_Longe extends LinearOpMode {
     private void torreManual(DcMotorEx tower) {
         int novoTarget = target;
         if (elapsedIntervaloC.milliseconds() >= 50) {
-            if (gamepad1.dpad_left && target > -limiteRotativo) {
+            if (gamepad1.dpad_left && target > -limiteRotativo || gamepad2.dpad_left) {
                 novoTarget -= 20;
                 elapsedIntervaloC.reset();
-            } else if (gamepad1.dpad_right && target < limiteRotativo) {
+            } else if (gamepad1.dpad_right && target < limiteRotativo || gamepad2.dpad_left) {
                 novoTarget += 20;
                 elapsedIntervaloC.reset();
             }
