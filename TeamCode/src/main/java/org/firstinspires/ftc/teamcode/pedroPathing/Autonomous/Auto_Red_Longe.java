@@ -173,8 +173,8 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command mirar = instant(() -> encoder(tower, -400, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(2000));
-        Command onShotL = instant(() -> l_left.setVelocity(2000));
+        Command onShotR = instant(() -> l_right.setVelocity(1950));
+        Command onShotL = instant(() -> l_left.setVelocity(1950));
         Command offShotR = instant(() -> l_right.setVelocity(1000));
         Command offShotL = instant(() -> l_left.setVelocity(1000));
         Command zeroShotR = instant(() -> l_right.setVelocity(0));
@@ -201,7 +201,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                         mirar,
                         goScore_F
                 ),
-                waitMs(500),
+                waitMs(1000),
                 abrirTrava,
                 onIntake,
                 waitMs(1700),
@@ -225,6 +225,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 goScore_3
                         )
                 ),
+                waitMs(500),
                 abrirTrava,
                 onIntake,
                 waitMs(1500),

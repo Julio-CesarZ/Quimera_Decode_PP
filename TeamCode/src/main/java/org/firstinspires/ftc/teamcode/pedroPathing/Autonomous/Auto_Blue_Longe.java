@@ -11,6 +11,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.pedropathing.ivy.Scheduler;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
@@ -60,7 +61,7 @@ public class Auto_Blue_Longe extends LinearOpMode {
         l_right.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         l_left.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
-        intake.setDirection(DcMotorEx.Direction.REVERSE);
+        intake.setDirection(DcMotorEx.Direction.FORWARD);
         l_right.setDirection(DcMotorEx.Direction.REVERSE);
         l_left.setDirection(DcMotorEx.Direction.REVERSE);
 
@@ -172,8 +173,8 @@ public class Auto_Blue_Longe extends LinearOpMode {
         Command mirar = instant(() -> encoder(tower, 400, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(1825));
-        Command onShotL = instant(() -> l_left.setVelocity(1825));
+        Command onShotR = instant(() -> l_right.setVelocity(1950));
+        Command onShotL = instant(() -> l_left.setVelocity(1950));
         Command offShotR = instant(() -> l_right.setVelocity(1000));
         Command offShotL = instant(() -> l_left.setVelocity(1000));
         Command zeroShotR = instant(() -> l_right.setVelocity(0));
@@ -200,7 +201,7 @@ public class Auto_Blue_Longe extends LinearOpMode {
                         mirar,
                         goScore_F
                 ),
-                waitMs(500),
+                waitMs(1000),
                 abrirTrava,
                 onIntake,
                 waitMs(1700),
@@ -224,6 +225,7 @@ public class Auto_Blue_Longe extends LinearOpMode {
                                 goScore_3
                         )
                 ),
+                waitMs(500),
                 abrirTrava,
                 onIntake,
                 waitMs(1500),

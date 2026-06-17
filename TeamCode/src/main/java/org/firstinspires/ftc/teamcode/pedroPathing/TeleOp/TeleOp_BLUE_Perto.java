@@ -240,9 +240,16 @@ public class TeleOp_BLUE_Perto extends LinearOpMode {
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
-            if (elapsedIntervaloServo.seconds() > 1.2 && lF) {
-                intake.setPower(intakeP);
-                intakeF = true;
+            if (y < 48) {
+                if (elapsedIntervaloServo.seconds() > 1.2 && lF) {
+                    intake.setPower(intakeP);
+                    intakeF = true;
+                }
+            } else {
+                if (elapsedIntervaloServo.seconds() > 2 && lF) {
+                    intake.setPower(intakeP);
+                    intakeF = true;
+                }
             }
 
             if (!reverse && !reverseL && elapsedintervaloL.seconds() >= 1) {
