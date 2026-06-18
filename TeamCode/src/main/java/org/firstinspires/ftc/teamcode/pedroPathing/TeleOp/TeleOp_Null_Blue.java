@@ -230,12 +230,10 @@ public class TeleOp_Null_Blue extends LinearOpMode {
             if (y < 48) {
                 if (elapsedIntervaloServo.seconds() > 2 && lF) {
                     intake.setPower(intakeP);
-                    intakeF = true;
                 }
             } else {
                 if (elapsedIntervaloServo.seconds() > 1.2 && lF) {
                     intake.setPower(intakeP);
-                    intakeF = true;
                 }
             }
 
@@ -309,6 +307,8 @@ public class TeleOp_Null_Blue extends LinearOpMode {
                     } else {
                         torreManual(tower);
                     }
+                } else {
+                    tower.setPower(0);
                 }
             } else {
                 if (camera) {
@@ -553,7 +553,7 @@ public class TeleOp_Null_Blue extends LinearOpMode {
             target = (int) interpola(pontosSituacao3, heading);
         }
 
-        return Range.clip(target, -750, 750);
+        return Range.clip(target, -limiteRotativo, limiteRotativo);
     }
 
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {
