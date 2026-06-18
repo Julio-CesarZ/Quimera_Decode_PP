@@ -450,7 +450,7 @@ public class TeleOp_RED_Perto extends LinearOpMode {
                 lastStamp = currentStamp;
 
             } else {
-                encoder(tower, atual, 0.3);
+                tower.setPower(0);
 
                 lastTx = 0;
                 lastStamp = 0;
