@@ -45,14 +45,14 @@ public class TeleOp_Null_Blue extends LinearOpMode {
     private double velocityAtual = 0;
     private double lastStamp = 0;
     private double lastTx = 0;
-    final double kP = 0.25;
-    final double kD = 0.035;
+    final double kP = 0.2;
+    final double kD = 0.021;
     final double towerP = 1;
     private int shotP = 0;
     private int change = 0;
     private int target = 0;
     final int maxChangeTick = 10;
-    final int limiteRotativo = 650;
+    final int limiteRotativo = 690;
     final int intakeP = 1;
 
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
@@ -228,12 +228,12 @@ public class TeleOp_Null_Blue extends LinearOpMode {
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
             if (y < 48) {
-                if (elapsedIntervaloServo.seconds() > 1.2 && lF) {
+                if (elapsedIntervaloServo.seconds() > 2 && lF) {
                     intake.setPower(intakeP);
                     intakeF = true;
                 }
             } else {
-                if (elapsedIntervaloServo.seconds() > 2 && lF) {
+                if (elapsedIntervaloServo.seconds() > 1.2 && lF) {
                     intake.setPower(intakeP);
                     intakeF = true;
                 }
@@ -273,6 +273,8 @@ public class TeleOp_Null_Blue extends LinearOpMode {
             if (gamepad1.a && !intakeF && !intervalo_a && !intakeSS) {
                 intake.setPower(intakeP);
                 intakeF = true;
+                lF = false;
+                velocityAtual = 0;
             } else if (gamepad1.a && intakeF && !intervalo_a) {
                 intake.setPower(0);
                 intakeF = false;
@@ -323,7 +325,7 @@ public class TeleOp_Null_Blue extends LinearOpMode {
 
             if (modo_ShotPA) {
                 if (y < 18) {
-                    shotP = (int) ticks + 150;
+                    shotP = (int) ticks + 180;
                 } else if (y >= 18 && y < 40) {
                     shotP = (int) ticks + 50;
                 } else {
@@ -360,7 +362,7 @@ public class TeleOp_Null_Blue extends LinearOpMode {
             telemetria(l_right, l_left, tower, x, y, heading);
 
             if(gamepad2.dpad_down) {
-                follower.setPose(new Pose(x, y, heading));
+                follower.setPose(new Pose(133.79, 6.78, Math.toRadians(180)));
                 tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 target = 0;

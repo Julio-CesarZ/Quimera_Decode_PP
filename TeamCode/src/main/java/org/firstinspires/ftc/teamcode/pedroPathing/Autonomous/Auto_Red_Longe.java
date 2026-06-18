@@ -170,11 +170,11 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.52));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, -400, 0.5));
+        Command mirar = instant(() -> encoder(tower, -420, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(1950));
-        Command onShotL = instant(() -> l_left.setVelocity(1950));
+        Command onShotR = instant(() -> l_right.setVelocity(2100));
+        Command onShotL = instant(() -> l_left.setVelocity(2100));
         Command offShotR = instant(() -> l_right.setVelocity(1000));
         Command offShotL = instant(() -> l_left.setVelocity(1000));
         Command zeroShotR = instant(() -> l_right.setVelocity(0));
@@ -228,7 +228,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                 waitMs(500),
                 abrirTrava,
                 onIntake,
-                waitMs(1500),
+                waitMs(1300),
                 shot_off,
                 parallel(
                         sequential(
@@ -255,6 +255,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 goScoreX
                         )
                 ),
+                waitMs(300),
                 abrirTrava,
                 onIntake,
                 waitMs(1500),
@@ -279,7 +280,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 goScore_Cycle
                         )
                 ),
-                waitMs(100),
+                waitMs(300),
                 abrirTrava,
                 onIntake,
                 waitMs(1450),
@@ -294,14 +295,6 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 waitMs(2000)
                         )
                 ),
-                race(
-                        toTakeXR,
-                        waitMs(2000)
-                ),
-                race(
-                        toTakeXR_2,
-                        waitMs(2000)
-                ),
                 parallel(
                         sequential(
                                 waitMs(1000),
@@ -312,6 +305,7 @@ public class Auto_Red_Longe extends LinearOpMode {
                                 goScore_Cycle
                         )
                 ),
+                waitMs(800),
                 abrirTrava,
                 onIntake,
                 waitMs(1500),
