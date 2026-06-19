@@ -15,8 +15,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@TeleOp(name = "TeleOp Unificado Blue", group = "TeleOp")
-public class TeleOp_Unificado_Blue extends LinearOpMode {
+@TeleOp(name = "TeleOp leave", group = "TeleOp")
+public class Tele_Leave_Blue extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;
@@ -70,7 +70,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
     private String changeT = "TeleOp Neutro";
 
     private final Pose startingPoseTeleopBC = new Pose(60.17, 106.49, Math.toRadians(180));
-    private final Pose startingPoseTeleopBF = new Pose(57, 36.05, Math.toRadians(180));
+    private final Pose startingPoseTeleopBF = new Pose(27, 8.27, Math.toRadians(180));
     private final Pose startingPoseTeleopRC = new Pose(83.83, 106.49, 0);
     private final Pose startingPoseTeleopRF = new Pose(87, 36.05, 0);
     private final Pose startingPoseTeleopCenterR = new Pose(72, 72, 0);
@@ -329,7 +329,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
             if (y < 48) {
-                if (elapsedIntervaloServo.seconds() > 1.35 && lF) {
+                if (elapsedIntervaloServo.seconds() > 1.5 && lF) {
                     intake.setPower(intakeP);
                 }
             } else {
@@ -400,7 +400,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
             }
 
             if (!targetVisible) {
-                if (!lF && y < 55) {
+                if (!lF) {
                     if (modo_TorreA) {
                         if (azul) {
                             target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);

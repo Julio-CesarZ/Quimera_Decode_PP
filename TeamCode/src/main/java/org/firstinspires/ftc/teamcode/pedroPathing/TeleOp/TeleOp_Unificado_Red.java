@@ -166,15 +166,14 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             }
             intervalo_LT = gamepad1.left_trigger > 0.3;
 
-            telemetry.addLine(modo_TorreA ? "Pressione [LT] para DESATIVAR o modo Auto da Torre" : "Pressione [LT] para ATIVAR o modo Auto da Torre");
-            telemetry.addLine("Change precisa ser igual a Movimentação\n");
+            telemetry.addLine(modo_TorreA ? "[LT] - DESATIVAR o modo Auto da Torre\n" : "[LT] - ATIVAR o modo Auto da Torre\n");
 
             if (gamepad1.right_trigger > 0.3 && !intervalo_RT) {
                 modo_ShotPA = !modo_ShotPA;
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
-            telemetry.addLine(modo_ShotPA ? "Pressione [RT] para DESATIVAR o modo Auto do Shot" : "Pressione [RT] para ATIVAR o modo Auto do Shot");
+            telemetry.addLine(modo_ShotPA ? "[RT] - DESATIVAR o modo Auto do Shot" : "[RT] - ATIVAR o modo Auto do Shot");
             telemetry.addLine("Change precisa ser igual ao Lançador\n");
 
             if (gamepad1.right_bumper && !intervalo_bumper) {
@@ -307,8 +306,8 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
 
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
-            if (lF || gamepad1.left_trigger > 0.3) {
-                if (elapsedIntervaloServo.seconds() > 1 && velocityAtual + 200 >= shotP && velocityAtual - 200 <= shotP) {
+            if (lF || gamepad1.left_trigger > 0.3 || reverseL || reverse) {
+                if (elapsedIntervaloServo.seconds() > 1) {
                     positionS = 0.52;
                     s1.setPosition(positionS);
                 }
@@ -330,7 +329,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
             if (y < 48) {
-                if (elapsedIntervaloServo.seconds() > 1.5 && lF) {
+                if (elapsedIntervaloServo.seconds() > 1.4 && lF) {
                     intake.setPower(intakeP);
                 }
             } else {
@@ -401,7 +400,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             }
 
             if (!targetVisible) {
-                if (!lF) {
+                if (!lF && y < 55) {
                     if (modo_TorreA) {
                         if (azul) {
                             target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);
@@ -435,7 +434,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
                 } else if (y >= 18 && y < 40) {
                     shotP = (int) ticks + 1000;
                 } else {
-                    shotP = (int) ticks + 75;
+                    shotP = (int) ticks;
                 }
                 if (lF) {
                     velocityAtual = shotP;
@@ -507,7 +506,6 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             telemetry.addData("Ticks/s Esq", l_left.getVelocity());
             telemetry.addData("Posição Torre", tower.getCurrentPosition());
             telemetry.addData("Alvo Torre", target);
-            telemetry.addData("Target Torre", tower.getTargetPosition());
             telemetry.addLine();
             telemetry.addData("X", x).addData("Y", y);
             telemetry.addData("Heading", heading);
