@@ -153,10 +153,10 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command mirarF = instant(() -> encoder(tower, 180, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR_F = instant(() -> l_right.setVelocity(1350));
-        Command onShotL_F = instant(() -> l_left.setVelocity(1350));
-        Command onShotR_S = instant(() -> l_right.setVelocity(1450));
-        Command onShotL_S = instant(() -> l_left.setVelocity(1450));
+        Command onShotR_F = instant(() -> l_right.setVelocity(1400));
+        Command onShotL_F = instant(() -> l_left.setVelocity(1400));
+        Command onShotR_S = instant(() -> l_right.setVelocity(1500));
+        Command onShotL_S = instant(() -> l_left.setVelocity(1500));
         Command offShotR = instant(() -> l_right.setVelocity(0));
         Command offShotL = instant(() -> l_left.setVelocity(0));
 

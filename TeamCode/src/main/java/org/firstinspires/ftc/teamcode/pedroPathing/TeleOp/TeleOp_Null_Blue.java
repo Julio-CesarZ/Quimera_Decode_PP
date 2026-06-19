@@ -4,6 +4,7 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -15,7 +16,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-
+@Disabled
 @TeleOp(name = "TeleOp Null Blue", group = "TeleOp")
 public class TeleOp_Null_Blue extends LinearOpMode {
 
@@ -228,7 +229,7 @@ public class TeleOp_Null_Blue extends LinearOpMode {
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
             if (y < 48) {
-                if (elapsedIntervaloServo.seconds() > 2 && lF) {
+                if (elapsedIntervaloServo.seconds() > 1.5 && lF) {
                     intake.setPower(intakeP);
                 }
             } else {
@@ -325,11 +326,11 @@ public class TeleOp_Null_Blue extends LinearOpMode {
 
             if (modo_ShotPA) {
                 if (y < 18) {
-                    shotP = (int) ticks + 180;
+                    shotP = (int) ticks + 1000;
                 } else if (y >= 18 && y < 40) {
-                    shotP = (int) ticks + 50;
+                    shotP = (int) ticks + 1000;
                 } else {
-                    shotP = (int) ticks;
+                    shotP = (int) ticks + 75;
                 }
                 if (lF) {
                     velocityAtual = shotP;
@@ -363,6 +364,7 @@ public class TeleOp_Null_Blue extends LinearOpMode {
 
             if(gamepad2.dpad_down) {
                 follower.setPose(new Pose(133.79, 6.78, Math.toRadians(180)));
+                follower.update();
                 tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 target = 0;

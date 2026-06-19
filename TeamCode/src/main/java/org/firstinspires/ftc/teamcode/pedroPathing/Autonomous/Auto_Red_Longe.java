@@ -173,8 +173,8 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command mirar = instant(() -> encoder(tower, -420, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(2100));
-        Command onShotL = instant(() -> l_left.setVelocity(2100));
+        Command onShotR = instant(() -> l_right.setVelocity(2200));
+        Command onShotL = instant(() -> l_left.setVelocity(2200));
         Command offShotR = instant(() -> l_right.setVelocity(1000));
         Command offShotL = instant(() -> l_left.setVelocity(1000));
         Command zeroShotR = instant(() -> l_right.setVelocity(0));

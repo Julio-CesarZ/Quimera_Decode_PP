@@ -4,21 +4,19 @@ import com.pedropathing.follower.Follower;
 import com.pedropathing.geometry.Pose;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
-@Disabled
-@TeleOp(name = "TeleOp Null Red", group = "TeleOp")
-public class TeleOp_Null_Red extends LinearOpMode {
+
+@TeleOp(name = "TeleOp Unificado Blue", group = "TeleOp")
+public class TeleOp_Unificado_Blue extends LinearOpMode {
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;
@@ -27,6 +25,9 @@ public class TeleOp_Null_Red extends LinearOpMode {
     boolean intervalo_y = false;
     boolean intervalo_bumper = false;
     boolean intervalo_dpad_up = false;
+    boolean intervalo2_dpad_down = false;
+    boolean intervalo2_Ltrigger_pressed = false;
+    boolean intervalo2_Rtrigger_pressed = false;
     boolean intervalo_stick = false;
     boolean intakeF = false;
     boolean intakeSS = false;
@@ -35,10 +36,12 @@ public class TeleOp_Null_Red extends LinearOpMode {
     boolean lF = false;
     boolean targetVisible;
     boolean telemetria = true;
-    boolean modo_TorreA = false;
+    boolean mode_2 = false;
+    boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
-    boolean azul = false;
+    boolean neutro = false;
+    boolean azul = true;
 
     private double velocityMultipleir = 0.9;
     private double tx = 0;
@@ -52,6 +55,7 @@ public class TeleOp_Null_Red extends LinearOpMode {
     private int shotP = 0;
     private int change = 0;
     private int target = 0;
+    private int TeleOp_K = 0;
     final int maxChangeTick = 10;
     final int limiteRotativo = 690;
     final int intakeP = 1;
@@ -63,20 +67,21 @@ public class TeleOp_Null_Red extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
 
     private String changeM = "Movimentação";
-    private Pose startingPoseTeleop = new Pose(72, 72, 0);
-    private Pose centerGol = new Pose(144, 144);
+    private String changeT = "TeleOp Neutro";
+
+    private final Pose startingPoseTeleopBC = new Pose(60.17, 106.49, Math.toRadians(180));
+    private final Pose startingPoseTeleopBF = new Pose(57, 36.05, Math.toRadians(180));
+    private final Pose startingPoseTeleopRC = new Pose(83.83, 106.49, 0);
+    private final Pose startingPoseTeleopRF = new Pose(87, 36.05, 0);
+    private final Pose startingPoseTeleopCenterR = new Pose(72, 72, 0);
+    private final Pose startingPoseTeleopCenterB = new Pose(72, 72, Math.toRadians(180));
+    private final Pose centerGolR = new Pose(144, 144);
+    private final Pose centerGolB = new Pose(0, 144);
 
     @Override
     public void runOpMode() throws InterruptedException {
 
-        if (azul) {
-            startingPoseTeleop = new Pose(72, 72, Math.toRadians(180));
-            centerGol = new Pose(0, 144);
-        }
-
         Follower follower = Constants.createFollower(hardwareMap);
-        //follower.setStartingPose(center == null ? startingPoseTeleop : center);
-        follower.setStartingPose(startingPoseTeleop);
         follower.update();
         follower.startTeleopDrive();
 
@@ -137,8 +142,15 @@ public class TeleOp_Null_Red extends LinearOpMode {
 
         while (!isStarted() && !isStopRequested()) {
 
-            telemetry.addLine("Modo para um jogador");
-            telemetry.addLine("Gamepad 1 - Controle Geral");
+            //mode_2 = gamepad1.getUser() != null && gamepad2.getUser() != null; - desativando a função para o torneio
+
+            if (mode_2) {
+                telemetry.addLine("Modo para dois jogadores");
+                telemetry.addLine("Gamepad 1 - Funções | Gamepad 2 - Chassi");
+            } else {
+                telemetry.addLine("Modo para um jogador");
+                telemetry.addLine("Gamepad 1 - Controle Geral");
+            }
             telemetry.addLine();
 
             if (gamepad1.y && !intervalo_y) {
@@ -170,8 +182,85 @@ public class TeleOp_Null_Red extends LinearOpMode {
             }
             intervalo_bumper = gamepad1.right_bumper;
 
-            telemetry.addLine(telemetria ? "Telemetria: Ativada" : "Telemetria: Desativada");
+            if (!neutro) {
+                if (azul) {
+                    if (TeleOp_K == 0) {
+                        if (gamepad2.left_trigger_pressed && !intervalo2_Ltrigger_pressed) {
+                            TeleOp_K = 1;
+                        }
+                        changeT = "TeleOp de Longe Blue";
+                    } else if (TeleOp_K == 1) {
+                        if (gamepad2.left_trigger_pressed && !intervalo2_Ltrigger_pressed) {
+                            TeleOp_K = 0;
+                        }
+                        changeT = "TeleOp de Perto Blue";
+                    }
+                } else {
+                    if (TeleOp_K == 0) {
+                        if (gamepad2.left_trigger_pressed && !intervalo2_Ltrigger_pressed) {
+                            TeleOp_K = 1;
+                        }
+                        changeT = "TeleOp de Longe Red";
+                    } else if (TeleOp_K == 1) {
+                        if (gamepad2.left_trigger_pressed && !intervalo2_Ltrigger_pressed) {
+                            TeleOp_K = 0;
+                        }
+                        changeT = "TeleOp de Perto Red";
+                    }
+                }
+
+                if (gamepad2.right_trigger_pressed && !intervalo2_Rtrigger_pressed) {
+                    neutro = true;
+                }
+
+                modo_TorreA = true;
+                camera = true;
+            } else {
+                if (gamepad2.right_trigger_pressed && !intervalo2_Rtrigger_pressed) {
+                    neutro = false;
+                }
+
+                if (azul) {
+                    changeT = "TeleOp Nulo Blue";
+                } else {
+                    changeT = "TeleOp Nulo Red";
+                }
+
+                modo_TorreA = false;
+                camera = false;
+            }
+
+            intervalo2_Rtrigger_pressed = gamepad2.right_trigger_pressed;
+            intervalo2_Ltrigger_pressed = gamepad2.left_trigger_pressed;
+
+            follower.update();
+
+            telemetry.addLine(changeT);
             telemetry.update();
+
+            sleep (100);
+        }
+
+        if (!neutro) {
+            if (azul) {
+                if (TeleOp_K == 0) {
+                    follower.setStartingPose(startingPoseTeleopBF);
+                } else if (TeleOp_K == 1) {
+                    follower.setStartingPose(startingPoseTeleopBC);
+                }
+            } else {
+                if (TeleOp_K == 0) {
+                    follower.setStartingPose(startingPoseTeleopRF);
+                } else if (TeleOp_K == 1) {
+                    follower.setStartingPose(startingPoseTeleopRC);
+                }
+            }
+        } else {
+            if (azul) {
+                follower.setStartingPose(startingPoseTeleopCenterB);
+            } else {
+                follower.setStartingPose(startingPoseTeleopCenterR);
+            }
         }
 
         while (opModeIsActive()) {
@@ -188,8 +277,15 @@ public class TeleOp_Null_Red extends LinearOpMode {
             double x = follower.getPose().getX();
             double y = follower.getPose().getY();
 
-            double xGol = centerGol.getX();
-            double yGol = centerGol.getY();
+            double xGol;
+            double yGol;
+            if (azul) {
+                xGol = centerGolB.getX();
+                yGol = centerGolB.getY();
+            } else {
+                xGol = centerGolR.getX();
+                yGol = centerGolR.getY();
+            }
 
             double distanciaM = Math.hypot(x - xGol, y - yGol) / 39.37;
 
@@ -199,10 +295,15 @@ public class TeleOp_Null_Red extends LinearOpMode {
             targetVisible = (result != null && result.isValid());
 
             double forward, strafe, turn;
-
-            forward = Math.pow(-gamepad1.left_stick_y * velocityMultipleir, 3);
-            strafe = Math.pow(-gamepad1.left_stick_x * velocityMultipleir, 3);
-            turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
+            if (mode_2) {
+                forward = Math.pow(-gamepad2.left_stick_y * velocityMultipleir, 3);
+                strafe = Math.pow(-gamepad2.left_stick_x * velocityMultipleir, 3);
+                turn = Math.pow(-gamepad2.right_stick_x * velocityMultipleir, 3);
+            } else {
+                forward = Math.pow(-gamepad1.left_stick_y * velocityMultipleir, 3);
+                strafe = Math.pow(-gamepad1.left_stick_x * velocityMultipleir, 3);
+                turn = Math.pow(-gamepad1.right_stick_x * velocityMultipleir, 3);
+            }
 
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
@@ -302,7 +403,11 @@ public class TeleOp_Null_Red extends LinearOpMode {
             if (!targetVisible) {
                 if (!lF) {
                     if (modo_TorreA) {
-                        target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);
+                        if (azul) {
+                            target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);
+                        } else {
+                            target = Range.clip(torreAuto(y, heading), -limiteRotativo, limiteRotativo);
+                        }
 
                         encoder(tower, target, towerP);
                     } else {
@@ -362,14 +467,20 @@ public class TeleOp_Null_Red extends LinearOpMode {
 
             telemetria(l_right, l_left, tower, x, y, heading);
 
-            if(gamepad2.dpad_down) {
-                follower.setPose(new Pose(10.21, 6.78, 0));
+            if(gamepad2.dpad_down && !intervalo2_dpad_down) {
+                if (azul) {
+                    follower.setPose(new Pose(133.79, 6.78, Math.toRadians(180)));
+                } else {
+                    follower.setPose(new Pose(10.21, 6.78, 0));
+                }
                 follower.update();
                 tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                tower.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
                 target = 0;
                 modo_TorreA = true;
+                camera = true;
             }
+            intervalo2_dpad_down = gamepad2.dpad_down;
         }
     }
 
@@ -463,10 +574,10 @@ public class TeleOp_Null_Red extends LinearOpMode {
     private void torreManual(DcMotorEx tower) {
         int novoTarget = target;
         if (elapsedIntervaloC.milliseconds() >= 50) {
-            if (gamepad1.dpad_left && target > -limiteRotativo || gamepad2.dpad_left) {
+            if ((gamepad1.dpad_left || gamepad2.dpad_left) && target > -limiteRotativo) {
                 novoTarget -= 20;
                 elapsedIntervaloC.reset();
-            } else if (gamepad1.dpad_right && target < limiteRotativo || gamepad2.dpad_left) {
+            } else if ((gamepad1.dpad_right || gamepad2.dpad_right) && target < limiteRotativo) {
                 novoTarget += 20;
                 elapsedIntervaloC.reset();
             }
@@ -487,7 +598,52 @@ public class TeleOp_Null_Red extends LinearOpMode {
         }
     }
 
-    private final Waypoint[] pontosSituacao1 = {
+    private final Waypoint[] pontosSituacao1_R = {
+            new Waypoint(0, -15),
+            new Waypoint(30, 170),
+            new Waypoint(60, 300),
+            new Waypoint(90, 490),
+            new Waypoint(120, 675),
+            new Waypoint(130, 750),
+            new Waypoint(187.5, -750),
+            new Waypoint(245, -730),
+            new Waypoint(295, -750),
+            new Waypoint(300, -385),
+            new Waypoint(330, -200),
+            new Waypoint(360, -15),
+    };
+
+    private final Waypoint[] pontosSituacao2_R = {
+            new Waypoint(0, -230),
+            new Waypoint(30, -90),
+            new Waypoint(60, 120),
+            new Waypoint(90, 300),
+            new Waypoint(120, 460),
+            new Waypoint(150, 645),
+            new Waypoint(165, 730),
+            new Waypoint(222.5, -750),
+            new Waypoint(280, -740),
+            new Waypoint(300, -616),
+            new Waypoint(330, -425),
+            new Waypoint(360, -230),
+    };
+
+    private final Waypoint[] pontosSituacao3_R = {
+            new Waypoint(0, -355),
+            new Waypoint(30, -150),
+            new Waypoint(60, 20),
+            new Waypoint(90, 195),
+            new Waypoint(120, 370),
+            new Waypoint(150, 550),
+            new Waypoint(180, 735),
+            new Waypoint(240, 750),
+            new Waypoint(295, -750),
+            new Waypoint(300, -616),
+            new Waypoint(330, -505),
+            new Waypoint(360, -335),
+    };
+
+    private final Waypoint[] pontosSituacao1_B = {
             new Waypoint(0, 40),
             new Waypoint(30, 190),
             new Waypoint(60, 370),
@@ -501,7 +657,7 @@ public class TeleOp_Null_Red extends LinearOpMode {
             new Waypoint(360, 40),
     };
 
-    private final Waypoint[] pontosSituacao2 = {
+    private final Waypoint[] pontosSituacao2_B = {
             new Waypoint(0, 305),
             new Waypoint(30, 440),
             new Waypoint(60, 660),
@@ -516,7 +672,7 @@ public class TeleOp_Null_Red extends LinearOpMode {
             new Waypoint(360, 305),
     };
 
-    private final Waypoint[] pontosSituacao3 = {
+    private final Waypoint[] pontosSituacao3_B = {
             new Waypoint(0, 375),
             new Waypoint(30, 570),
             new Waypoint(60, 750),
@@ -545,14 +701,26 @@ public class TeleOp_Null_Red extends LinearOpMode {
 
     private int torreAuto(double y, double heading) {
 
-        if (y >= 115) {
-            target = (int) interpola(pontosSituacao1, heading);
+        if (azul) {
+            if (y >= 115) {
+                target = (int) interpola(pontosSituacao1_B, heading);
 
-        } else if (y < 115 && y > 45) {
-            target = (int) interpola(pontosSituacao2, heading);
+            } else if (y < 115 && y > 45) {
+                target = (int) interpola(pontosSituacao2_B, heading);
 
-        } else if (y <= 45) {
-            target = (int) interpola(pontosSituacao3, heading);
+            } else if (y <= 45) {
+                target = (int) interpola(pontosSituacao3_B, heading);
+            }
+        } else {
+            if (y >= 115) {
+                target = (int) interpola(pontosSituacao1_R, heading);
+
+            } else if (y < 115 && y > 45) {
+                target = (int) interpola(pontosSituacao2_R, heading);
+
+            } else if (y <= 45) {
+                target = (int) interpola(pontosSituacao3_R, heading);
+            }
         }
 
         return Range.clip(target, -limiteRotativo, limiteRotativo);
