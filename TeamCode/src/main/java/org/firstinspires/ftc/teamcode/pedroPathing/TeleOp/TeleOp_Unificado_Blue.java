@@ -329,7 +329,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
             if (y < 48) {
-                if (elapsedIntervaloServo.seconds() > 1.35 && lF) {
+                if (elapsedIntervaloServo.seconds() > 1.4 && lF) {
                     intake.setPower(intakeP);
                 }
             } else {
@@ -400,7 +400,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
             }
 
             if (!targetVisible) {
-                if (!lF && y < 55) {
+                if (!lF || y > 50) {
                     if (modo_TorreA) {
                         if (azul) {
                             target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);

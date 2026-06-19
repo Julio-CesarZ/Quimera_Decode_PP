@@ -400,7 +400,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             }
 
             if (!targetVisible) {
-                if (!lF && y < 55) {
+                if (!lF || y > 50) {
                     if (modo_TorreA) {
                         if (azul) {
                             target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);
