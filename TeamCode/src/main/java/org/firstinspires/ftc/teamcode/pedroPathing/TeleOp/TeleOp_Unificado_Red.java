@@ -272,7 +272,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            while (time.seconds() < 1.2) {
+            while (time.seconds() < 1.5) {
                 if (azul) {
                     tower.setTargetPosition(-315);
                     tower.setPower(0.5);
@@ -282,7 +282,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
                 }
             }
 
-            while (time.seconds() < 1.3) {
+            while (time.seconds() < 1.6) {
                 tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
