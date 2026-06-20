@@ -170,11 +170,11 @@ public class Auto_Red_Longe extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.52));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, -427, 0.5));
+        Command mirar = instant(() -> encoder(tower, -400, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
-        Command onShotR = instant(() -> l_right.setVelocity(2200));
-        Command onShotL = instant(() -> l_left.setVelocity(2200));
+        Command onShotR = instant(() -> l_right.setVelocity(2300));
+        Command onShotL = instant(() -> l_left.setVelocity(2300));
         Command offShotR = instant(() -> l_right.setVelocity(1000));
         Command offShotL = instant(() -> l_left.setVelocity(1000));
         Command zeroShotR = instant(() -> l_right.setVelocity(0));

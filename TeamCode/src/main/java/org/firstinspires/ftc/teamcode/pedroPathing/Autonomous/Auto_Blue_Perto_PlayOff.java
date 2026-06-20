@@ -31,8 +31,8 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
     private final Pose startPose = new Pose(33.55, 133.49, Math.toRadians(180)); // 33.55 133.49
     private final Pose scorePose = new Pose(47.27, 83.65, Math.toRadians(180)); //47.27 83.65
     private final Pose takePose_1 = new Pose(19.07, 83.65, Math.toRadians(180)); // 19.07 83.65
-    private final Pose takePose_2 = new Pose(11.08, 5.17, Math.toRadians(180)); // 11.08 59.17
-    private final Pose takePose_Gate = new Pose(12.42, 59.28, Math.toRadians(146.54)); //12.42 59.28 146.54
+    private final Pose takePose_2 = new Pose(11.08, 59.17, Math.toRadians(180)); // 11.08 59.17
+    private final Pose takePose_Gate = new Pose(12, 60, Math.toRadians(146.54)); //12.42 59.28 146.54
     private final Pose outPose = new Pose(60.17, 106.49, Math.toRadians(180));
     PathChain score1, take1, take2, score2, takeG1, scoreG1, out, score_t1;
 
@@ -304,8 +304,7 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
                 parallel(
                         shot_off,
                         fecharTrava,
-                        offIntake,
-                        zerar
+                        offIntake
                 )
         );
 

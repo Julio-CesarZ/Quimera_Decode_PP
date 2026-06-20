@@ -54,6 +54,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
     final double kP = 0.2;
     final double kD = 0.021;
     final double towerP = 1;
+
     private int shotP = 0;
     private int change = 0;
     private int target = 0;
@@ -67,13 +68,14 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
     ElapsedTime elapsedintervaloL = new ElapsedTime();
     ElapsedTime elapsedintervaloIntakeSS = new ElapsedTime();
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
+    ElapsedTime time = new ElapsedTime();
 
     private String changeM = "Movimentação";
     private String changeT = "TeleOp Neutro";
 
-    private final Pose startingPoseTeleopBC = new Pose(47.88, 84, Math.toRadians(180));
+    private final Pose startingPoseTeleopBC = new Pose(47.27, 83.65, Math.toRadians(180));
     private final Pose startingPoseTeleopBF = new Pose(57, 36.05, Math.toRadians(180));
-    private final Pose startingPoseTeleopRC = new Pose(97.12, 83.03, 0);
+    private final Pose startingPoseTeleopRC = new Pose(96.13, 83.03, 0);
     private final Pose startingPoseTeleopRF = new Pose(87, 36.05, 0);
     private final Pose startingPoseTeleopCenterR = new Pose(72, 72, 0);
     private final Pose startingPoseTeleopCenterB = new Pose(72, 72, Math.toRadians(180));
@@ -141,6 +143,12 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         elapsedSuavizador.reset();
         elapsedintervaloIntakeSS.reset();
         elapsedIntervaloC.reset();
+
+        if (azul) {
+            target = 315;
+        } else {
+            target = -315;;
+        }
 
         while (!isStarted() && !isStopRequested()) {
 
@@ -260,7 +268,25 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             }
         }
 
+        time.reset();
+
         while (opModeIsActive()) {
+
+            while (time.seconds() < 1.2) {
+                if (azul) {
+                    tower.setTargetPosition(-315);
+                    tower.setPower(0.5);
+                } else {
+                    tower.setTargetPosition(315);
+                    tower.setPower(0.5);
+                }
+            }
+
+            while (time.seconds() < 1.3) {
+                tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            }
+
             follower.update();
 
             double rawHeading = Math.toDegrees(follower.getPose().getHeading());
