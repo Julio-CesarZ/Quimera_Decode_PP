@@ -26,9 +26,11 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
     boolean intervalo_bumper = false;
     boolean intervalo_dpad_up = false;
     boolean intervalo2_dpad_down = false;
+    boolean intervalo2_dpad_up = false;
     boolean intervalo2_Ltrigger_pressed = false;
     boolean intervalo2_Rtrigger_pressed = false;
     boolean intervalo_stick = false;
+    boolean intervalo_stick2 = false;
     boolean intakeF = false;
     boolean intakeSS = false;
     boolean reverse = false;
@@ -69,9 +71,9 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
     private String changeM = "Movimentação";
     private String changeT = "TeleOp Neutro";
 
-    private final Pose startingPoseTeleopBC = new Pose(60.17, 106.49, Math.toRadians(180));
+    private final Pose startingPoseTeleopBC = new Pose(47.88, 84, Math.toRadians(180));
     private final Pose startingPoseTeleopBF = new Pose(57, 36.05, Math.toRadians(180));
-    private final Pose startingPoseTeleopRC = new Pose(83.83, 106.49, 0);
+    private final Pose startingPoseTeleopRC = new Pose(97.12, 83.03, 0);
     private final Pose startingPoseTeleopRF = new Pose(87, 36.05, 0);
     private final Pose startingPoseTeleopCenterR = new Pose(72, 72, 0);
     private final Pose startingPoseTeleopCenterB = new Pose(72, 72, Math.toRadians(180));
@@ -161,10 +163,11 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
             telemetry.addLine(camera ? "Câmera Ativada" : "Câmera Desativada");
             telemetry.addLine("Pressione [Y] para alternar a câmera\n");
 
-            if (gamepad1.left_trigger > 0.3 && !intervalo_LT) {
+            if ((gamepad1.left_trigger > 0.3 && !intervalo_LT) || (gamepad2.left_stick_button && gamepad2.right_stick_button && !intervalo_stick2)) {
                 modo_TorreA = !modo_TorreA;
             }
             intervalo_LT = gamepad1.left_trigger > 0.3;
+            intervalo_stick2 = gamepad2.left_stick_button && gamepad2.right_stick_button;
 
             telemetry.addLine(modo_TorreA ? "[LT] - DESATIVAR o modo Auto da Torre\n" : "[LT] - ATIVAR o modo Auto da Torre\n");
 
@@ -211,9 +214,6 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
                 if (gamepad2.right_trigger_pressed && !intervalo2_Rtrigger_pressed) {
                     neutro = true;
                 }
-
-                modo_TorreA = true;
-                camera = true;
             } else {
                 if (gamepad2.right_trigger_pressed && !intervalo2_Rtrigger_pressed) {
                     neutro = false;
@@ -224,9 +224,6 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
                 } else {
                     changeT = "TeleOp Nulo Red";
                 }
-
-                modo_TorreA = false;
-                camera = false;
             }
 
             intervalo2_Rtrigger_pressed = gamepad2.right_trigger_pressed;
@@ -255,6 +252,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
                 }
             }
         } else {
+            modo_TorreA = false;
             if (azul) {
                 follower.setStartingPose(startingPoseTeleopCenterB);
             } else {
@@ -329,7 +327,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
             if (y < 48) {
-                if (elapsedIntervaloServo.seconds() > 1.4 && lF) {
+                if (elapsedIntervaloServo.seconds() > 1.45 && lF) {
                     intake.setPower(intakeP);
                 }
             } else {
@@ -421,12 +419,13 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
                 }
             }
 
-            boolean sticksPressionados = gamepad1.right_stick_button && gamepad1.left_stick_button;
-            if (sticksPressionados && !intervalo_stick && !lF) {
+            boolean sticksPressionados = (gamepad1.right_stick_button && gamepad1.left_stick_button) || gamepad2.right_trigger > 0.3;
+            if (sticksPressionados && !intervalo_stick && !lF && !intervalo2_Rtrigger_pressed) {
                 if (change == 0) modo_TorreA = !modo_TorreA;
                 if (change == 1) modo_ShotPA = !modo_ShotPA;
             }
             intervalo_stick = sticksPressionados;
+            intervalo2_Rtrigger_pressed = gamepad2.right_trigger > 0.3;
 
             if (modo_ShotPA) {
                 if (y < 18) {
@@ -434,7 +433,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
                 } else if (y >= 18 && y < 40) {
                     shotP = (int) ticks + 1000;
                 } else {
-                    shotP = (int) ticks;
+                    shotP = (int) ticks + 100;
                 }
                 if (lF) {
                     velocityAtual = shotP;
@@ -480,6 +479,15 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
                 camera = true;
             }
             intervalo2_dpad_down = gamepad2.dpad_down;
+
+            if (gamepad2.dpad_up && !intervalo2_dpad_up) {
+                tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                target = 0;
+                modo_TorreA = true;
+                camera = true;
+            }
+            intervalo2_dpad_up = gamepad2.dpad_up;
         }
     }
 

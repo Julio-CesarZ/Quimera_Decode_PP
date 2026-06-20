@@ -23,18 +23,18 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "BLUE Auto - Perto", group = "Auto")
-public class Auto_Blue_Perto extends LinearOpMode {
+@Autonomous(name = "BLUE Auto PlayOff - Perto", group = "Auto")
+public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
 
     Follower follower;
 
-    private final Pose startPose = new Pose(33.53, 132.68, Math.toRadians(180));
-    private final Pose scorePose = new Pose(47.88, 84, Math.toRadians(180));
-    private final Pose takePose_1 = new Pose(18, 84.76, Math.toRadians(180));
-    private final Pose takePose_2 = new Pose(10.5, 58, Math.toRadians(180));
-    private final Pose takePose_Gate = new Pose(12, 58.5, Math.toRadians(149.2));
+    private final Pose startPose = new Pose(33.55, 133.49, Math.toRadians(180)); // 33.55 133.49
+    private final Pose scorePose = new Pose(47.27, 83.65, Math.toRadians(180)); //47.27 83.65
+    private final Pose takePose_1 = new Pose(19.07, 83.65, Math.toRadians(180)); // 19.07 83.65
+    private final Pose takePose_2 = new Pose(11.08, 5.17, Math.toRadians(180)); // 11.08 59.17
+    private final Pose takePose_Gate = new Pose(12.42, 59.28, Math.toRadians(146.54)); //12.42 59.28 146.54
     private final Pose outPose = new Pose(60.17, 106.49, Math.toRadians(180));
-    PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
+    PathChain score1, take1, take2, score2, takeG1, scoreG1, out, score_t1;
 
     @Override
     public void runOpMode() {
@@ -90,6 +90,10 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .addPath(new BezierLine(scorePose, takePose_1))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+        score_t1 = follower.pathBuilder()
+                .addPath(new BezierLine(takePose_1, scorePose))
+                .setConstantHeadingInterpolation(scorePose.getHeading())
+                .build();
         take2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
@@ -142,6 +146,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command toGate_1 = follow(follower, takeG1);
         Command goScoreG_1 = follow(follower, scoreG1);
         Command outLine = follow(follower, out);
+        Command goScoreT_1 = follow(follower, score_t1);
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
@@ -290,21 +295,18 @@ public class Auto_Blue_Perto extends LinearOpMode {
                         race(
                                 toTake_1,
                                 waitMs(1500)
-                        ),
-                        mirarF
+                        )
                 ),
-                parallel(
-                        lastShot,
-                        outLine
-                ),
-                waitMs(200),
+                goScoreT_1,
+                abrirTrava,
+                onIntake,
+                waitMs(1400),
                 parallel(
                         shot_off,
                         fecharTrava,
                         offIntake,
                         zerar
                 )
-
         );
 
         waitForStart();

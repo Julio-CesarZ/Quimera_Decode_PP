@@ -23,18 +23,18 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
-@Autonomous(name = "BLUE Auto - Perto", group = "Auto")
-public class Auto_Blue_Perto extends LinearOpMode {
+@Autonomous(name = "RED Auto PlayOff - Perto", group = "Auto")
+public class Auto_Red_Perto_PlayOff extends LinearOpMode {
 
     Follower follower;
 
-    private final Pose startPose = new Pose(33.53, 132.68, Math.toRadians(180));
-    private final Pose scorePose = new Pose(47.88, 84, Math.toRadians(180));
-    private final Pose takePose_1 = new Pose(18, 84.76, Math.toRadians(180));
-    private final Pose takePose_2 = new Pose(10.5, 58, Math.toRadians(180));
-    private final Pose takePose_Gate = new Pose(12, 58.5, Math.toRadians(149.2));
-    private final Pose outPose = new Pose(60.17, 106.49, Math.toRadians(180));
-    PathChain score1, take1, take2, score2, takeG1, scoreG1, out;
+    private final Pose startPose = new Pose(110.45, 132.68, 0);
+    private final Pose scorePose = new Pose(96.13, 83.03, 0);
+    private final Pose takePose_1 = new Pose(124.93, 84.76, 0);
+    private final Pose takePose_2 = new Pose(132.92, 58, 0);
+    private final Pose takePose_Gate = new Pose(131.58, 59.45, Math.toRadians(33.46));
+    private final Pose outPose = new Pose(83.83, 106.49, 0);
+    PathChain scoreF, take1, take2, score2, takeG1, scoreG1, out, score_t1;
 
     @Override
     public void runOpMode() {
@@ -82,7 +82,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
 
         s1.setPosition(0.63);
 
-        score1 = follower.pathBuilder()
+        scoreF = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
@@ -90,11 +90,15 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .addPath(new BezierLine(scorePose, takePose_1))
                 .setConstantHeadingInterpolation(startPose.getHeading())
                 .build();
+        score_t1 = follower.pathBuilder()
+                .addPath(new BezierLine(takePose_1, scorePose))
+                .setConstantHeadingInterpolation(scorePose.getHeading())
+                .build();
         take2 = follower.pathBuilder()
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(49.795, 54.922),
+                                new Pose(94.205, 54.922),
                                 takePose_2
                         )
                 )
@@ -104,7 +108,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 takePose_2,
-                                new Pose(49.795, 54.922),
+                                new Pose(94.205, 54.922),
                                 scorePose
                         )
                 )
@@ -114,7 +118,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 scorePose,
-                                new Pose(47.38, 66.82),
+                                new Pose(96.62, 66.82),
                                 takePose_Gate
                         )
                 )
@@ -124,7 +128,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .addPath(
                         new BezierCurve(
                                 takePose_Gate,
-                                new Pose(44.4, 68.86),
+                                new Pose(99.6, 68.86),
                                 scorePose
                         )
                 )
@@ -135,13 +139,14 @@ public class Auto_Blue_Perto extends LinearOpMode {
                 .setConstantHeadingInterpolation(outPose.getHeading())
                 .build();
 
-        Command goScore_1 = follow(follower, score1);
+        Command goScore_1 = follow(follower, scoreF);
         Command toTake_1 = follow(follower, take1);
         Command toTake_2 = follow(follower, take2);
         Command goScore_2 = follow(follower, score2);
         Command toGate_1 = follow(follower, takeG1);
         Command goScoreG_1 = follow(follower, scoreG1);
         Command outLine = follow(follower, out);
+        Command goScoreT_1 = follow(follower, score_t1);
 
         Command onIntake = instant(() -> intake.setPower(1));
         Command offIntake = instant(() -> intake.setPower(0));
@@ -149,8 +154,8 @@ public class Auto_Blue_Perto extends LinearOpMode {
         Command abrirTrava = instant(() -> s1.setPosition(0.52));
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
-        Command mirar = instant(() -> encoder(tower, 315, 0.5));
-        Command mirarF = instant(() -> encoder(tower, 187, 0.5));
+        Command mirar = instant(() -> encoder(tower, -315, 0.5));
+        Command mirarF = instant(() -> encoder(tower, -195, 0.5));
         Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1400));
@@ -193,7 +198,7 @@ public class Auto_Blue_Perto extends LinearOpMode {
         );
 
         Command lastShot = sequential(
-                waitMs(800),
+                waitMs(600),
                 abrirTrava
         );
 
@@ -290,21 +295,18 @@ public class Auto_Blue_Perto extends LinearOpMode {
                         race(
                                 toTake_1,
                                 waitMs(1500)
-                        ),
-                        mirarF
+                        )
                 ),
-                parallel(
-                        lastShot,
-                        outLine
-                ),
-                waitMs(200),
+                goScoreT_1,
+                abrirTrava,
+                onIntake,
+                waitMs(1400),
                 parallel(
                         shot_off,
                         fecharTrava,
                         offIntake,
                         zerar
                 )
-
         );
 
         waitForStart();
