@@ -15,8 +15,14 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+// Esse é o meu código TeleOp principal - Ele possui duas versões (Red e Blue) porque o sistema de coordenadas (angular) é diferente para cada lado da arena
+
 @TeleOp(name = "TeleOp Unificado Red", group = "TeleOp")
 public class TeleOp_Unificado_Red extends LinearOpMode {
+
+    // Abaixo nos temos a lista das principais variáveis
+
+    // Essas foram utilizadas para definir o intervalo entre o pressionar de cada motor
 
     boolean intervalo_a = false;
     boolean intervalo_x = false;
@@ -31,20 +37,35 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
     boolean intervalo2_Rtrigger_pressed = false;
     boolean intervalo_stick = false;
     boolean intervalo_stick2 = false;
+
+    // Essas foram utilizadas para verificar o estado de cada motor
     boolean intakeF = false;
     boolean intakeSS = false;
     boolean reverse = false;
     boolean reverseL = false;
     boolean lF = false;
+
+    // Essa foi utiliza para verificar se existe um alvo visivel na visão da LimeLight
     boolean targetVisible;
+
+    // Controlar o estado da telemetria - Ela só pode ser alterada no MENU antes de iniciar o Loop Principal
     boolean telemetria = true;
+
+    // A lógica dessa variável está desativada para esse código, mas a ideia era controlar o modo "Single" e "Dual" de players
+    // Eu desativei porque precisei alterar o estado da última posição do Autonomous para Longe ou Perto do Gol
+    // Isso traz um 'todo' para as próximas gerações: descobrir como passar a coodernada final do robô para o código TeleOp sem colocar diretamente nele
     boolean mode_2 = false;
+
+    // Controla os estados de calibração automática do Robô
     boolean modo_TorreA = true;
     boolean modo_ShotPA = true;
     boolean camera = true;
-    boolean neutro = false;
-    boolean azul = false;
 
+    // Verifica o estado da posição inicial do robô
+    boolean neutro = false; // coordenada vermelha (72, 72, 0); coodernada azul (72, 72, Math.toRadians(180))
+    boolean azul = false; // definindo o lado para a lógica da odometria atuar
+
+    // Variáveis numéricas
     private double velocityMultipleir = 0.9;
     private double tx = 0;
     private double positionS = 0.63;
@@ -59,10 +80,12 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
     private int change = 0;
     private int target = 0;
     private int TeleOp_K = 0;
+    private int i = 0;
     final int maxChangeTick = 10;
     final int limiteRotativo = 690;
     final int intakeP = 1;
 
+    // Variáveis de tempo (Elapsed Time é preferivel nos loops principais porque o "Sleep" para a execução do código
     ElapsedTime elapsedIntervaloServo = new ElapsedTime();
     ElapsedTime elapsedSuavizador = new ElapsedTime();
     ElapsedTime elapsedintervaloL = new ElapsedTime();
@@ -70,9 +93,11 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
     ElapsedTime elapsedIntervaloC = new ElapsedTime();
     ElapsedTime time = new ElapsedTime();
 
+    // Variáveis de Texto - Utilizadas apenas na telemetria
     private String changeM = "Movimentação";
     private String changeT = "TeleOp Neutro";
 
+    // Variáveis final de posição
     private final Pose startingPoseTeleopBC = new Pose(47.27, 83.65, Math.toRadians(180));
     private final Pose startingPoseTeleopBF = new Pose(57, 36.05, Math.toRadians(180));
     private final Pose startingPoseTeleopRC = new Pose(96.13, 83.03, 0);
@@ -110,6 +135,9 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         PIDFCoefficients coefficientsRightMotor = l_right.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        // Alterando os coeficientes PIDF do motor (O FeedForward) para aumentar a proatividade do motor na resposta a queda de rotação dos motores com
+        // a passagem de artefatos
+
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
                 coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.7
         ));
@@ -126,7 +154,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.setPollRateHz(50);
+        limelight.setPollRateHz(50); // Definindo a taxa de atualização em 50 Hz para garantir uma leitura estável de todas as informações da LimeLight
 
         if (azul) {
             limelight.pipelineSwitch(1);
@@ -144,15 +172,12 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         elapsedintervaloIntakeSS.reset();
         elapsedIntervaloC.reset();
 
-        if (azul) {
-            target = 315;
-        } else {
-            target = -315;;
-        }
-
         while (!isStarted() && !isStopRequested()) {
 
-            //mode_2 = gamepad1.getUser() != null && gamepad2.getUser() != null; - desativando a função para o torneio
+            //mode_2 = gamepad1.getUser() != null && gamepad2.getUser() != null; - desativando a função (citada acima) para o torneio
+
+            // Abaixo eu tenho um Menu que controla algumas funções - Ele é mais útil para testes, porém para o Premiere Event se tornou essencial
+            // para selecionar a posição final do robô após o período Autonomous
 
             if (mode_2) {
                 telemetry.addLine("Modo para dois jogadores");
@@ -242,8 +267,10 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             telemetry.addLine(changeT);
             telemetry.update();
 
-            sleep (100);
+            sleep(100); // Utilizando um Sleep Aqui porque fora do Loop Principal isso não é um problema
         }
+
+        // Atualizando a posição uma vez apenas fora do loop para garantir que o código não defina a posiçõa muitas vezes e cause um acúmulo errático de posição
 
         if (!neutro) {
             if (azul) {
@@ -270,7 +297,14 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
 
         time.reset();
 
+        // Início do Loop Principal
+
         while (opModeIsActive()) {
+
+            // Abaixo eu desenvolvi uma "gambiarra" porque eu não tive tempo para pensar em outra alternativa durante o intervalo para o ínicio dos playoffs
+            // A ideia foi conciliar com o tempo do final da posição do Autonomous para os playoffs, que não precisavam sair da linha do final
+            // do Auto (sim, o tempo aumentou porque o final da rota disparava os artefatos enquanto o robô se movia, mesmo com a distância maior)
+            // todo: Mudar o TeleOp para a versão normal (com as adaptações do Auto para o PLayOff) e remover essa gambiarra
 
             while (time.seconds() < 1.5) {
                 if (azul) {
@@ -288,6 +322,8 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             }
 
             follower.update();
+
+            // A lógica abaixo foca em normalizar o valor dos ângulos entre 0 e 360 ao invés de 180 até -180
 
             double rawHeading = Math.toDegrees(follower.getPose().getHeading());
             double heading = (rawHeading % 360 + 360) % 360;
@@ -310,14 +346,16 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
                 yGol = centerGolR.getY();
             }
 
-            double distanciaM = Math.hypot(x - xGol, y - yGol) / 39.37;
+            double distanciaM = Math.hypot(x - xGol, y - yGol) / 39.37; // fórmula da distância entre pontos para capturar a distância do robô até o Gol
 
-            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.079, 0.075, 1.1) * 28) / 60;
+            double ticks = (veloV0_RPM(distanciaM, 60.1, 0.311, 1.079, 0.075, 1.1) * 28) / 60; // aplicando a fórmula da trajetória
 
+            // verifica o resultado da LimeLight para garantir que o código não irá gerar uma exceção ao tentar realizar uma divisão (ou ler um dado) por um frame "nulo"
             LLResult result = limelight.getLatestResult();
             targetVisible = (result != null && result.isValid());
 
             double forward, strafe, turn;
+            // Elevando o valor ao cubo para substituir a lógica da zona morta para garantir uma transição suave entre zonas
             if (mode_2) {
                 forward = Math.pow(-gamepad2.left_stick_y * velocityMultipleir, 3);
                 strafe = Math.pow(-gamepad2.left_stick_x * velocityMultipleir, 3);
@@ -330,8 +368,10 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
 
             follower.setTeleOpDrive(forward, strafe, turn, true);
 
+            // As lógicas abaixo possuem uma espécie de "interpolação" que garante que um movimento só seja executado se outro movimento não esteja sendo
+
             if (lF || gamepad1.left_trigger > 0.3 || reverseL || reverse) {
-                if (elapsedIntervaloServo.seconds() > 1) {
+                if (elapsedIntervaloServo.seconds() > 1) { // abrir a trava apenas após pressionar o botão do lançador
                     positionS = 0.52;
                     s1.setPosition(positionS);
                 }
@@ -352,6 +392,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             }
             intervalo_RT = gamepad1.right_trigger > 0.3;
 
+            // Definindo tempos diferentes para o Intake ligar automaticamente após pressionar o botão do disparador com base na posição "perto" e "longe"
             if (y < 48) {
                 if (elapsedIntervaloServo.seconds() > 1.45 && lF) {
                     intake.setPower(intakeP);
@@ -367,7 +408,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
                 l_left.setVelocity(velocityAtual);
             }
 
-            if (!lF) {
+            if (!lF) { // será ativado apenas se o lançador estiver desativado
                 if (gamepad1.y && !intakeF && !intakeSS && !reverse) {
                     l_right.setVelocity(-1000);
                     l_left.setVelocity(-1000);
@@ -416,7 +457,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             intervalo_dpad_up = gamepad1.dpad_up;
 
             if (intakeSS) {
-                if (elapsedintervaloIntakeSS.milliseconds() % (intervaloSS * 2) <= intervaloSS) {
+                if (elapsedintervaloIntakeSS.milliseconds() % (intervaloSS * 2) <= intervaloSS) { // lógica de divisão modular para o disparo único
                     intake.setPower(intakeP);
                 } else {
                     intake.setPower(0);
@@ -424,7 +465,8 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             }
 
             if (!targetVisible) {
-                if (!lF || y > 50) {
+                if (!lF || y > 50) { // Se o robô estiver perto do Gol a torre continua mirando por odometria
+                    // todo: A mira por odometria atual é muito bruta (interpolação linear) - transitar para a mira por calculo angular (teta) em relação ao Gol
                     if (modo_TorreA) {
                         if (azul) {
                             target = Range.clip(torreAuto(y, normalHeading), -limiteRotativo, limiteRotativo);
@@ -441,7 +483,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
                 }
             } else {
                 if (camera) {
-                    camera(result, y, tower);
+                    camera(result, y, tower); //todo: utilizar a câmera para atualizar a posição via odometria e confiar totalmente na mira via odometria
                 }
             }
 
@@ -455,12 +497,13 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
 
             if (modo_ShotPA) {
                 if (y < 18) {
-                    shotP = (int) ticks + 1000;
+                    shotP = (int) ticks + 1000; // valores aumentados para valores muito distantes do Gol
                 } else if (y >= 18 && y < 40) {
                     shotP = (int) ticks + 1000;
                 } else {
                     shotP = (int) ticks + 100;
                 }
+                // todo: verificar a possibilidade de modificar a fórmula da trajetória para considerar a altura da parede do Gol em valores muito distantes
                 if (lF) {
                     velocityAtual = shotP;
                 }
@@ -491,7 +534,8 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
 
             telemetria(l_right, l_left, tower, x, y, heading);
 
-            if(gamepad2.dpad_down && !intervalo2_dpad_down) {
+            // lógica do reset da torre e da posição para caso o Autonomous de errado de alguma forma
+            if (gamepad2.dpad_down && !intervalo2_dpad_down) {
                 if (azul) {
                     follower.setPose(new Pose(133.79, 6.78, Math.toRadians(180)));
                 } else {
@@ -517,6 +561,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         }
     }
 
+    // métodos para reduzir o tamanho do código dentro do loop principal
     private void telemetria(DcMotorEx l_right, DcMotorEx l_left, DcMotorEx tower, double x, double y, double heading) {
         if (telemetria) {
             if (targetVisible) {
@@ -564,11 +609,11 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
             if (Math.abs(tx) > 1) {
                 int position = 0;
                 if (azul) {
-                    position = (y > 125) ? atual + 50 : atual;
+                    position = (y > 125) ? atual + 50 : atual; // adicionando alguns ticks de erro para a posição bem no canto da arena (mirar mais no centro do Gol)
                 } else {
                     position = (y > 125) ? atual - 50 : atual;
                 }
-                int alvo = position + (int) (tx * 7);
+                int alvo = position + (int) (tx * 7); // o valor '7' corresponde a rotação de aproximadamente 1,15 graus
                 alvo = Range.clip(alvo, -limiteRotativo, limiteRotativo);
 
                 int delta = Range.clip(alvo - target, -maxChangeTick, maxChangeTick);
@@ -620,6 +665,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         }
     }
 
+    // lógica "Lerp" de interpolação
     public static class Waypoint {
         double heading;
         double target;
@@ -758,6 +804,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         return Range.clip(target, -limiteRotativo, limiteRotativo);
     }
 
+    // função para mover algum motor via encoder
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {
         if (motor.getMode() == DcMotorEx.RunMode.RUN_TO_POSITION) {
             motor.setTargetPosition(novoAlvo);
@@ -765,6 +812,7 @@ public class TeleOp_Unificado_Red extends LinearOpMode {
         }
     }
 
+    // Cálculo da trajetória
     private double veloV0_RPM(double x, double graus, double y0, double y, double wheel_D, double motor_E) {
         double grausRadians = Math.toRadians(graus);
         double numerador = 9.81 * Math.pow(x, 2);

@@ -59,6 +59,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
     private int change = 0;
     private int target = 0;
     private int TeleOp_K = 0;
+    private int i = 0;
     final int maxChangeTick = 10;
     final int limiteRotativo = 690;
     final int intakeP = 1;
@@ -143,12 +144,6 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
         elapsedSuavizador.reset();
         elapsedintervaloIntakeSS.reset();
         elapsedIntervaloC.reset();
-
-        if (azul) {
-            target = 315;
-        } else {
-            target = -315;;
-        }
 
         while (!isStarted() && !isStopRequested()) {
 
@@ -286,6 +281,7 @@ public class TeleOp_Unificado_Blue extends LinearOpMode {
                 tower.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                 tower.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             }
+
 
             follower.update();
 

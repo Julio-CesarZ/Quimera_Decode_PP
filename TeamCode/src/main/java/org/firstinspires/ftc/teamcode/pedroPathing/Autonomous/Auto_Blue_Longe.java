@@ -169,7 +169,7 @@ public class Auto_Blue_Longe extends LinearOpMode {
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
         Command mirar = instant(() -> encoder(tower, 405, 0.5));
-        Command zerar = instant(() -> encoder(tower, 0, 0.5));
+        Command zerarTeleOp = instant(() -> encoder(tower, 315, 0.5));
 
         Command onShotR = instant(() -> l_right.setVelocity(2200));
         Command onShotL = instant(() -> l_left.setVelocity(2200));
@@ -312,7 +312,7 @@ public class Auto_Blue_Longe extends LinearOpMode {
                         shot_zero,
                         fecharTrava,
                         offIntake,
-                        zerar
+                        zerarTeleOp
                 )
 
         );

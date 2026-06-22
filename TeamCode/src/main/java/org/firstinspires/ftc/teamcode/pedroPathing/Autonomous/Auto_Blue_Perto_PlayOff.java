@@ -23,23 +23,29 @@ import static com.pedropathing.ivy.pedro.PedroCommands.turnTo;
 
 import org.firstinspires.ftc.teamcode.pedroPathing.Constants;
 
+// Esse código será comentando pois foi o principal Autonomous que utilizamos nos PlayOffs
+
 @Autonomous(name = "BLUE Auto PlayOff - Perto", group = "Auto")
 public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
 
     Follower follower;
 
-    private final Pose startPose = new Pose(33.55, 133.49, Math.toRadians(180)); // 33.55 133.49
-    private final Pose scorePose = new Pose(47.27, 83.65, Math.toRadians(180)); //47.27 83.65
-    private final Pose takePose_1 = new Pose(19.07, 83.65, Math.toRadians(180)); // 19.07 83.65
-    private final Pose takePose_2 = new Pose(11.08, 59.17, Math.toRadians(180)); // 11.08 59.17
-    private final Pose takePose_Gate = new Pose(12, 60, Math.toRadians(146.54)); //12.42 59.28 146.54
+    // Aqui nós definimos todas as posições em variáveis apenas para facilitar a organização dentro do código
+
+    private final Pose startPose = new Pose(33.55, 133.49, Math.toRadians(180));
+    private final Pose scorePose = new Pose(47.27, 83.65, Math.toRadians(180));
+    private final Pose takePose_1 = new Pose(19.07, 83.65, Math.toRadians(180));
+    private final Pose takePose_2 = new Pose(11.08, 59.17, Math.toRadians(180));
+    private final Pose takePose_Gate = new Pose(12, 60, Math.toRadians(146.54));
     private final Pose outPose = new Pose(60.17, 106.49, Math.toRadians(180));
-    PathChain score1, take1, take2, score2, takeG1, scoreG1, out, score_t1;
+    PathChain score1, take1, take2, score2, takeG1, scoreG1, score_t1;
 
     @Override
     public void runOpMode() {
+        // Essencial redefinir o Scheduler porque a configuração do Lvy exige
         Scheduler.reset();
 
+        // Confinguração padrão da biblioteca follower e motores
         follower = Constants.createFollower(hardwareMap);
         follower.setStartingPose(startPose);
         follower.update();
@@ -65,6 +71,8 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
         PIDFCoefficients coefficientsRightMotor = l_right.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
         PIDFCoefficients coefficientsLeftMotor = l_left.getPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER);
 
+        // alterando o F do PIDF em 1.5 vezes para aumentar a resposta proativa do motor com a perda de rotação com a passagem dos artefatos
+
         l_right.setPIDFCoefficients(DcMotorEx.RunMode.RUN_USING_ENCODER, new PIDFCoefficients(
                 coefficientsRightMotor.p, coefficientsRightMotor.i, coefficientsRightMotor.d, coefficientsRightMotor.f * 1.5
         ));
@@ -81,6 +89,8 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
         tower.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         s1.setPosition(0.63);
+
+        // Desenhando os caminhos
 
         score1 = follower.pathBuilder()
                 .addPath(new BezierLine(startPose, scorePose))
@@ -134,10 +144,8 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
                 )
                 .setLinearHeadingInterpolation(takePose_Gate.getHeading(), scorePose.getHeading())
                 .build();
-        out = follower.pathBuilder()
-                .addPath(new BezierLine(takePose_1, outPose))
-                .setConstantHeadingInterpolation(outPose.getHeading())
-                .build();
+
+        // Definindo as ações (comandos)
 
         Command goScore_1 = follow(follower, score1);
         Command toTake_1 = follow(follower, take1);
@@ -145,7 +153,6 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
         Command goScore_2 = follow(follower, score2);
         Command toGate_1 = follow(follower, takeG1);
         Command goScoreG_1 = follow(follower, scoreG1);
-        Command outLine = follow(follower, out);
         Command goScoreT_1 = follow(follower, score_t1);
 
         Command onIntake = instant(() -> intake.setPower(1));
@@ -155,8 +162,6 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
         Command fecharTrava = instant(() -> s1.setPosition(0.63));
 
         Command mirar = instant(() -> encoder(tower, 315, 0.5));
-        Command mirarF = instant(() -> encoder(tower, 187, 0.5));
-        Command zerar = instant(() -> encoder(tower, 0, 0.5));
 
         Command onShotR_F = instant(() -> l_right.setVelocity(1400));
         Command onShotL_F = instant(() -> l_left.setVelocity(1400));
@@ -197,10 +202,7 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
                 onIntake
         );
 
-        Command lastShot = sequential(
-                waitMs(800),
-                abrirTrava
-        );
+        // Comando principal
 
         Command sequence = sequential(
                 parallel(
@@ -312,6 +314,8 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
 
         schedule(sequence);
 
+        // Loop de execução
+
         while (opModeIsActive()) {
             follower.update();
             Scheduler.execute();
@@ -322,7 +326,11 @@ public class Auto_Blue_Perto_PlayOff extends LinearOpMode {
         }
     }
 
+    // Função encoder padrão utilizada em praticamente todos os meus códigos
+    //
+
     private void encoder(DcMotorEx motor, int novoAlvo, double power) {
+        // Garante que o motor a ser chamado esteja no modo RUN_TO_POSITION - Evita comportamentos possivelmente estranhos
         if (motor.getMode() == DcMotorEx.RunMode.RUN_TO_POSITION) {
             motor.setTargetPosition(novoAlvo);
             motor.setPower(power);
